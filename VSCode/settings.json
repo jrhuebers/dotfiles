@@ -41,5 +41,10 @@
     "workbench.reduceMotion": "on",
     "editor.scrollbar.horizontal": "hidden",
     "editor.scrollbar.vertical": "visible",
-    "editor.minimap.enabled": false
+    "editor.minimap.enabled": false,
+    "claudeCode.preferredLocation": "panel",
+    "window.autoDetectColorScheme": true,
+    "workbench.experimental.modernUI": false,
+    "chat.remoteAgentHosts": [],
+    "remote.tunnels.alwaysUpdateCLI": true
 }
