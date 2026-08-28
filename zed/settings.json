@@ -1,0 +1,171 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run `zed: open default settings` from the
+// command palette (cmd-shift-p / ctrl-shift-p)
+{
+  "format_on_save": "on",
+  "preview_tabs": {
+    "enabled": true
+  },
+  "use_system_window_tabs": false,
+  "zoomed_padding": true,
+  "languages": {
+    "TOML": {
+      "tab_size": 2
+    },
+    "JSON": {
+      "format_on_save": "on"
+    }
+  },
+  "icon_theme": "JetBrains Icons Light",
+  "minimap": {
+    "thumb_border": "left_open"
+  },
+  "git": {
+    "inline_blame": {
+      "show_commit_summary": true,
+      "location": "status_bar"
+    }
+  },
+  "file_finder": {
+    "file_icons": true
+  },
+  "buffer_font_family": "Menlo",
+  "ui_font_family": ".SystemUIFont",
+  "gutter": {
+    "runnables": true
+  },
+  "agent_buffer_font_size": 12.0,
+  "agent_servers": {
+    "codex-acp": {
+      "default_config_options": {
+        "mode": "agent-full-access"
+      },
+      "type": "registry"
+    },
+    "claude-acp": {
+      "default_config_options": {
+        "mode": "auto",
+        "model": "default",
+        "fast": false
+      },
+      "type": "registry",
+    },
+  },
+  "collaboration_panel": {
+    "button": false,
+    "dock": "left",
+  },
+  "agent": {
+    "dock": "right",
+    "default_model": {
+      "provider": "ollama",
+      "model": "qwen2.5:3b-instruct",
+    },
+    "model_parameters": [],
+  },
+  "centered_layout": {
+    "left_padding": 0.2,
+  },
+  "bottom_dock_layout": "contained",
+  "tabs": {
+    "close_position": "left",
+    "file_icons": false,
+    "git_status": false,
+  },
+  "tab_bar": {
+    "show_nav_history_buttons": true,
+    "show_tab_bar_buttons": true,
+    "show": true,
+  },
+  "title_bar": {
+    "show_branch_status_icon": false,
+    "show_onboarding_banner": true,
+    "show_sign_in": true,
+    "show_user_picture": true,
+    "show_menus": false,
+  },
+  "diagnostics": {
+    "button": true,
+  },
+  "status_bar": {
+    "cursor_position_button": true,
+    "active_language_button": true,
+  },
+  "project_panel": {
+    "sort_mode": "directories_first",
+    "git_status_indicator": true,
+    "diagnostic_badges": false,
+    "scrollbar": {
+      "show": "auto"
+    },
+    "bold_folder_labels": false,
+    "dock": "left",
+    "hide_hidden": true,
+    "hide_root": true,
+    "sticky_scroll": true,
+    "indent_guides": {
+      "show": "always",
+    },
+    "indent_size": 15.0,
+    "folder_icons": true,
+    "file_icons": true,
+    "entry_spacing": "standard",
+    "hide_gitignore": false,
+    "button": true,
+  },
+  "hidden_files": [
+    "__pycache__",
+    ".idea",
+    ".cursor",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".claude",
+    "*.egg-info",
+    "build",
+  ],
+  "outline_panel": {
+    "dock": "left",
+    "button": true,
+  },
+  "scrollbar": {
+    "show": "always",
+    "axes": {
+      "horizontal": false,
+    },
+  },
+  "agent_ui_font_size": 15.0,
+  "git_panel": {
+    "tree_view": false,
+    "dock": "left",
+    "scrollbar": {
+      "show": "auto",
+    },
+  },
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false,
+  },
+  "terminal": {
+    "show_count_badge": false,
+    "scrollbar": {
+      "show": "system"
+    },
+    "font_family": ".ZedMono",
+    "button": true,
+    "font_size": 12.0,
+  },
+  "cursor_blink": false,
+  "base_keymap": "VSCode",
+  "ui_font_size": 15.0,
+  "buffer_font_size": 12.0,
+  "theme": {
+    "mode": "system",
+    "light": "VSCode Light Modern",
+    "dark": "Ayu Dark",
+  },
+}
