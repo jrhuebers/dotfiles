@@ -1,0 +1,5 @@
+[mgr]
+prepend_keymap = [
+  { on = "o", run = 'shell --block -- if [ -n "${TMUX:-}" ]; then tmux new-window -c "%d1" "${EDITOR:-vi}" "%s1"; else "${EDITOR:-vi}" "%s1"; fi', desc = "Open in new tmux window" },
+  { on = "O", run = 'shell --block -- if [ -n "${TMUX:-}" ]; then tmux new-window -d -c "%d1" "${EDITOR:-vi}" "%s1"; else "${EDITOR:-vi}" "%s1"; fi', desc = "Open in background tmux window" },
+]
