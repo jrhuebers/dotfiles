@@ -14,6 +14,7 @@ This file is the entry point for recreating the machine. It explains how to main
 ## Knowledge base index
 
 - [`docs/git.md`](docs/git.md) — Global Git author identity and installation/query commands.
+- [`docs/open-in-cursor.md`](docs/open-in-cursor.md) — macOS Finder service for opening files and folders in Cursor.
 - [`docs/gnome-keyboard-layout.md`](docs/gnome-keyboard-layout.md) — User-level GNOME/Wayland XKB layout for German characters on a British keyboard.
 - [`docs/tmux.md`](docs/tmux.md) — tmux installation, `.tmux.conf` deployment, reload command, and key settings.
 - [`docs/vim.md`](docs/vim.md) — Vim installation and `.vimrc` deployment.
