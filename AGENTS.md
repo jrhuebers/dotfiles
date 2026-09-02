@@ -18,3 +18,4 @@ This file is the entry point for recreating the machine. It explains how to main
 - [`docs/tmux.md`](docs/tmux.md) — tmux installation, `.tmux.conf` deployment, reload command, and key settings.
 - [`docs/vim.md`](docs/vim.md) — Vim installation and `.vimrc` deployment.
 - [`docs/yazi.md`](docs/yazi.md) — Yazi installation for Fedora/macOS, configuration deployment, package installation, and keybindings.
+- [`docs/zed.md`](docs/zed.md) — Zed configuration contents and symlink-based setup.
