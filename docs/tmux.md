@@ -7,8 +7,9 @@ configuration first, then override only settings that identify the machine.
 ## Configuration pattern
 
 The ordering is intentional: the repository file supplies the common behavior
-(mouse support, extended keys, window and status formatting, pane-border
-indicators, and heavy pane borders), while settings after the `source-file`
+(mouse support, extended keys, window and status formatting, red inactive
+heavy pane borders, and coloured active-pane indicators without arrows), while
+settings after the `source-file`
 command identify the machine. In particular,
 give each machine a distinct status-bar style so sessions are visually
 separable. Keep machine-specific changes small and local to the wrapper rather
