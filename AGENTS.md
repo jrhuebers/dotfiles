@@ -16,4 +16,5 @@ This file is the entry point for recreating the machine. It explains how to main
 - [`docs/git.md`](docs/git.md) — Global Git author identity and installation/query commands.
 - [`docs/gnome-keyboard-layout.md`](docs/gnome-keyboard-layout.md) — User-level GNOME/Wayland XKB layout for German characters on a British keyboard.
 - [`docs/tmux.md`](docs/tmux.md) — tmux installation, `.tmux.conf` deployment, reload command, and key settings.
+- [`docs/vim.md`](docs/vim.md) — Vim installation and `.vimrc` deployment.
 - [`docs/yazi.md`](docs/yazi.md) — Yazi installation for Fedora/macOS, configuration deployment, package installation, and keybindings.

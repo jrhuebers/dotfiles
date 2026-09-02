@@ -30,4 +30,11 @@ cp -a .config/yazi/. ~/.config/yazi/
 cd ~/.config/yazi && ya pkg install
 ```
 
-The configuration contains the `vscode-light-modern` flavor, light/dark theme settings, and `o`/`O` keybindings for opening files in the editor (using a new tmux window when running inside tmux).
+The configuration contains the `vscode-light-modern` flavor, light/dark theme settings, and `o`/`O` keybindings for opening files in the editor (using a new tmux window when running inside tmux). The editor is selected through the shell environment:
+
+```sh
+export EDITOR=vim
+export VISUAL=vim
+```
+
+These exports are configured in `~/.bashrc`.
