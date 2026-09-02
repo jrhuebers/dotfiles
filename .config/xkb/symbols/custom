@@ -1,0 +1,12 @@
+// British layout with convenient German characters on AltGr.
+// The base layout remains the standard system gb layout.
+
+partial alphanumeric_keys
+xkb_symbols "basic" {
+    include "gb(basic)"
+
+    key <AD07> { [ u, U, udiaeresis, Udiaeresis ] };
+    key <AD09> { [ o, O, odiaeresis, Odiaeresis ] };
+    key <AC01> { [ a, A, adiaeresis, Adiaeresis ] };
+    key <AC02> { [ s, S, ssharp, U1E9E ] };
+};
