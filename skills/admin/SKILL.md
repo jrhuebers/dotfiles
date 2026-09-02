@@ -11,9 +11,21 @@ clear operational records.
 
 ## Documentation
 
-As persistent memory, maintain the documentation files in `~/admin-docs/`.
-Consult `~/admin-docs-map.md` to find the relevant document, and keep the
-relevant document up to date in the same task when changing the environment.
+Maintain two separate documentation layers:
+
+- **Local system documentation:** persistent operational memory belongs in
+  `~/admin-docs/`. Consult `~/admin-docs-map.md` to find the relevant document,
+  and keep it up to date in the same task when changing the environment.
+- **Portable dotfiles documentation:** repository-managed setup belongs in
+  `~/dotfiles/docs/`. Its documentation map and index are
+  `~/dotfiles/AGENTS.md`; consult it when a change affects the dotfiles
+  checkout. Keep one topic per Markdown file, document copyable commands and
+  source-versus-installed paths, and update the index when adding, removing, or
+  renaming a file under `~/dotfiles/docs/`.
+
+Keep local system documentation out of the dotfiles repository. Do not put
+host-specific operational state, private paths, service details, or secrets in
+`~/dotfiles/AGENTS.md` or `~/dotfiles/docs/`.
 
 ## Safety and operations
 

@@ -1,0 +1,27 @@
+{
+  "lastChangelogVersion": "0.84.4",
+  "theme": "light",
+  "tuiMode": "fullscreen",
+  "fullscreenScrollbar": "always",
+  "scrollSpeed": {
+    "wheelLines": 8
+  },
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-5.6-luna",
+  "defaultThinkingLevel": "high",
+  "packages": [
+    "/home/ubuntu/repos/pi-web-access",
+    "git:github.com/jrhuebers/pi-context-viewer",
+    "npm:@d3ara1n/pi-context-include",
+    {
+      "source": "git:github.com/jrhuebers/pi-adaptive-ripgrep",
+      "extensions": [
+        "+index.ts"
+      ]
+    },
+    "git:github.com/jrhuebers/pi-background-tasks",
+    "git:github.com/jrhuebers/pi-turn-timing",
+    "npm:pi-scroll-speed"
+  ],
+  "hideThinkingBlock": false
+}
