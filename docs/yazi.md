@@ -22,15 +22,19 @@ The current installed version is `26.9.1`. Bash completions from the archive go 
 
 ## Configure
 
-Copy the repository configuration and install the declared packages:
+The repository is the source of truth for Yazi configuration. Local configuration files under `~/.config/yazi/` should be symlinks to the corresponding tracked files under `~/dotfiles/.config/yazi/`; do not copy these files. Generated package content, such as installed flavors, remains local.
+
+Symlink the repository configuration and install the declared packages:
 
 ```sh
 mkdir -p ~/.config/yazi
-cp -a .config/yazi/. ~/.config/yazi/
+for file in keymap.toml package.toml theme.toml yazi.toml; do
+  ln -sfn ~/dotfiles/.config/yazi/$file ~/.config/yazi/$file
+done
 cd ~/.config/yazi && ya pkg install
 ```
 
-The configuration contains the `vscode-light-modern` flavor, light/dark theme settings, and `o`/`O` keybindings for opening files in the editor (using a new tmux window when running inside tmux). The editor is selected through the shell environment:
+The configuration contains the `vscode-light-modern` flavor, light/dark theme settings, and `o`/`O` keybindings that send PDFs to `xdg-open` and open other files in the editor (using a new tmux window when running inside tmux). Yazi's default open action also sends PDFs to `xdg-open`. The editor is selected through the shell environment:
 
 ```sh
 export EDITOR=vim
