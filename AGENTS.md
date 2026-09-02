@@ -1,26 +1,19 @@
-# Machine setup inventory
+# Machine setup knowledge base
 
-This file records the software and personal settings needed to recreate this machine. When setting up a new Linux or macOS computer, clone this repository and use this file as the setup checklist.
+This file is the entry point for recreating the machine. It explains how to maintain the knowledge base and indexes the detailed setup documentation. When working in this repository, read this file and the relevant topic document before making changes.
 
-## Yazi
+## Rules for agents
 
-Yazi is installed from the latest stable official GitHub release, not Flatpak or Snap. On Fedora x86_64, use `yazi-x86_64-unknown-linux-gnu.zip`; on macOS use the matching `aarch64-apple-darwin` or `x86_64-apple-darwin` archive. Copy `yazi` and `ya` to `~/.local/bin` and make them executable. The current installed version is `26.9.1`.
+- For every software install, uninstall, or configuration change, update the relevant file in `docs/` or create one if it does not exist.
+- Keep one topic per Markdown file, usually one piece of software or one configuration.
+- Document installation, configuration, platform differences, important paths, verification, and removal when relevant. Keep commands copyable and distinguish the repository source from the installed destination.
+- Put difficult or multi-step installation/configuration procedures in `docs/`, not in this file.
+- Keep this index up to date: every Markdown file under `docs/` must be listed below with a short description.
+- After making a change, verify it and update its documentation before reporting completion.
 
-Install the configuration and its packages from the repository with:
+## Knowledge base index
 
-```sh
-mkdir -p ~/.config/yazi
-cp -a .config/yazi/. ~/.config/yazi/
-cd ~/.config/yazi && ya pkg install
-```
-
-This installs the `vscode-light-modern` flavor declared in `package.toml`. The configuration includes `keymap.toml`, `theme.toml`, and custom `o`/`O` editor keybindings. Bash completions are installed under `~/.local/share/bash-completion/completions/`.
-
-## Git
-
-`.gitconfig` contains the global Git name and email. After cloning, install it with:
-
-```sh
-cp .gitconfig ~/.gitconfig
-```
-
+- [`docs/git.md`](docs/git.md) — Global Git author identity and installation/query commands.
+- [`docs/gnome-keyboard-layout.md`](docs/gnome-keyboard-layout.md) — User-level GNOME/Wayland XKB layout for German characters on a British keyboard.
+- [`docs/tmux.md`](docs/tmux.md) — tmux installation, `.tmux.conf` deployment, reload command, and key settings.
+- [`docs/yazi.md`](docs/yazi.md) — Yazi installation for Fedora/macOS, configuration deployment, package installation, and keybindings.
