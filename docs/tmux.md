@@ -19,7 +19,7 @@ A host wrapper should follow this pattern:
 
 ```tmux
 # Shared tmux configuration
-source-file -q "$HOME/repos/dotfiles/.tmux.conf"
+source-file -q "$HOME/dotfiles/.tmux.conf"
 
 # Choose a style unique to this machine, after the shared configuration.
 set -g status-style "bg=colour236,fg=colour255"
@@ -35,13 +35,13 @@ Keep the repository file at its checkout path and create `~/.tmux.conf` as the
 machine-specific wrapper; do not replace the wrapper with a direct copy of the
 repository file.
 
-After cloning this repository to `~/repos/dotfiles` (or adapting the path in
+After cloning this repository to `~/dotfiles` (or adapting the path in
 the wrapper), create the host-specific file:
 
 ```sh
 cat >~/.tmux.conf <<'EOF'
 # Shared tmux configuration
-source-file -q "$HOME/repos/dotfiles/.tmux.conf"
+source-file -q "$HOME/dotfiles/.tmux.conf"
 
 # Choose a style unique to this machine.
 set -g status-style "bg=colour236,fg=colour255"
