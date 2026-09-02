@@ -1,6 +1,6 @@
 # Machine setup knowledge base
 
-This file is the entry point for recreating the machine. It explains how to maintain the knowledge base and indexes the detailed setup documentation. When working in this repository, read this file and the relevant topic document before making changes.
+This file is the entry point for recreating the machine. It explains how to maintain the knowledge base and indexes the detailed setup documentation.
 
 ## Rules for agents
 
