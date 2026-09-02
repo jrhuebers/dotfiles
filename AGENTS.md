@@ -16,3 +16,11 @@ cd ~/.config/yazi && ya pkg install
 
 This installs the `vscode-light-modern` flavor declared in `package.toml`. The configuration includes `keymap.toml`, `theme.toml`, and custom `o`/`O` editor keybindings. Bash completions are installed under `~/.local/share/bash-completion/completions/`.
 
+## Git
+
+`.gitconfig` contains the global Git name and email. After cloning, install it with:
+
+```sh
+cp .gitconfig ~/.gitconfig
+```
+
