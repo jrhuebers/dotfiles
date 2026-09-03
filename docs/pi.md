@@ -6,6 +6,8 @@ keeps the two configuration files that are currently used on the server:
 - `pi/settings.json` → `~/.pi/agent/settings.json`
 - `pi/models.json` → `~/.pi/agent/models.json`
 
+The global package list includes `npm:pi-btw`, which provides the `/btw` side-conversation extension. The source spec is recorded in `pi/settings.json`; Pi installs it under `~/.pi/agent/npm/node_modules/pi-btw`.
+
 ## Refresh the repository copies
 
 After changing the live Pi configuration, refresh the repository snapshots from
@@ -35,3 +37,12 @@ cmp -s ~/dotfiles/pi/settings.json ~/.pi/agent/settings.json && \
 ```
 
 Do not add authentication tokens or other secrets to the tracked configuration.
+
+To install or remove the package in the live global Pi setup:
+
+```sh
+pi install npm:pi-btw
+pi remove npm:pi-btw
+```
+
+After installation, verify it with `pi list` and restart Pi so the extension loads. The extension's `/btw` thread can use the configured Pi model and coding tools; review third-party package source before updating it.

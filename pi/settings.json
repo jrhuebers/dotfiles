@@ -21,7 +21,8 @@
     },
     "git:github.com/jrhuebers/pi-background-tasks",
     "git:github.com/jrhuebers/pi-turn-timing",
-    "npm:pi-scroll-speed"
+    "npm:pi-scroll-speed",
+    "npm:pi-btw"
   ],
   "hideThinkingBlock": false
 }
