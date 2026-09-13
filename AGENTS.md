@@ -17,6 +17,7 @@ documentation belongs in `~/admin-docs/`, not in this repository.
 ## Knowledge base index
 
 - [`docs/git.md`](docs/git.md) — Global Git author identity and installation/query commands.
+- [`docs/glow.md`](docs/glow.md) — Glow Markdown renderer installation and configuration.
 - [`docs/open-in-cursor.md`](docs/open-in-cursor.md) — macOS Finder service for opening files and folders in Cursor.
 - [`docs/gnome-keyboard-layout.md`](docs/gnome-keyboard-layout.md) — User-level GNOME/Wayland XKB layout for German characters on a British keyboard.
 - [`docs/pi.md`](docs/pi.md) — Pi agent configuration snapshots, deployment, refresh, and verification.
