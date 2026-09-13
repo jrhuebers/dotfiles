@@ -6,7 +6,7 @@ keeps the two configuration files that are currently used on the server:
 - `pi/settings.json` → `~/.pi/agent/settings.json`
 - `pi/models.json` → `~/.pi/agent/models.json`
 
-The global package list includes `npm:pi-btw`, which provides the `/btw` side-conversation extension. The source spec is recorded in `pi/settings.json`; Pi installs it under `~/.pi/agent/npm/node_modules/pi-btw`.
+The global package list includes `npm:pi-btw`, which provides the `/btw` side-conversation extension, and `npm:pi-simple-web-tools@0.1.0`, which provides compact `web_search` and `fetch_content` tools. Their source specs are recorded in `pi/settings.json`; Pi installs them under `~/.pi/agent/npm/node_modules/`. The simple web-tools Exa credential is user-local and secret-bearing; follow [`pi-simple-web-tools.md`](pi-simple-web-tools.md) rather than tracking it here.
 
 ## Refresh the repository copies
 

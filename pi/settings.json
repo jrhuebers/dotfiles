@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "0.84.4",
+  "lastChangelogVersion": "0.85.1",
   "theme": "light",
   "tuiMode": "fullscreen",
   "fullscreenScrollbar": "always",
@@ -10,7 +10,6 @@
   "defaultModel": "gpt-5.6-luna",
   "defaultThinkingLevel": "high",
   "packages": [
-    "/home/ubuntu/repos/pi-web-access",
     "git:github.com/jrhuebers/pi-context-viewer",
     "npm:@d3ara1n/pi-context-include",
     {
@@ -22,7 +21,8 @@
     "git:github.com/jrhuebers/pi-background-tasks",
     "git:github.com/jrhuebers/pi-turn-timing",
     "npm:pi-scroll-speed",
-    "npm:pi-btw"
+    "npm:pi-btw",
+    "npm:pi-simple-web-tools@0.1.0"
   ],
   "hideThinkingBlock": false
 }
