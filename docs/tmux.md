@@ -3,6 +3,8 @@
 The repository's `.tmux.conf` is the shared tmux configuration. The system-level
 `~/.tmux.conf` should be a small machine-specific wrapper: source the shared
 configuration first, then override only settings that identify the machine.
+The shared configuration is compatible with tmux 3.4 by guarding newer
+`extended-keys-format` settings behind a tmux-version check.
 
 ## Configuration pattern
 
