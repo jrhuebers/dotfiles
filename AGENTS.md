@@ -16,13 +16,19 @@ documentation belongs in `~/admin-docs/`, not in this repository.
 
 ## Knowledge base index
 
+- [`docs/admin-skill.md`](docs/admin-skill.md) — Universal, machine-aware admin skill deployment and verification.
+- [`docs/device-profiles.md`](docs/device-profiles.md) — Cluster versus personal-device configuration profiles and on/off matrix.
 - [`docs/git.md`](docs/git.md) — Global Git author identity and installation/query commands.
+- [`docs/hermes-skills.md`](docs/hermes-skills.md) — Archived Hermes skills boundary, use, promotion, and removal.
 - [`docs/glow.md`](docs/glow.md) — Glow Markdown renderer installation and configuration.
 - [`docs/open-in-cursor.md`](docs/open-in-cursor.md) — macOS Finder service for opening files and folders in Cursor.
 - [`docs/pi-simple-web-tools.md`](docs/pi-simple-web-tools.md) — Pi web-search/fetch extension setup with Exa authentication.
-- [`docs/gnome-keyboard-layout.md`](docs/gnome-keyboard-layout.md) — User-level GNOME/Wayland XKB layout for German characters on a British keyboard.
+- [`docs/linux-keyboard-layout.md`](docs/linux-keyboard-layout.md) — User-level Linux GNOME/Wayland XKB layout for German characters on a British keyboard.
 - [`docs/pi.md`](docs/pi.md) — Pi agent configuration snapshots, deployment, refresh, and verification.
+- [`docs/shell.md`](docs/shell.md) — Cluster Bash and personal macOS Zsh startup profiles.
+- [`docs/ssh.md`](docs/ssh.md) — Personal SSH client configuration deployment and verification.
 - [`docs/tmux.md`](docs/tmux.md) — tmux installation, `.tmux.conf` deployment, reload command, and key settings.
 - [`docs/vim.md`](docs/vim.md) — Vim installation and `.vimrc` deployment.
+- [`docs/vscode.md`](docs/vscode.md) — VS Code workstation settings deployment and scope.
 - [`docs/yazi.md`](docs/yazi.md) — Yazi installation for Fedora/macOS, configuration deployment, package installation, and keybindings.
 - [`docs/zed.md`](docs/zed.md) — Zed configuration contents and symlink-based setup.

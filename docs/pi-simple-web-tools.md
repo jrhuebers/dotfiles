@@ -1,6 +1,9 @@
 # Pi simple web tools
 
-`pi-simple-web-tools` is the Pi extension used on Johannes's laptop for compact web access inside agents.
+`pi-simple-web-tools` is the Pi extension used for compact web access inside
+agents. It is currently listed in both the cluster and personal Pi profiles;
+whether it is usable on a cluster depends on that cluster's network policy and
+its separately configured user credential.
 
 It exposes exactly two tools:
 
@@ -9,9 +12,11 @@ It exposes exactly two tools:
 
 The package source is `jillesme/pi-simple-web-tools`; the installed npm package name is `pi-simple-web-tools`.
 
-## Current laptop setup
+## Current personal-device setup
 
-On the Fedora ThinkPad, this is installed as a Pi npm package:
+On the Fedora ThinkPad, this is installed as a Pi npm package. The package is
+also present in the cluster Pi settings snapshot, but it is not a substitute
+for checking cluster outbound-network policy:
 
 ```sh
 pi install npm:pi-simple-web-tools

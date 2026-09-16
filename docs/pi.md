@@ -1,44 +1,58 @@
 # Pi agent
 
 Pi's user-level configuration is installed under `~/.pi/agent`. This repository
-keeps the two configuration files that are currently used on the server:
+keeps separate settings profiles because a compute cluster has Slurm tools that
+should not be enabled on personal machines:
 
-- `pi/settings.json` → `~/.pi/agent/settings.json`
-- `pi/models.json` → `~/.pi/agent/models.json`
+- `pi/cluster/settings.json` → `~/.pi/agent/settings.json` on a cluster host.
+- `pi/personal/settings.json` → `~/.pi/agent/settings.json` on a laptop,
+  desktop PC, or personal server such as the Oracle server.
+- `pi/models.json` is shared by both profiles.
 
-The global package list includes `npm:pi-btw`, which provides the `/btw` side-conversation extension, and `npm:pi-simple-web-tools@0.1.0`, which provides compact `web_search` and `fetch_content` tools. Their source specs are recorded in `pi/settings.json`; Pi installs them under `~/.pi/agent/npm/node_modules/`. The simple web-tools Exa credential is user-local and secret-bearing; follow [`pi-simple-web-tools.md`](pi-simple-web-tools.md) rather than tracking it here.
+The profile difference is currently one package: `git:github.com/jrhuebers/pi-slurm`
+is enabled only in the cluster profile. All other Pi settings and packages are
+currently identical, including `npm:pi-simple-web-tools@0.1.0`. The web-tools
+credential is user-local and secret-bearing; follow
+[`pi-simple-web-tools.md`](pi-simple-web-tools.md) rather than tracking it here.
+See [`device-profiles.md`](device-profiles.md) for the complete cluster/personal
+split across this repository.
 
 ## Refresh the repository copies
 
-After changing the live Pi configuration, refresh the repository snapshots from
-`~/dotfiles`:
+Set `PI_PROFILE` to the profile used by the live machine before refreshing:
 
 ```sh
-mkdir -p ~/dotfiles/pi
-cp -p ~/.pi/agent/{settings.json,models.json} ~/dotfiles/pi/
+PI_PROFILE=personal  # use cluster on a cluster host
+mkdir -p ~/dotfiles/pi/$PI_PROFILE
+cp -p ~/.pi/agent/settings.json ~/dotfiles/pi/$PI_PROFILE/settings.json
+cp -p ~/.pi/agent/models.json ~/dotfiles/pi/models.json
 ```
 
 ## Deploy the repository copies
 
-From a checkout at `~/dotfiles`, install the tracked configuration files with:
+From a checkout at `~/dotfiles`, select exactly one profile:
 
 ```sh
+PI_PROFILE=personal  # use cluster on a cluster host
+case "$PI_PROFILE" in cluster|personal) ;; *) exit 2 ;; esac
 mkdir -p ~/.pi/agent
-cp -p ~/dotfiles/pi/{settings.json,models.json} ~/.pi/agent/
+cp -p ~/dotfiles/pi/$PI_PROFILE/settings.json ~/.pi/agent/settings.json
+cp -p ~/dotfiles/pi/models.json ~/.pi/agent/models.json
 ```
 
-Restart Pi after configuration changes so it reloads the files. Verify that the
-repository and installed copies match with:
+Do not install the cluster profile on a personal device: it registers Slurm
+commands that are unavailable or inappropriate there. Restart Pi after
+configuration changes so it reloads the files. Verify the selected profile with:
 
 ```sh
-cmp -s ~/dotfiles/pi/settings.json ~/.pi/agent/settings.json && \
+cmp -s ~/dotfiles/pi/$PI_PROFILE/settings.json ~/.pi/agent/settings.json && \
   cmp -s ~/dotfiles/pi/models.json ~/.pi/agent/models.json && \
-  echo 'Pi configuration copies match.'
+  echo "Pi $PI_PROFILE configuration copies match."
 ```
 
 Do not add authentication tokens or other secrets to the tracked configuration.
 
-To install or remove the package in the live global Pi setup:
+To install or remove a package in the live global Pi setup:
 
 ```sh
 pi install npm:pi-btw
