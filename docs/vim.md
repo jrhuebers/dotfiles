@@ -27,6 +27,21 @@ The configuration enables syntax/filetype support, line numbers, visible
 whitespace, four-space indentation (except Makefiles), incremental highlighted
 search, mouse support, wrapped-line movement, and a persistent status line.
 
+## Plugins
+
+Vim plugins are managed with [vim-plug](https://github.com/junegunn/vim-plug).
+The configuration declares `Julian/lean.vim` for Lean syntax highlighting.
+Install vim-plug and then install the declared plugins with:
+
+```sh
+curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+vim -Nu ~/.vimrc -n -es +'PlugInstall --sync' +qa
+```
+
+Use `:PlugUpdate` inside Vim to update plugins and `:PlugClean` to remove
+plugins no longer declared in `.vimrc`.
+
 ## Verify and remove
 
 ```sh

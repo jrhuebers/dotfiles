@@ -1,4 +1,8 @@
 
+call plug#begin()
+Plug 'Julian/lean.vim'
+call plug#end()
+
 filetype plugin indent on
 syntax on
 
