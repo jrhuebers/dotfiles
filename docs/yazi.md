@@ -10,6 +10,8 @@ Use the archive matching the platform:
 - Intel macOS: `yazi-x86_64-apple-darwin.zip`
 - Apple Silicon macOS: `yazi-aarch64-apple-darwin.zip`
 
+Verify the downloaded archive against the SHA-256 digest published for the selected GitHub release before unpacking it.
+
 After unpacking the archive:
 
 ```sh
