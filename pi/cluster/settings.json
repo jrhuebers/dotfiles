@@ -23,7 +23,8 @@
     "npm:pi-scroll-speed",
     "npm:pi-btw",
     "npm:pi-simple-web-tools@0.1.0",
-    "git:github.com/jrhuebers/pi-slurm"
+    "git:github.com/jrhuebers/pi-slurm",
+    "npm:@signalridge/pi-goal"
   ],
   "hideThinkingBlock": false
 }

@@ -22,7 +22,8 @@
     "git:github.com/jrhuebers/pi-turn-timing",
     "npm:pi-scroll-speed",
     "npm:pi-btw",
-    "npm:pi-simple-web-tools@0.1.0"
+    "npm:pi-simple-web-tools@0.1.0",
+    "npm:@signalridge/pi-goal"
   ],
   "hideThinkingBlock": false
 }

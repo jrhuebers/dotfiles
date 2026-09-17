@@ -10,9 +10,11 @@ should not be enabled on personal machines:
 - `pi/models.json` is shared by both profiles.
 
 The profile difference is currently one package: `git:github.com/jrhuebers/pi-slurm`
-is enabled only in the cluster profile. All other Pi settings and packages are
-currently identical, including `npm:pi-simple-web-tools@0.1.0`. The web-tools
-credential is user-local and secret-bearing; follow
+is enabled only in the cluster profile. Both profiles include
+`npm:@signalridge/pi-goal`, which provides the session-scoped `/goal` command and
+`goal_complete`, `goal_blocked`, and `goal_wait` tools for autonomous, verifiable
+completion. All other Pi settings and packages are currently identical, including
+`npm:pi-simple-web-tools@0.1.0`. The web-tools credential is user-local and secret-bearing; follow
 [`pi-simple-web-tools.md`](pi-simple-web-tools.md) rather than tracking it here.
 See [`device-profiles.md`](device-profiles.md) for the complete cluster/personal
 split across this repository.
@@ -56,7 +58,8 @@ To install or remove a package in the live global Pi setup:
 
 ```sh
 pi install npm:pi-btw
+pi install npm:@signalridge/pi-goal
 pi remove npm:pi-btw
 ```
 
-After installation, verify it with `pi list` and restart Pi so the extension loads. The extension's `/btw` thread can use the configured Pi model and coding tools; review third-party package source before updating it.
+After installation, verify it with `pi list` and restart Pi so the extension loads. The `pi-goal` package is included in both settings profiles; use `/goal` to start or manage a session-scoped autonomous goal. The extension's `/btw` thread can use the configured Pi model and coding tools; review third-party package source before updating it.
