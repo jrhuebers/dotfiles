@@ -7,6 +7,8 @@ documentation belongs in `~/admin-docs/`, not in this repository.
 
 ## Rules for agents
 
+- Before making changes in this repository, run `git pull --ff-only`. If the pull cannot fast-forward cleanly, stop and resolve that first.
+- After making changes, verify them, commit the intended files, and push the commit to `origin` before reporting completion. Do not include unrelated working-tree changes.
 - For every software install, uninstall, or configuration change, update the relevant file in `docs/` or create one if it does not exist.
 - Keep one topic per Markdown file, usually one piece of software or one configuration.
 - Document installation, configuration, platform differences, important paths, verification, and removal when relevant. Keep commands copyable and distinguish the repository source from the installed destination.
