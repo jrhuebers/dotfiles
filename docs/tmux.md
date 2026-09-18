@@ -24,7 +24,7 @@ A host wrapper should follow this pattern:
 source-file -q "$HOME/dotfiles/.tmux.conf"
 
 # Choose a style unique to this machine, after the shared configuration.
-set -g status-style "bg=colour245,fg=colour232"
+set -g status-style "bg=colour236,fg=colour255"
 ```
 
 Use different valid style values on each machine.
@@ -46,7 +46,7 @@ cat >~/.tmux.conf <<'EOF'
 source-file -q "$HOME/dotfiles/.tmux.conf"
 
 # Choose a style unique to this machine.
-set -g status-style "bg=colour245,fg=colour232"
+set -g status-style "bg=colour236,fg=colour255"
 EOF
 tmux source-file ~/.tmux.conf
 ```
