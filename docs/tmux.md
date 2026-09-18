@@ -27,7 +27,7 @@ source-file -q "$HOME/dotfiles/.tmux.conf"
 set -g status-style "bg=colour236,fg=colour255"
 ```
 
-Use different valid style values on each machine. A literal hex foreground such as `#eeeeee` can avoid a dim terminal-specific ANSI `white` palette.
+Use different valid style values on each machine. A literal hex foreground such as `#dddddd` can avoid a dim terminal-specific ANSI `white` palette.
 
 ## Install and configure
 
