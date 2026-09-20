@@ -30,7 +30,7 @@ node.
 | Item or software | Cluster | Personal Linux GUI | Personal macOS | Personal headless server | What to do |
 | --- | --- | --- | --- | --- | --- |
 | Pi settings | **on:** `pi/cluster/settings.json` | **on:** `pi/personal/settings.json` | **on:** `pi/personal/settings.json` | **on:** `pi/personal/settings.json` | Follow [`pi.md`](pi.md). The cluster profile alone enables `pi-slurm` and `pi-subagents`. |
-| Pi model list | **on** | **on** | **on** | **on** | Deploy shared `pi/models.json` with the selected Pi profile. |
+| Pi model configuration | local | local | local | local | Configure `~/.pi/agent/models.json` per machine when custom providers/models are needed; do not track credentials or machine-specific model endpoints here. |
 | Pi web tools | optional | optional | optional | optional | The package is currently in both Pi profiles, but each machine needs its own Exa credential and must allow outbound access. Follow [`pi-simple-web-tools.md`](pi-simple-web-tools.md). |
 | Bash startup | **on, after review** | **off** | **off** | **off** | `.bashrc` hard-codes the cluster `/cephfs` home and path; it is cluster-specific. See [`shell.md`](shell.md). |
 | Zsh startup | **off** | **off** | **on, after review** | **off** | `.zshrc` contains macOS `/Users/...` and Antigravity paths; do not copy it unchanged to Linux. See [`shell.md`](shell.md). |
@@ -57,7 +57,6 @@ PI_PROFILE=cluster    # use personal on any personal device or server
 case "$PI_PROFILE" in cluster|personal) ;; *) exit 2 ;; esac
 mkdir -p ~/.pi/agent
 cp -p ~/dotfiles/pi/$PI_PROFILE/settings.json ~/.pi/agent/settings.json
-cp -p ~/dotfiles/pi/models.json ~/.pi/agent/models.json
 ```
 
 Do not recreate a single root-level `pi/settings.json`; doing so would remove

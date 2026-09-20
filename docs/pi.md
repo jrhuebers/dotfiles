@@ -7,7 +7,6 @@ should not be enabled on personal machines:
 - `pi/cluster/settings.json` → `~/.pi/agent/settings.json` on a cluster host.
 - `pi/personal/settings.json` → `~/.pi/agent/settings.json` on a laptop,
   desktop PC, or personal server such as the Oracle server.
-- `pi/models.json` is shared by both profiles.
 
 The cluster profile enables two packages that are not in the personal profile:
 `git:github.com/jrhuebers/pi-slurm` and `npm:pi-subagents`. Both profiles include
@@ -27,7 +26,6 @@ Set `PI_PROFILE` to the profile used by the live machine before refreshing:
 PI_PROFILE=personal  # use cluster on a cluster host
 mkdir -p ~/dotfiles/pi/$PI_PROFILE
 cp -p ~/.pi/agent/settings.json ~/dotfiles/pi/$PI_PROFILE/settings.json
-cp -p ~/.pi/agent/models.json ~/dotfiles/pi/models.json
 ```
 
 ## Deploy the repository copies
@@ -39,7 +37,6 @@ PI_PROFILE=personal  # use cluster on a cluster host
 case "$PI_PROFILE" in cluster|personal) ;; *) exit 2 ;; esac
 mkdir -p ~/.pi/agent
 cp -p ~/dotfiles/pi/$PI_PROFILE/settings.json ~/.pi/agent/settings.json
-cp -p ~/dotfiles/pi/models.json ~/.pi/agent/models.json
 ```
 
 Do not install the cluster profile on a personal device: it registers Slurm
@@ -48,8 +45,7 @@ configuration changes so it reloads the files. Verify the selected profile with:
 
 ```sh
 cmp -s ~/dotfiles/pi/$PI_PROFILE/settings.json ~/.pi/agent/settings.json && \
-  cmp -s ~/dotfiles/pi/models.json ~/.pi/agent/models.json && \
-  echo "Pi $PI_PROFILE configuration copies match."
+  echo "Pi $PI_PROFILE configuration copy matches."
 ```
 
 Do not add authentication tokens or other secrets to the tracked configuration.
