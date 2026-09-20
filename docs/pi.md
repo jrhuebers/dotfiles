@@ -8,10 +8,11 @@ should not be enabled on personal machines:
 - `pi/personal/settings.json` → `~/.pi/agent/settings.json` on a laptop,
   desktop PC, or personal server such as the Oracle server.
 
-The cluster profile enables two packages that are not in the personal profile:
-`git:github.com/jrhuebers/pi-slurm` and `npm:pi-subagents`. Both profiles include
-`npm:@signalridge/pi-goal`, which provides the session-scoped `/goal` command and
-`goal_complete`, `goal_blocked`, and `goal_wait` tools for autonomous, verifiable
+The cluster profile enables one package that is not in the personal profile:
+`git:github.com/jrhuebers/pi-slurm`. Both profiles include
+`npm:@signalridge/pi-goal` and `npm:pi-subagents`. The goal package provides the
+session-scoped `/goal` command and `goal_complete`, `goal_blocked`, and
+`goal_wait` tools for autonomous, verifiable
 completion. All other Pi settings and packages are currently identical, including
 `npm:pi-simple-web-tools@0.1.0`. The web-tools credential is user-local and secret-bearing; follow
 [`pi-simple-web-tools.md`](pi-simple-web-tools.md) rather than tracking it here.

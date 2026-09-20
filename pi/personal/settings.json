@@ -24,7 +24,8 @@
     "npm:pi-scroll-speed",
     "npm:pi-btw",
     "npm:pi-simple-web-tools@0.1.0",
-    "npm:@signalridge/pi-goal"
+    "npm:@signalridge/pi-goal",
+    "npm:pi-subagents"
   ],
   "hideThinkingBlock": false
 }

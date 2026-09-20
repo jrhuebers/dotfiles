@@ -29,7 +29,7 @@ node.
 
 | Item or software | Cluster | Personal Linux GUI | Personal macOS | Personal headless server | What to do |
 | --- | --- | --- | --- | --- | --- |
-| Pi settings | **on:** `pi/cluster/settings.json` | **on:** `pi/personal/settings.json` | **on:** `pi/personal/settings.json` | **on:** `pi/personal/settings.json` | Follow [`pi.md`](pi.md). The cluster profile alone enables `pi-slurm` and `pi-subagents`. |
+| Pi settings | **on:** `pi/cluster/settings.json` | **on:** `pi/personal/settings.json` | **on:** `pi/personal/settings.json` | **on:** `pi/personal/settings.json` | Follow [`pi.md`](pi.md). The cluster profile alone enables `pi-slurm`. |
 | Pi model configuration | local | local | local | local | Configure `~/.pi/agent/models.json` per machine when custom providers/models are needed; do not track credentials or machine-specific model endpoints here. |
 | Pi web tools | optional | optional | optional | optional | The package is currently in both Pi profiles, but each machine needs its own Exa credential and must allow outbound access. Follow [`pi-simple-web-tools.md`](pi-simple-web-tools.md). |
 | Bash startup | **on, after review** | **off** | **off** | **off** | `.bashrc` hard-codes the cluster `/cephfs` home and path; it is cluster-specific. See [`shell.md`](shell.md). |
@@ -64,8 +64,9 @@ the profile boundary. [`pi.md`](pi.md) documents refresh and verification.
 
 ## Current explicit splits
 
-The paired configuration variant is Pi: `pi-slurm` and `pi-subagents` are
-**on** in the cluster settings and **off** in the personal settings. The other explicit
+The paired configuration variant is Pi: `pi-slurm` is **on** in the cluster
+settings and **off** in the personal settings; `pi-subagents` is **on** in both.
+The other explicit
 profile boundaries are single-purpose files: cluster Bash, macOS Zsh and Finder
 integration, Linux GNOME/Wayland keyboard integration, and workstation-only
 editor configuration. tmux, Vim, Git, Glow, and Yazi are currently shared
