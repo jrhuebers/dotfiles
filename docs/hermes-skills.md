@@ -8,7 +8,8 @@ Tools that discover or install skills must use `skills/` and must not scan,
 symlink, or install `hermes-skills/`. The active directory contains the
 selected admin, research, and workflow skills:
 
-- `admin`, `create-new-research-repo`, `hydra-config-management`,
+- `admin`, `computational-research`, `create-new-research-repo`,
+  `hydra-config-management`,
   `report-writing`, `research-paper-writing`, and
   `supervised-research-diagnostics`;
 - `start-slurm-job` and `training-run-analysis` (the Codex-imported skills);
