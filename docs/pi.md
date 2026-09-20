@@ -9,8 +9,8 @@ should not be enabled on personal machines:
   desktop PC, or personal server such as the Oracle server.
 - `pi/models.json` is shared by both profiles.
 
-The profile difference is currently one package: `git:github.com/jrhuebers/pi-slurm`
-is enabled only in the cluster profile. Both profiles include
+The cluster profile enables two packages that are not in the personal profile:
+`git:github.com/jrhuebers/pi-slurm` and `npm:pi-subagents`. Both profiles include
 `npm:@signalridge/pi-goal`, which provides the session-scoped `/goal` command and
 `goal_complete`, `goal_blocked`, and `goal_wait` tools for autonomous, verifiable
 completion. All other Pi settings and packages are currently identical, including
