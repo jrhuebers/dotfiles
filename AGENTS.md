@@ -23,6 +23,7 @@ documentation belongs in `~/admin-docs/`, not in this repository.
 - [`docs/git.md`](docs/git.md) — Global Git author identity and installation/query commands.
 - [`docs/hermes-skills.md`](docs/hermes-skills.md) — Archived Hermes skills boundary, use, promotion, and removal.
 - [`docs/glow.md`](docs/glow.md) — Glow Markdown renderer installation and configuration.
+- [`docs/herdr.md`](docs/herdr.md) — Herdr terminal multiplexer usage and current local configuration.
 - [`docs/cloc.md`](docs/cloc.md) — Required cloc source-code line counter installation on every machine.
 - [`docs/open-in-cursor.md`](docs/open-in-cursor.md) — macOS Finder service for opening files and folders in Cursor.
 - [`docs/pi-simple-web-tools.md`](docs/pi-simple-web-tools.md) — Pi web-search/fetch extension setup with Exa authentication.

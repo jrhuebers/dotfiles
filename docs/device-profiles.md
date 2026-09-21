@@ -36,6 +36,7 @@ node.
 | Zsh startup | **off** | **off** | **on, after review** | **off** | `.zshrc` contains macOS `/Users/...` and Antigravity paths; do not copy it unchanged to Linux. See [`shell.md`](shell.md). |
 | SSH client config | optional | **on** when accessing the cluster | **on** when accessing the cluster | optional | `.ssh/config` is a client-side convenience configuration, not a server or compute-node setting. Never track private keys. See [`ssh.md`](ssh.md). |
 | tmux | **on** | optional | optional | optional | The shared `.tmux.conf` is portable; create a small host wrapper for the per-machine status style. See [`tmux.md`](tmux.md). |
+| Herdr | **on** | **on** | **on** | **on** | Standard terminal multiplexer for coding-agent workspaces on every supported profile. Use the shared leader/configuration documented in [`herdr.md`](herdr.md). |
 | Vim | optional | optional | optional | optional | `.vimrc` is shared. See [`vim.md`](vim.md). |
 | Git | optional | optional | optional | optional | `.gitconfig` is shared. See [`git.md`](git.md). |
 | Glow | optional | optional | optional | optional | Shared configuration, with OS-specific installation commands. See [`glow.md`](glow.md). |
