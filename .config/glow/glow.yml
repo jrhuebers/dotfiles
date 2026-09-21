@@ -8,3 +8,5 @@ pager: true
 width: 0
 # show all files, including hidden and ignored.
 all: false
+# render only \n\n as a new line
+preserveNewLines: false

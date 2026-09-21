@@ -37,8 +37,9 @@ mkdir -p ~/.config/glow
 cp -p ~/dotfiles/.config/glow/glow.yml ~/.config/glow/
 ```
 
-The current configuration uses the light style, enables pager mode, and disables
-line wrapping. Render a file with:
+The current configuration uses the light style, enables pager mode, disables
+line wrapping, and renders only consecutive newlines as line breaks with
+`preserveNewLines: false`. Render a file with:
 
 ```sh
 glow README.md
