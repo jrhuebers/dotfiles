@@ -2,6 +2,41 @@
 
 Yazi is the terminal file manager used here. Install the latest stable official release; do not use Flatpak or Snap.
 
+## Dependency: `pdftoppm`
+
+Yazi's PDF preview/open workflow requires `pdftoppm`, provided by Poppler.
+Install it on every machine before configuring Yazi:
+
+Ubuntu/Debian:
+
+```sh
+sudo apt update
+sudo apt install poppler-utils
+```
+
+Fedora/RHEL:
+
+```sh
+sudo dnf install poppler-utils
+```
+
+macOS with Homebrew:
+
+```sh
+brew install poppler
+```
+
+Verify the dependency with:
+
+```sh
+command -v pdftoppm
+pdftoppm -v
+```
+
+On this Ubuntu host, where `sudo` is unavailable, `pdftoppm` is installed
+user-locally at `~/.local/bin/pdftoppm`; its extracted Poppler runtime is under
+`~/.local/opt/poppler-utils-24.02.0-1ubuntu9.9/`.
+
 ## Install
 
 Use the archive matching the platform:
@@ -44,3 +79,14 @@ export VISUAL=vim
 ```
 
 These exports are configured in `~/.bashrc`.
+
+## Remove
+
+For a system installation, remove Poppler with the matching package manager,
+for example `sudo apt remove poppler-utils` or `brew uninstall poppler`. For
+the user-local installation on this host:
+
+```sh
+rm -f ~/.local/bin/pdftoppm
+rm -rf ~/.local/opt/poppler-utils-24.02.0-1ubuntu9.9
+```
