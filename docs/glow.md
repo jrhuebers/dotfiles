@@ -42,9 +42,9 @@ fi
 ln -s ~/dotfiles/.config/glow/glow.yml ~/.config/glow/glow.yml
 ```
 
-The current configuration uses the light style, enables pager mode, disables
-line wrapping, and preserves source newlines in TUI mode with
-`preserveNewLines: true`. Render a file with:
+The current configuration uses the light style, launches Glow in TUI mode,
+and disables pager mode. With `preserveNewLines: false`, single newlines are
+reflowed while blank-line paragraph breaks remain. Render a file with:
 
 ```sh
 glow README.md

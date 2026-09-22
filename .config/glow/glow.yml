@@ -3,10 +3,12 @@ style: "light"
 # mouse support (TUI-mode only)
 mouse: false
 # use pager to display markdown
-pager: true
+pager: false
+# display with TUI
+tui: true
 # word-wrap at width (0 disables wrapping)
 width: 0
 # show all files, including hidden and ignored.
 all: false
-# preserve source newlines in TUI output
-preserveNewLines: true
+# reflow single newlines; keep blank-line paragraph breaks
+preserveNewLines: false
