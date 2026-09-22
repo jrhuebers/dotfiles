@@ -42,17 +42,9 @@ fi
 ln -s ~/dotfiles/.config/glow/glow.yml ~/.config/glow/glow.yml
 ```
 
-The current configuration uses the light style and pager mode. In Glow's
-non-interactive pager mode, source newlines are always preserved. The
-`preserveNewLines: false` setting applies to TUI mode, where single newlines
-are reflowed while blank-line paragraph breaks remain. Use this when that
-behavior is desired:
-
-```sh
-glow --pager=false --tui README.md
-```
-
-For the normal working default, render a file with:
+The current configuration uses the light style, launches Glow in TUI mode,
+and disables pager mode. With `preserveNewLines: false`, single newlines are
+reflowed while blank-line paragraph breaks remain. Render a file with:
 
 ```sh
 glow README.md
