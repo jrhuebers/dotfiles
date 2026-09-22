@@ -39,6 +39,15 @@ curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
 vim -Nu ~/.vimrc -n -es +'PlugInstall --sync' +qa
 ```
 
+On a shared cluster where the tracked `.gitconfig` rewrites GitHub HTTPS URLs to
+SSH and the cluster has no GitHub SSH authentication, install the declared
+plugin over HTTPS instead:
+
+```sh
+GIT_CONFIG_GLOBAL=/dev/null git clone https://github.com/Julian/lean.vim.git \
+  ~/.vim/plugged/lean.vim
+```
+
 Use `:PlugUpdate` inside Vim to update plugins and `:PlugClean` to remove
 plugins no longer declared in `.vimrc`.
 
