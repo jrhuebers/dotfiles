@@ -6,11 +6,13 @@ The canonical configuration is `.config/glow/glow.yml`; on each machine,
 
 ## Install
 
-On supported profiles, install the official prebuilt release in the user-local
-binary directory. The current Linux x86_64 cluster installation instead uses
-an unreleased upstream `main` build at commit `6b365ee` because it contains the
-TUI direct-file rendering fix. Stable installations should use the official
-release instructions below.
+Install a tagged release in the user-local binary directory when one newer
+than 3.0.0 is available. Until then, use the pinned upstream commit
+`6b365eea95f7541d4af441d971010b09f6082a0e`, which contains the TUI direct-file
+rendering fix missing from Glow 3.0.0.
+
+For an official release newer than 3.0.0, download the Linux x86_64 tarball
+and install it with:
 
 ```sh
 mkdir -p ~/.local/bin
@@ -19,7 +21,22 @@ tar -xzf glow_*_Linux_x86_64.tar.gz
 install -m 0755 glow ~/.local/bin/glow
 ```
 
-Ensure `~/.local/bin` is in `PATH`, then verify the install:
+To build the pinned commit from source, use Go 1.26.6 or newer:
+
+```sh
+set -eu
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+git clone https://github.com/charmbracelet/glow.git "$work/glow"
+cd "$work/glow"
+git checkout --detach 6b365eea95f7541d4af441d971010b09f6082a0e
+go build -trimpath -ldflags "-s -w -X main.Version=main -X main.CommitSHA=$(git rev-parse HEAD)" -o "$work/glow-bin" .
+mkdir -p ~/.local/bin
+install -m 0755 "$work/glow-bin" ~/.local/bin/glow
+```
+
+On a shared cluster, run the source build through Slurm rather than directly
+on the login node. Ensure `~/.local/bin` is in `PATH`, then verify the install:
 
 ```sh
 glow --version
