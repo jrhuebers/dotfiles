@@ -1,8 +1,8 @@
 # Glow
 
 [Glow](https://github.com/charmbracelet/glow) renders Markdown in a terminal.
-The tracked configuration is `.config/glow/glow.yml`; its installed location is
-`~/.config/glow/glow.yml`.
+The canonical configuration is `.config/glow/glow.yml`; on each machine,
+`~/.config/glow/glow.yml` must be a symlink to that tracked file.
 
 ## Install
 
@@ -31,11 +31,15 @@ brew install glow
 
 ## Configuration
 
-Deploy the tracked configuration:
+Deploy the tracked configuration as a symlink:
 
 ```sh
 mkdir -p ~/.config/glow
-cp -p ~/dotfiles/.config/glow/glow.yml ~/.config/glow/
+# Back up an existing regular file or symlink before replacing it.
+if [ -e ~/.config/glow/glow.yml ] || [ -L ~/.config/glow/glow.yml ]; then
+  mv ~/.config/glow/glow.yml ~/.config/glow/glow.yml.backup-$(date +%Y%m%d-%H%M%S)
+fi
+ln -s ~/dotfiles/.config/glow/glow.yml ~/.config/glow/glow.yml
 ```
 
 The current configuration uses the light style, enables pager mode, disables
@@ -49,17 +53,18 @@ glow README.md
 Verify the installed copy matches the repository copy:
 
 ```sh
-cmp -s ~/dotfiles/.config/glow/glow.yml ~/.config/glow/glow.yml && \
-  echo 'Glow configuration copies match.'
+test "$(readlink -f ~/.config/glow/glow.yml)" = \
+  "$(readlink -f ~/dotfiles/.config/glow/glow.yml)" && \
+  echo 'Glow configuration symlink is correct.'
 ```
 
-## Refresh the tracked copy
+## Change the configuration
 
-After changing the live configuration, refresh the repository copy:
+Edit the tracked source directly, then commit and push it. All machine-local
+paths should remain symlinks to this source:
 
 ```sh
-mkdir -p ~/dotfiles/.config/glow
-cp -p ~/.config/glow/glow.yml ~/dotfiles/.config/glow/
+${EDITOR:-vi} ~/dotfiles/.config/glow/glow.yml
 ```
 
 ## Remove
