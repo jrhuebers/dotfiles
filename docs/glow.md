@@ -6,8 +6,9 @@ The tracked configuration is `.config/glow/glow.yml`; its installed location is
 
 ## Install
 
-On this Linux host, install the official prebuilt release in the user-local
-binary directory:
+On supported profiles, install the official prebuilt release in the user-local
+binary directory. The Linux x86_64 installation on the RCP cluster was verified
+with Glow 3.0.0 on 2026-09-22:
 
 ```sh
 mkdir -p ~/.local/bin
