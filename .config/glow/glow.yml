@@ -6,8 +6,6 @@ mouse: false
 pager: false
 # display with TUI
 tui: true
-# word-wrap at width (0 disables wrapping)
-width: 0
 # show all files, including hidden and ignored.
 all: false
 # reflow single newlines; keep blank-line paragraph breaks
