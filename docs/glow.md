@@ -7,8 +7,10 @@ The canonical configuration is `.config/glow/glow.yml`; on each machine,
 ## Install
 
 On supported profiles, install the official prebuilt release in the user-local
-binary directory. The Linux x86_64 installation on the RCP cluster was verified
-with Glow 3.0.0 on 2026-09-22:
+binary directory. The current Linux x86_64 cluster installation instead uses
+an unreleased upstream `main` build at commit `6b365ee` because it contains the
+TUI direct-file rendering fix. Stable installations should use the official
+release instructions below.
 
 ```sh
 mkdir -p ~/.local/bin
