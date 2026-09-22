@@ -20,6 +20,15 @@ The file may name a private key, but private keys themselves are deliberately
 not tracked. Ensure that every referenced key exists locally with restrictive
 permissions before connecting.
 
+The tracked configuration includes the RCP cluster alias:
+
+```sshconfig
+Host rcp
+    HostName jumphost.rcp.epfl.ch
+    User huebers
+    IdentityFile ~/.ssh/id_ed25519
+```
+
 ## Verify
 
 For an alias already present in the configuration, inspect the resolved

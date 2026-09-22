@@ -29,6 +29,23 @@ mkdir -p ~/dotfiles/pi/$PI_PROFILE
 cp -p ~/.pi/agent/settings.json ~/dotfiles/pi/$PI_PROFILE/settings.json
 ```
 
+## Install Pi on a no-sudo Ubuntu cluster host
+
+Pi requires Node.js `>=22.19.0`. When the cluster does not provide Node.js or
+sudo, install the official Linux x86_64 Node.js 22 archive under `~/.local/opt`
+and link `node`, `npm`, and `npx` into `~/.local/bin`. Verify the archive with
+the matching SHA-256 entry from Node.js `SHASUMS256.txt`. Then install Pi
+user-locally:
+
+```sh
+npm install --prefix "$HOME/.local" --global @earendil-works/pi-coding-agent
+pi --version
+```
+
+Do not copy `~/.pi/agent/auth.json`, `models.json`, session files, or provider
+credentials between machines. Configure authentication separately on the
+cluster if permitted.
+
 ## Deploy the repository copies
 
 From a checkout at `~/dotfiles`, select exactly one profile:

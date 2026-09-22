@@ -8,6 +8,20 @@ installed per user; on the documented Fedora host the binary is
 Use the same configuration and workflow on every supported host, adapting only
 the platform-specific installation step.
 
+## Install
+
+On a Linux cluster without system package privileges, use Herdr's official
+user-local installer:
+
+```sh
+curl -fsSL https://herdr.dev/install.sh | sh
+herdr --version
+```
+
+The installer places the binary in `~/.local/bin`; ensure that directory is in
+`PATH`. Do not run the installer from a shared system account or replace a
+package-managed installation.
+
 ## Current configuration
 
 The live configuration is at `~/.config/herdr/config.toml`. It is currently

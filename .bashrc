@@ -12,6 +12,8 @@ PS1='\[\e[38;5;214m\]${debian_chroot:+($debian_chroot)}\[\e[0m\]\
 $ '
 export PS1
 export PROMPT_COMMAND='printf "\n"'
+export EDITOR=vim
+export VISUAL=vim
 
 alias ls='ls --color=auto'
 alias squeue='squeue --format="%.18i %.9P %.30j %.8u %.2t %.10M %.6D %R"'
