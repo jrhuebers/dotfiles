@@ -39,6 +39,7 @@ node.
 | Herdr | **on** | **on** | **on** | **on** | Standard terminal multiplexer for coding-agent workspaces on every supported profile. Use the shared leader/configuration documented in [`herdr.md`](herdr.md). |
 | Vim | optional | optional | optional | optional | `.vimrc` is shared. See [`vim.md`](vim.md). |
 | Git | optional | optional | optional | optional | `.gitconfig` is shared. See [`git.md`](git.md). |
+| GitHub CLI (`gh`) | **on** | **on** | **on** | **on** | Install the CLI on every supported machine. See [`git.md`](git.md). |
 | Glow | optional | optional | optional | optional | Shared configuration, with OS-specific installation commands. See [`glow.md`](glow.md). |
 | Yazi | optional | optional | optional | optional | Shared configuration, with Linux/macOS installation differences. See [`yazi.md`](yazi.md). |
 | VS Code settings | **off** | optional | optional | **off** | `VSCode/settings.json` is a GUI workstation configuration. It may be used by a local editor client connected to a cluster. See [`vscode.md`](vscode.md). |
