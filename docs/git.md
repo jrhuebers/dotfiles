@@ -14,6 +14,13 @@ cp .gitconfig ~/.gitconfig
 
 A repository-local `.git/config` can override these global values and is not synced with the remote.
 
+On a shared cluster without GitHub SSH authentication, an HTTPS checkout can
+be refreshed without the global URL rewrite for that command:
+
+```sh
+GIT_CONFIG_GLOBAL=/dev/null git -C ~/dotfiles pull --ff-only
+```
+
 ## Query
 
 ```sh
