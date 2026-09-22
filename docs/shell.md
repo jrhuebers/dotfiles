@@ -3,22 +3,30 @@
 The tracked shell files are **not** interchangeable. Select the machine profile
 in [`device-profiles.md`](device-profiles.md) before deploying either one.
 
-## Cluster Bash
+## Bash
 
-`.bashrc` is for the cluster profile only. It deliberately sets the cluster
-home directory and user-local binary path, and adds the cluster tmux helper.
-Do not copy it to a laptop, desktop, or personal server.
+`.bashrc` is a portable Bash configuration. It adds `$HOME/.local/bin` to
+`PATH` if needed, configures the prompt, enables colored `ls` output, and
+provides generic tmux attachment and `squeue` display aliases. It does not
+override `HOME` or assume a shared filesystem.
 
-From a cluster-host checkout, install it with:
+From a Linux checkout, install it with:
 
 ```sh
 install -m 0644 ~/dotfiles/.bashrc ~/.bashrc
 bash -n ~/.bashrc
 ```
 
-Start a new Bash login session to use it. Verify that the configured home and
-path are appropriate for the current host before replacing any existing shell
-startup file.
+After installation, verify it with:
+
+```sh
+bash -n ~/.bashrc
+bash -ic 'printf "%s\\n" "$PATH"; alias ls attach squeue'
+```
+
+Start a new Bash login session to use it. Verify that the configured path is
+appropriate for the current host before replacing any existing shell startup
+file.
 
 ## Personal macOS Zsh
 

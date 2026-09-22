@@ -10,9 +10,9 @@ content (>=1000 chars). Falls back to pymupdf if pypdf is unavailable.
 import sys, pathlib
 
 DEFAULT_DIRS = [
-    pathlib.Path("/cephfs/users/huebers/FIM/papers"),
-    pathlib.Path("/cephfs/users/huebers/diffusion-qmc/papers"),
-    pathlib.Path("/cephfs/users/huebers/gauge-graph-network/papers"),
+    pathlib.Path.home() / "FIM/papers",
+    pathlib.Path.home() / "diffusion-qmc/papers",
+    pathlib.Path.home() / "gauge-graph-network/papers",
 ]
 
 try:

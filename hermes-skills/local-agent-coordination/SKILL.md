@@ -61,5 +61,5 @@ inspect, but they are NOT a channel for agent-to-agent communication —
 operator rule: agent-to-agent communication goes through agent-net ONLY
 (no tmux send-keys into an agent's window). Same-host note: a tmux Unix
 socket cannot be reached across hosts even when the socket file lives on
-shared /cephfs; the agent session runs on ml2ran02, so tmux on gwkilab
-(login node) is out of reach (ssh from compute node to gwkilab times out).
+shared storage; a tmux Unix socket remains host-local, so a session on one
+host cannot reach a tmux socket on another host.

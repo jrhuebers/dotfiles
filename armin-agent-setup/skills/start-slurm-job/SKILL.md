@@ -100,8 +100,8 @@ Create (apple/banana shape):
 ```bash
 sbatch --parsable --job-name=apple --partition=GPU1 --gres=gpu:1 \
   --cpus-per-task=8 --mem=64G --time=7-00:00:00 \
-  --output=/cephfs/users/huebers/slurm-logs/apple-%j.out \
-  --error=/cephfs/users/huebers/slurm-logs/apple-%j.err \
+  --output=$HOME/slurm-logs/apple-%j.out \
+  --error=$HOME/slurm-logs/apple-%j.err \
   --wrap='exec sleep infinity'
 ```
 

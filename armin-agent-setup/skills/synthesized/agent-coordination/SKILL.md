@@ -9,7 +9,7 @@ platforms: [linux]
 # Agent Coordination — File-Based Message Bus Protocol
 
 A generic protocol for coordinating multiple independent agent processes running
-on a shared filesystem (e.g. a cluster home on NFS/Lustre/CephFS). No daemons,
+on a shared filesystem (e.g. shared network storage). No daemons,
 no sockets, no central server — **the message IS a file**. Any process that can
 read/write files and run bash can join. This document describes the protocol
 so any agent harness can implement it.

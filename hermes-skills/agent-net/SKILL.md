@@ -8,9 +8,8 @@ platforms: [linux]
 
 # Agent Net — messaging between Hermes agents
 
-File-based messaging bus between Hermes agents on the shared /cephfs home
-(`~/.hermes/agent-net/`). Inboxes live on cephfs, so it works cross-host on
-the cluster. Delivery reuses the slurm-watcher mechanism: the receiving agent
+File-based messaging bus between Hermes agents using a shared filesystem
+(`~/.hermes/agent-net/`). Inboxes require shared storage to work across hosts. Delivery reuses the slurm-watcher mechanism: the receiving agent
 arms a background watcher (`agent-net-listen`) that exits when a message
 arrives -> `notify_on_complete` ping re-enters its conversation with the
 message body inline.
@@ -211,7 +210,7 @@ What was lost and what replaces it:
 
 ## Non-Hermes participants (e.g. Claude Code on a subscription)
 
-The bus is just files on cephfs — ANY process that can run bash can join, no
+The bus is just files on shared storage — ANY process that can run bash can join, no
 Hermes involved. Verified protocol facts from ~/.hermes/agent-net/README.md
 and agent-net-register: registry is one JSON per name; names must match
 `^[a-z0-9][a-z0-9-]{0,31}$`; message files are `inbox/<to>/<ts>-<from>.json`

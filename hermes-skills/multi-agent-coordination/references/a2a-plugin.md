@@ -49,8 +49,8 @@ DESIGN.md, __init__.py, adapter.py, tools.py, plugin.yaml).
 
 ## Why agent-net wins here
 
-Single shared cephfs home = exactly the topology a file bus is built for.
-A2A's cross-machine advantage is moot while every agent shares the
+A shared filesystem is exactly the topology a file bus is built for.
+A2A's cross-machine advantage is limited while every agent shares the
 filesystem. agent-net has no server, no ports, no tokens, no single point
 of failure; it survives job resubmission and process crashes; and it
 accommodates non-Hermes members (Claude Code) via plain files.
@@ -78,7 +78,7 @@ accommodates non-Hermes members (Claude Code) via plain files.
   `A2A_ADVERTISED_TOOLSETS` / `extra.advertised_toolsets` if you don't want
   external peers to see the full tool surface.
 - Push callbacks are SSRF-guarded + HMAC-SHA256 signed (X-A2A-Signature).
-- Conversations + audit logs add disk — minor but real on a 99%-full cephfs.
+- Conversations + audit logs add disk usage — minor but real on a nearly-full shared filesystem.
 - One outstanding task per conversation context; HTTP worker threads handle
   concurrent contexts; no queue-depth knob.
 

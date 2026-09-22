@@ -32,7 +32,7 @@ node.
 | Pi settings | **on:** `pi/cluster/settings.json` | **on:** `pi/personal/settings.json` | **on:** `pi/personal/settings.json` | **on:** `pi/personal/settings.json` | Follow [`pi.md`](pi.md). The cluster profile alone enables `pi-slurm`. |
 | Pi model configuration | local | local | local | local | Configure `~/.pi/agent/models.json` per machine when custom providers/models are needed; do not track credentials or machine-specific model endpoints here. |
 | Pi web tools | optional | optional | optional | optional | The package is currently in both Pi profiles, but each machine needs its own Exa credential and must allow outbound access. Follow [`pi-simple-web-tools.md`](pi-simple-web-tools.md). |
-| Bash startup | **on, after review** | **off** | **off** | **off** | `.bashrc` hard-codes the cluster `/cephfs` home and path; it is cluster-specific. See [`shell.md`](shell.md). |
+| Bash startup | optional | optional | **off** | optional | `.bashrc` is a portable Linux Bash configuration; it does not override `HOME` or assume a shared filesystem. See [`shell.md`](shell.md). |
 | Zsh startup | **off** | **off** | **on, after review** | **off** | `.zshrc` contains macOS `/Users/...` and Antigravity paths; do not copy it unchanged to Linux. See [`shell.md`](shell.md). |
 | SSH client config | optional | **on** when accessing the cluster | **on** when accessing the cluster | optional | `.ssh/config` is a client-side convenience configuration, not a server or compute-node setting. Never track private keys. See [`ssh.md`](ssh.md). |
 | tmux | **on** | optional | optional | optional | The shared `.tmux.conf` is portable; create a small host wrapper for the per-machine status style. See [`tmux.md`](tmux.md). |
@@ -68,7 +68,7 @@ the profile boundary. [`pi.md`](pi.md) documents refresh and verification.
 The paired configuration variant is Pi: `pi-slurm` is **on** in the cluster
 settings and **off** in the personal settings; `pi-subagents` is **on** in both.
 The other explicit
-profile boundaries are single-purpose files: cluster Bash, macOS Zsh and Finder
+profile boundaries are single-purpose files: macOS Zsh and Finder
 integration, Linux GNOME/Wayland keyboard integration, and workstation-only
-editor configuration. tmux, Vim, Git, Glow, and Yazi are currently shared
+editor configuration. Bash, tmux, Vim, Git, Glow, and Yazi are currently shared
 rather than split into profile variants.

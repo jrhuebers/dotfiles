@@ -30,8 +30,8 @@ mechanism that ties it together.
 
 ## The agent-net bus (inbox = maildir pattern)
 
-File-based message bus on the shared /cephfs home. No daemons, no sockets:
-the message IS a JSON file. Works across cluster hosts because cephfs is
+File-based message bus on a shared filesystem. No daemons, no sockets:
+the message IS a JSON file. It works across hosts when that filesystem is
 shared. Layout: `~/.hermes/agent-net/{registry,inbox,seen,outbox}/`.
 Commands live in `~/.local/bin/agent-net-*`. Full protocol + message format:
 `references/agent-discovery.md`.

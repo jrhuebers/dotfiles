@@ -80,7 +80,7 @@ launched it (and it is not in the dashboard because of step-limit blindness):
    The srun join processes show the full command they ran (`srun
    --jobid=52999 --overlap ... python scripts/benchmark.py dataset=cora ...`).
 3. Walk up to the PARENT (`ps -o ppid= -p <pid>` → repeat): the launching
-   shell is a `bash -lic` loop whose `cd /cephfs/users/huebers/<repo>` pins
+   shell is a `bash -lic` loop whose `cd $HOME/<repo>` pins
    the agent — e.g. a loop `cd gauge-graph-network ... for tm in dfs bfs
    ...; do srun --jobid=52999 ...; done; echo CORA_TREES2_DONE` is the
    gauge agent's benchmark sweep.

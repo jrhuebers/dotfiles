@@ -24,7 +24,7 @@ Message file: `~/.hermes/agent-net/inbox/<to>/<ts-nanos>-<from>.json`
 
 ```json
 {"name": "qmc", "host": "ml2ran02", "tty": "pts/4",
- "workspace": "/cephfs/users/huebers/diffusion-qmc",
+ "workspace": "$HOME/diffusion-qmc",
  "session_id": "20260811_233834_8c4907",
  "description": "...", "registered_at": <s>, "heartbeat_at": <s>}
 ```
@@ -92,8 +92,8 @@ ps -o tty= -p "$p"   # -> pts/12
 
 | name | pts | session | workspace | status |
 |------|-----|---------|-----------|--------|
-| helper1 | pts/0 | 20260812_111637_5b9dea | /cephfs/users/huebers | live, listener armed |
-| helper2 | pts/12 | 20260812_185717_71bf9d | /cephfs/users/huebers | live, listener armed |
+| helper1 | pts/0 | 20260812_111637_5b9dea | $HOME | live, listener armed |
+| helper2 | pts/12 | 20260812_185717_71bf9d | $HOME | live, listener armed |
 | fim | pts/1 | 20260812_110554_b93e1c | FIM | live, listener armed |
 | gauge | pts/8 | 20260812_103357_f882bf | gauge-graph-network | registered, hello queued |
 | qmc | pts/4 | 20260811_233834_8c4907 | diffusion-qmc | registered, hello queued (do not disturb while training) |
@@ -102,9 +102,8 @@ Live truth: `agent-net-list`.
 
 ## Environment facts that shaped the design
 
-- All agent processes run on ml2ran02 (inside mission-control allocation,
-  job 53157) — same host, so tty-based liveness works; cephfs is shared so
-  inboxes work cross-host anyway.
+- All agent processes ran on one host, so tty-based liveness worked; shared
+  storage made inboxes available across hosts.
 - Hermes gateway runs in tmux session "gateway" on socket
   `~/.tmux-sock/mission` (`hermes gateway run`), connected to Discord.
 - `hermes send` pipes text to messaging platforms only — NOT to local agents.

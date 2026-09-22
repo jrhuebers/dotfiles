@@ -23,9 +23,9 @@ import glob
 from datetime import date
 
 DEFAULTS = [
-    "/cephfs/users/huebers/FIM/papers",
-    "/cephfs/users/huebers/diffusion-qmc/papers",
-    "/cephfs/users/huebers/gauge-graph-network/papers",
+    "$HOME/FIM/papers",
+    "$HOME/diffusion-qmc/papers",
+    "$HOME/gauge-graph-network/papers",
 ]
 
 

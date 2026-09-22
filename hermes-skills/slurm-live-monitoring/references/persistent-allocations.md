@@ -9,8 +9,8 @@ places — the same list every time (verified 2026-08-14 with `durian`):
 
     sbatch --parsable --job-name=<name> --partition=GPU1 --gres=gpu:1 \
       --cpus-per-task=8 --mem=64G --time=14-00:00:00 \
-      --output=/cephfs/users/huebers/slurm-logs/<name>-%j.out \
-      --error=/cephfs/users/huebers/slurm-logs/<name>-%j.err \
+      --output=$HOME/slurm-logs/<name>-%j.out \
+      --error=$HOME/slurm-logs/<name>-%j.err \
       --wrap="exec sleep infinity"
 
 80GB allocations (apple/banana) use --time=7-00:00:00. The job may sit

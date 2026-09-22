@@ -20,9 +20,9 @@ import urllib.request
 UA = {"User-Agent": "research-assistant/1.0 (citation audit)"}
 
 README_PATHS = [
-    "/cephfs/users/huebers/FIM/papers/README.md",
-    "/cephfs/users/huebers/diffusion-qmc/papers/README.md",
-    "/cephfs/users/huebers/gauge-graph-network/papers/README.md",
+    "$HOME/FIM/papers/README.md",
+    "$HOME/diffusion-qmc/papers/README.md",
+    "$HOME/gauge-graph-network/papers/README.md",
 ]
 
 ROW_RE = re.compile(r"^\|\s*arxiv_(\d{4}\.\d{4,5})\.pdf\s*\|\s*([^|]*?)\s*\|\s*\1\s*\|", re.M)
