@@ -43,8 +43,8 @@ ln -s ~/dotfiles/.config/glow/glow.yml ~/.config/glow/glow.yml
 ```
 
 The current configuration uses the light style, enables pager mode, disables
-line wrapping, and renders only consecutive newlines as line breaks with
-`preserveNewLines: false`. Render a file with:
+line wrapping, and preserves source newlines in TUI mode with
+`preserveNewLines: true`. Render a file with:
 
 ```sh
 glow README.md
