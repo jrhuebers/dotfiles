@@ -35,8 +35,7 @@ mkdir -p ~/.local/bin
 install -m 0755 "$work/glow-bin" ~/.local/bin/glow
 ```
 
-On a shared cluster, run the source build through Slurm rather than directly
-on the login node. Ensure `~/.local/bin` is in `PATH`, then verify the install:
+Ensure `~/.local/bin` is in `PATH`, then verify the install:
 
 ```sh
 glow --version
