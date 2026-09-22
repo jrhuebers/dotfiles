@@ -41,7 +41,7 @@ user-locally at `~/.local/bin/pdftoppm`; its extracted Poppler runtime is under
 
 Use the archive matching the platform:
 
-- Fedora x86_64: `yazi-x86_64-unknown-linux-gnu.zip`
+- Linux x86_64 (glibc, including Ubuntu/Fedora): `yazi-x86_64-unknown-linux-gnu.zip`
 - Intel macOS: `yazi-x86_64-apple-darwin.zip`
 - Apple Silicon macOS: `yazi-aarch64-apple-darwin.zip`
 
@@ -55,7 +55,7 @@ cp yazi-*/yazi yazi-*/ya ~/.local/bin/
 chmod +x ~/.local/bin/yazi ~/.local/bin/ya
 ```
 
-The current installed version is `26.9.1`. Bash completions from the archive go in `~/.local/share/bash-completion/completions/`.
+The current installed version is `26.9.1`; the RCP cluster installation was verified on 2026-09-22. Bash completions from the archive go in `~/.local/share/bash-completion/completions/`.
 
 ## Configure
 
