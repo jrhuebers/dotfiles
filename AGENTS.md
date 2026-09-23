@@ -32,6 +32,7 @@ documentation belongs in `~/admin-docs/`, not in this repository.
 - [`docs/shell.md`](docs/shell.md) — Cluster Bash and personal macOS Zsh startup profiles.
 - [`docs/ssh.md`](docs/ssh.md) — Personal SSH client configuration deployment and verification.
 - [`docs/tmux.md`](docs/tmux.md) — tmux installation, `.tmux.conf` deployment, reload command, and key settings.
+- [`docs/tiktoken.md`](docs/tiktoken.md) — User-local tiktoken Python package installation and verification on every supported machine.
 - [`docs/vim.md`](docs/vim.md) — Vim installation and `.vimrc` deployment.
 - [`docs/vscode.md`](docs/vscode.md) — VS Code workstation settings deployment and scope.
 - [`docs/yazi.md`](docs/yazi.md) — Yazi installation for Fedora/macOS, configuration deployment, package installation, and keybindings.
