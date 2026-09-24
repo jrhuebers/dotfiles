@@ -21,6 +21,7 @@
     "git:github.com/jrhuebers/pi-background-tasks",
     "git:github.com/jrhuebers/pi-turn-timing",
     "git:github.com/jrhuebers/pi-sleep",
+    "git:github.com/jrhuebers/pi-whoami",
     "npm:pi-scroll-speed",
     "npm:pi-btw",
     "npm:pi-simple-web-tools@0.1.0",

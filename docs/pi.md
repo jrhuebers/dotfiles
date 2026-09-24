@@ -10,7 +10,8 @@ should not be enabled on personal machines:
 
 The cluster profile enables one package that is not in the personal profile:
 `git:github.com/jrhuebers/pi-slurm`. Both profiles include
-`npm:@signalridge/pi-goal` and `npm:pi-subagents`. The goal package provides the
+`git:github.com/jrhuebers/pi-whoami`, `npm:@signalridge/pi-goal`, and
+`npm:pi-subagents`. The goal package provides the
 session-scoped `/goal` command and `goal_complete`, `goal_blocked`, and
 `goal_wait` tools for autonomous, verifiable
 completion. All other Pi settings and packages are currently identical, including
