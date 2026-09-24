@@ -36,4 +36,5 @@ documentation belongs in `~/admin-docs/`, not in this repository.
 - [`docs/vim.md`](docs/vim.md) — Vim installation and `.vimrc` deployment.
 - [`docs/vscode.md`](docs/vscode.md) — VS Code workstation settings deployment and scope.
 - [`docs/yazi.md`](docs/yazi.md) — Yazi installation for Fedora/macOS, configuration deployment, package installation, and keybindings.
+- [`docs/bat.md`](docs/bat.md) — bat installation, portable paths, usage, and platform differences.
 - [`docs/zed.md`](docs/zed.md) — Zed configuration contents and symlink-based setup.

@@ -42,6 +42,7 @@ node.
 | GitHub CLI (`gh`) | **on** | **on** | **on** | **on** | Install the CLI on every supported machine. See [`git.md`](git.md). |
 | Glow | **on** | **on** | **on** | **on** | Install Glow on every supported profile and deploy the shared configuration. See [`glow.md`](glow.md). |
 | Yazi | **on** | **on** | **on** | **on** | Install Yazi on every supported profile and deploy the shared configuration. See [`yazi.md`](yazi.md). |
+| bat | **on** | **on** | **on** | **on** | Install the terminal viewer on every supported profile. See [`bat.md`](bat.md). |
 | tiktoken | **on** | **on** | **on** | **on** | Install the user-local Python package on every supported machine where Python is available. See [`tiktoken.md`](tiktoken.md). |
 | VS Code settings | **off** | optional | optional | **off** | `VSCode/settings.json` is a GUI workstation configuration. It may be used by a local editor client connected to a cluster. See [`vscode.md`](vscode.md). |
 | Zed settings, tasks, themes | **off** | optional | optional | **off** | `zed/` is a GUI workstation configuration. Its default agent is local Ollama, which must not be assumed on a cluster or server. See [`zed.md`](zed.md). |
