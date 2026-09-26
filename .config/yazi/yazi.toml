@@ -1,6 +1,6 @@
 [opener]
 md = [
-  { run = "PAGER='less -R' md %s1", desc = "View Markdown with md", block = true, for = "linux" },
+  { run = "md %s1", desc = "View Markdown with md", block = true, for = "linux" },
 ]
 pdf = [
   { run = "xdg-open %s1", desc = "Open PDF", orphan = true, for = "linux" },

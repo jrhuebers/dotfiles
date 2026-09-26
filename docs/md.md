@@ -16,8 +16,7 @@ Clone or update the standalone repository for the canonical configuration:
 git clone https://github.com/jrhuebers/md.git ~/md
 ```
 
-For Linux x86_64, install the official release archive after verifying its
-published SHA-256 checksum:
+For Linux x86_64, install the official release archive after verifying its published SHA-256 checksum. The 0.6.40 release below predates the built-in pager terminal-input improvement; if you encounter terminal input problems when using `md` inside another TUI, try building current source (commit `ed52c94` or later) using the next example instead:
 
 ```sh
 version=0.6.40
@@ -44,7 +43,7 @@ mkdir -p ~/.config
 ln -sfn ~/md/.config/md.yaml ~/.config/md.yaml
 ```
 
-The viewer uses its built-in interactive pager when `$PAGER` is unset, or the specified external pager when set (for example, `PAGER='less -R' md FILE`). Yazi sets `PAGER='less -R'` for its blocked Markdown opener because its input can become unresponsive after the built-in pager exits. LaTeX-to-Unicode rendering is enabled by default and can be disabled with `render_latex: false` in `~/.config/md.yaml`.
+The viewer uses its built-in interactive pager when `$PAGER` is unset, or the specified external pager when set (for example, `PAGER='less -R' md FILE`). Since `jrhuebers/md` commit `ed52c94`, the built-in pager keeps terminal input blocking to avoid timeouts being mistaken for EOF by another TUI. This is a preventive change, not a confirmed fix for every Yazi input freeze; an external pager remains a workaround if the problem persists. LaTeX-to-Unicode rendering is enabled by default and can be disabled with `render_latex: false` in `~/.config/md.yaml`.
 
 ## Verify
 
