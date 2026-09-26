@@ -21,7 +21,8 @@ small keyboard file picker. It recursively lists visible Markdown files while
 skipping hidden files and directories. The header shows a live count as files
 are discovered. Files are shown in pages; use arrow keys or `j`/`k` to move
 within and across pages, or `h`/`l` and left/right to change pages. A dot bar
-shows the active page. Press Enter to open a file, or `q` to quit.
+shows the active page. Long paths are truncated to one terminal row. Press
+Enter to open a file, or `q` to quit.
 
 ## Configuration
 

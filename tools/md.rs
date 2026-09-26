@@ -133,7 +133,7 @@ fn main() {
         return;
     }
     if args.iter().any(|arg| arg == "--version") {
-        println!("md 0.3.6");
+        println!("md 0.3.7");
         return;
     }
 
@@ -680,8 +680,46 @@ fn page_move(selected: usize, file_count: usize, visible: usize, direction: isiz
     target_start + cursor.min(target_len.saturating_sub(1))
 }
 
+fn truncate_terminal(text: &str, width: usize) -> String {
+    let characters: Vec<char> = text.chars().collect();
+    if characters.len() <= width {
+        return text.to_string();
+    }
+    if width <= 1 {
+        return "…".to_string();
+    }
+    let tail: String = characters.into_iter().rev().take(width - 1).collect::<Vec<_>>().into_iter().rev().collect();
+    format!("…{tail}")
+}
+
+fn page_indicator(page_count: usize, current_page: usize, width: usize) -> String {
+    let max_pages = width.saturating_sub(2).max(1) / 2;
+    let mut result = String::new();
+    let (start, end, leading, trailing) = if page_count <= max_pages {
+        (0, page_count, false, false)
+    } else if current_page < max_pages / 2 {
+        (0, max_pages.saturating_sub(1), false, true)
+    } else if current_page + max_pages / 2 >= page_count {
+        (page_count - max_pages.saturating_sub(1), page_count, true, false)
+    } else {
+        let half = max_pages.saturating_sub(2) / 2;
+        (current_page.saturating_sub(half), current_page + half + 1, true, true)
+    };
+    if leading {
+        result.push_str("… ");
+    }
+    for page in start..end {
+        result.push_str(if page == current_page { "● " } else { "• " });
+    }
+    if trailing {
+        result.push('…');
+    }
+    result
+}
+
 fn draw_picker(files: &[PathBuf], selected: usize, scanning: bool) -> io::Result<()> {
     let visible = picker_visible_rows();
+    let columns = terminal_columns().unwrap_or(80) as usize;
     let current_page = selected / visible;
     let first = current_page * visible;
     let last = (first + visible).min(files.len());
@@ -691,11 +729,11 @@ fn draw_picker(files: &[PathBuf], selected: usize, scanning: bool) -> io::Result
     screen.push_str(&style(PICKER_H1_FG, Some(PICKER_H1_BG), true, false, false));
     screen.push_str(" md ");
     screen.push_str(RESET);
-    screen.push_str(" select a Markdown file  │  ");
-    screen.push_str(&format!("{} file{} found", files.len(), if files.len() == 1 { "" } else { "s" }));
+    let mut header = format!(" select a Markdown file  │  {} file{} found", files.len(), if files.len() == 1 { "" } else { "s" });
     if scanning {
-        screen.push_str(" (searching…)");
+        header.push_str(" (searching…)");
     }
+    screen.push_str(&truncate_terminal(&header, columns.saturating_sub(5).max(1)));
     screen.push_str("\n\n");
     for (index, path) in files.iter().enumerate().skip(first).take(last - first) {
         screen.push(' ');
@@ -704,24 +742,25 @@ fn draw_picker(files: &[PathBuf], selected: usize, scanning: bool) -> io::Result
         } else {
             screen.push_str("\x1b[38;2;4;181;117m  ");
         }
-        screen.push_str(&path.to_string_lossy());
+        screen.push_str(&truncate_terminal(&path.to_string_lossy(), columns.saturating_sub(3).max(1)));
         screen.push_str(RESET);
         screen.push('\n');
     }
     let page_count = files.len().div_ceil(visible).max(1);
     screen.push_str("\n ");
-    for page in 0..page_count {
-        if page == current_page {
-            screen.push_str("\x1b[38;5;240m●");
+    let indicator = page_indicator(page_count, current_page, columns);
+    screen.push_str("\x1b[38;5;250m");
+    for character in indicator.chars() {
+        if character == '●' {
+            screen.push_str("\x1b[38;5;240m●\x1b[38;5;250m");
         } else {
-            screen.push_str("\x1b[38;5;250m•");
+            screen.push(character);
         }
-        screen.push(' ');
     }
     screen.push_str(RESET);
     screen.push_str("\n ");
     screen.push_str(DIM);
-    screen.push_str("↑/↓ or j/k  ←/→ or h/l page  enter open  q quit");
+    screen.push_str(&truncate_terminal("↑/↓ or j/k  ←/→ or h/l page  enter open  q quit", columns.saturating_sub(1).max(1)));
     screen.push_str(RESET);
     print!("{screen}");
     io::stdout().flush()
