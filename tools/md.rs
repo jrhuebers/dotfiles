@@ -133,7 +133,7 @@ fn main() {
         return;
     }
     if args.iter().any(|arg| arg == "--version") {
-        println!("md 0.3.7");
+        println!("md 0.3.8");
         return;
     }
 
@@ -688,8 +688,11 @@ fn truncate_terminal(text: &str, width: usize) -> String {
     if width <= 1 {
         return "…".to_string();
     }
-    let tail: String = characters.into_iter().rev().take(width - 1).collect::<Vec<_>>().into_iter().rev().collect();
-    format!("…{tail}")
+    let head_len = (width - 1) / 2;
+    let tail_len = width - 1 - head_len;
+    let head: String = characters[..head_len].iter().collect();
+    let tail: String = characters[characters.len() - tail_len..].iter().collect();
+    format!("{head}…{tail}")
 }
 
 fn page_indicator(page_count: usize, current_page: usize, width: usize) -> String {
