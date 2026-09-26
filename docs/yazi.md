@@ -85,7 +85,18 @@ The tracked Bash profile sources `~/.config/yazi/shell-wrapper.sh`; if the profi
 [ -r "$HOME/.config/yazi/shell-wrapper.sh" ] && . "$HOME/.config/yazi/shell-wrapper.sh"
 ```
 
-Use `y` rather than `yazi` to launch Yazi. The wrapper passes `--cwd-file` to Yazi for normal quits and gives the plugin a separate per-invocation selection file for Enter; the selected path takes precedence when present. The wrapper reads the whole path even when `read -d ''` returns nonzero because Yazi does not terminate paths with NUL. Enter on a directory quits Yazi into that directory; pressing `q` still quits into Yazi's current directory, while `Q` intentionally suppresses the directory change.
+Use `y` rather than `yazi` to launch Yazi: **calling `yazi` directly does not change the parent shell**, and the plugin deliberately treats Enter on directories as ordinary navigation when the wrapper is absent. The Bash wrapper passes `--cwd-file` to Yazi for normal quits and gives the plugin a separate per-invocation selection file for Enter; the selected path takes precedence when present. The wrapper reads the whole path even when `read -d ''` returns nonzero because Yazi does not terminate paths with NUL. Enter on a directory quits Yazi into that directory; pressing `q` still quits into Yazi's current directory, while `Q` intentionally suppresses the directory change. For another shell, install and source an equivalent wrapper in that shell's startup profile; sourcing the Bash profile is not a substitute.
+
+Verify in a new interactive Bash session (or after `source ~/.bashrc`):
+
+```sh
+type y
+y
+# Hover over a directory and press Enter; Yazi should close.
+pwd
+```
+
+The directory reported by `pwd` should be the hovered directory. If Enter only opens the directory in Yazi, check that `type y` reports a function and that you launched with `y`, not `yazi`.
 
 The configuration contains the `vscode-light-modern` flavor, light/dark theme settings, an `e` keybinding that edits the hovered file, and `o`/`O` keybindings that send PDFs to `xdg-open` and open other files in the editor (using a new tmux window when running inside tmux). Pressing Enter on `.md` files uses the standalone `md` viewer; Yazi blocks until the pager exits. Yazi's default open action also sends PDFs to `xdg-open`. The editor is selected through the shell environment:
 
