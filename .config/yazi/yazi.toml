@@ -1,6 +1,6 @@
 [opener]
 md = [
-  { run = "if [ -n \"${HERDR_ENV:-}\" ]; then PAGER='less -R' md %s1; else md %s1; fi", desc = "View Markdown with md", block = true, for = "linux" },
+  { run = "env -u PAGER md %s1", desc = "View Markdown with md", block = true, for = "linux" },
 ]
 pdf = [
   { run = "xdg-open %s1", desc = "Open PDF", orphan = true, for = "linux" },
