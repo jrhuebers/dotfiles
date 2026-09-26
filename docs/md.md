@@ -20,7 +20,7 @@ For Linux x86_64, install the official release archive after verifying its
 published SHA-256 checksum:
 
 ```sh
-version=0.6.39
+version=0.6.40
 archive="md-v${version}-x86_64-unknown-linux-gnu.tar.gz"
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
@@ -44,9 +44,7 @@ mkdir -p ~/.config
 ln -sfn ~/md/.config/md.yaml ~/.config/md.yaml
 ```
 
-The viewer uses `$PAGER` when set and otherwise `less -R`. LaTeX-to-Unicode
-rendering is enabled by default and can be disabled with `render_latex: false`
-in `~/.config/md.yaml`.
+The viewer uses its built-in interactive pager when `$PAGER` is unset, or the specified external pager when set (for example, `PAGER='less -R' md FILE`). Yazi sets `PAGER='less -R'` for its blocked Markdown opener because its input can become unresponsive after the built-in pager exits. LaTeX-to-Unicode rendering is enabled by default and can be disabled with `render_latex: false` in `~/.config/md.yaml`.
 
 ## Verify
 
