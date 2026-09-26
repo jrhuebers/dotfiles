@@ -133,7 +133,7 @@ fn main() {
         return;
     }
     if args.iter().any(|arg| arg == "--version") {
-        println!("md 0.3.3");
+        println!("md 0.3.4");
         return;
     }
 
@@ -572,6 +572,7 @@ fn is_markdown_file(path: &Path) -> bool {
 fn picker_loop(tty: &mut File, receiver: Receiver<PathBuf>) -> io::Result<Option<PathBuf>> {
     let mut files = Vec::new();
     let mut selected = 0usize;
+    let mut first_visible = 0usize;
     let mut scanning = true;
     let mut dirty = true;
     let mut last_draw = Instant::now() - Duration::from_secs(1);
@@ -598,7 +599,7 @@ fn picker_loop(tty: &mut File, receiver: Receiver<PathBuf>) -> io::Result<Option
             } else if !files.is_empty() {
                 selected = selected.min(files.len() - 1);
             }
-            draw_picker(&files, selected, scanning)?;
+            draw_picker(&files, selected, &mut first_visible, scanning)?;
             dirty = false;
             last_draw = Instant::now();
         }
@@ -653,11 +654,20 @@ fn read_key(tty: &mut File) -> io::Result<Option<Key>> {
     Ok(Some(key))
 }
 
-fn draw_picker(files: &[PathBuf], selected: usize, scanning: bool) -> io::Result<()> {
+fn draw_picker(files: &[PathBuf], selected: usize, first_visible: &mut usize, scanning: bool) -> io::Result<()> {
     let rows = terminal_rows().unwrap_or(24) as usize;
     let visible = rows.saturating_sub(5).max(1);
-    let max_first = files.len().saturating_sub(visible);
-    let first = selected.saturating_sub(visible.saturating_sub(1)).min(max_first);
+    if files.is_empty() {
+        *first_visible = 0;
+    } else {
+        if selected < *first_visible {
+            *first_visible = selected;
+        } else if selected >= *first_visible + visible {
+            *first_visible = selected + 1 - visible;
+        }
+        *first_visible = (*first_visible).min(files.len().saturating_sub(visible));
+    }
+    let first = *first_visible;
     let last = (first + visible).min(files.len());
 
     let mut screen = String::from("\x1b[2J\x1b[H");
