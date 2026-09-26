@@ -20,6 +20,20 @@ completion. All other Pi settings and packages are currently identical, includin
 See [`device-profiles.md`](device-profiles.md) for the complete cluster/personal
 split across this repository.
 
+## Runtime extension profiles
+
+The live cluster setup provides named runtime profiles through a user-local wrapper at `~/.local/bin/pi`; the original Pi launcher is preserved as `~/.local/bin/pi.real`.
+
+`pi --research` uses normal Pi resource discovery and therefore loads the full configured setup.
+
+`pi --basic` disables discovered extensions, prompt templates, and themes, then explicitly loads the configured allowed extensions; it leaves skill discovery enabled so all user, project, and package skills remain available.
+
+The basic profile intentionally excludes `pi-slurm`, `pi-subagents`, and `pi-btw` extensions, while retaining skills supplied by those packages.
+
+The installed profile definitions are `~/.pi/profiles/basic.json` and `~/.pi/profiles/research.json`; the wrapper requires `jq` and forwards ordinary Pi CLI flags unchanged.
+
+The profile JSON files currently use absolute paths into the local Pi package store, so regenerate or adapt their extension paths when deploying this setup to another machine rather than copying them unchanged.
+
 ## Refresh the repository copies
 
 Set `PI_PROFILE` to the profile used by the live machine before refreshing:
