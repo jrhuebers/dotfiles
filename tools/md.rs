@@ -133,7 +133,7 @@ fn main() {
         return;
     }
     if args.iter().any(|arg| arg == "--version") {
-        println!("md 0.3.8");
+        println!("md 0.3.9");
         return;
     }
 
@@ -527,7 +527,7 @@ fn select_paths(directory: &Path) -> io::Result<Option<Vec<String>>> {
 
     let mut tty = OpenOptions::new().read(true).write(true).open("/dev/tty")?;
     let saved = stty(&["-g"])?;
-    stty(&["-icanon", "-echo", "min", "0", "time", "1"])?;
+    stty(&["-icanon", "-echo", "min", "0", "time", "0"])?;
     let selected = picker_loop(&mut tty, receiver)?;
     let _ = restore_tty(&saved);
     print!("\x1b[2J\x1b[H");
@@ -617,6 +617,8 @@ fn picker_loop(tty: &mut File, receiver: Receiver<PathBuf>) -> io::Result<Option
                 Key::Quit => return Ok(None),
                 Key::Other | Key::Down | Key::Enter | Key::PreviousPage | Key::NextPage => {}
             }
+        } else {
+            thread::sleep(Duration::from_millis(10));
         }
     }
 }
@@ -646,13 +648,24 @@ fn read_key(tty: &mut File) -> io::Result<Option<Key>> {
         b'q' | 0x03 | 0x1b => {
             if byte[0] == 0x1b {
                 let mut escape = [0u8; 2];
-                tty.read_exact(&mut escape)?;
-                match escape {
-                    [b'[', b'A'] => return Ok(Some(Key::Up)),
-                    [b'[', b'B'] => return Ok(Some(Key::Down)),
-                    [b'[', b'D'] => return Ok(Some(Key::PreviousPage)),
-                    [b'[', b'C'] => return Ok(Some(Key::NextPage)),
-                    _ => {}
+                let mut received = 0;
+                let deadline = Instant::now() + Duration::from_millis(50);
+                while received < escape.len() && Instant::now() < deadline {
+                    let count = tty.read(&mut escape[received..])?;
+                    if count == 0 {
+                        thread::sleep(Duration::from_millis(1));
+                    } else {
+                        received += count;
+                    }
+                }
+                if received == escape.len() {
+                    match escape {
+                        [b'[', b'A'] => return Ok(Some(Key::Up)),
+                        [b'[', b'B'] => return Ok(Some(Key::Down)),
+                        [b'[', b'D'] => return Ok(Some(Key::PreviousPage)),
+                        [b'[', b'C'] => return Ok(Some(Key::NextPage)),
+                        _ => {}
+                    }
                 }
             }
             Key::Quit
