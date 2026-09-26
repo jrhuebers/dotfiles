@@ -83,6 +83,17 @@ cmp -s ~/dotfiles/pi/$PI_PROFILE/settings.json ~/.pi/agent/settings.json && \
 
 Do not add authentication tokens or other secrets to the tracked configuration.
 
+## Install the paper-fetching skill
+
+The portable source bundle is `~/dotfiles/skills/paper-fetching/`; install it into Pi's user skill directory as a symlink so `SKILL.md` and its helper scripts stay together and updates to the checkout are immediately visible:
+
+```sh
+mkdir -p ~/.pi/agent/skills
+ln -s ~/dotfiles/skills/paper-fetching ~/.pi/agent/skills/paper-fetching
+```
+
+If the link already exists, inspect it rather than replacing an unrelated skill. Verify with `readlink ~/.pi/agent/skills/paper-fetching` and confirm `SKILL.md` plus `scripts/fetch_papers.py` are readable. Start a new Pi session or use `/reload` in the current session. Invoke with `/skill:paper-fetching`; the helper commands and prerequisites are documented in the skill itself. To uninstall, remove only the user skill symlink: `rm ~/.pi/agent/skills/paper-fetching`.
+
 To install or remove a package in the live global Pi setup:
 
 ```sh
