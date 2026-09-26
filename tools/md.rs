@@ -86,6 +86,7 @@ impl Theme {
 struct Config {
     style: String,
     width: usize,
+    scroll_speed: usize,
     themes: HashMap<String, Theme>,
 }
 
@@ -94,14 +95,14 @@ impl Config {
         let mut themes = HashMap::new();
         themes.insert("glow-light".to_string(), Theme::glow_light());
         themes.insert("glow-dark".to_string(), Theme::glow_dark());
-        Self { style: "glow-light".to_string(), width: 0, themes }
+        Self { style: "glow-light".to_string(), width: 0, scroll_speed: 4, themes }
     }
 
-    fn theme(self) -> io::Result<(Theme, usize)> {
+    fn theme(self) -> io::Result<(Theme, usize, usize)> {
         let theme = self.themes.get(&self.style).cloned().ok_or_else(|| {
             io::Error::new(io::ErrorKind::InvalidInput, format!("unknown md style: {}", self.style))
         })?;
-        Ok((theme, self.width))
+        Ok((theme, self.width, self.scroll_speed))
     }
 }
 
@@ -121,7 +122,7 @@ fn main() {
             std::process::exit(2);
         }
     };
-    let (theme, configured_width) = config;
+    let (theme, configured_width, scroll_speed) = config;
     let width = if configured_width == 0 {
         terminal_columns().unwrap_or(80) as usize
     } else {
@@ -133,7 +134,7 @@ fn main() {
         return;
     }
     if args.iter().any(|arg| arg == "--version") {
-        println!("md 0.4.0");
+        println!("md 0.4.1");
         return;
     }
 
@@ -154,7 +155,7 @@ fn main() {
     };
     let rendered = render_markdown(&input, &theme, width);
 
-    if let Err(error) = page(&rendered) {
+    if let Err(error) = page(&rendered, scroll_speed) {
         eprintln!("md: {error}");
         std::process::exit(1);
     }
@@ -195,6 +196,10 @@ fn parse_config(contents: &str) -> io::Result<Config> {
                 config.width = value.trim().parse().map_err(|_| {
                     io::Error::new(io::ErrorKind::InvalidInput, "md.yaml width must be an integer")
                 })?;
+            } else if let Some(value) = content.strip_prefix("scroll_speed:") {
+                config.scroll_speed = value.trim().parse::<usize>().map_err(|_| {
+                    io::Error::new(io::ErrorKind::InvalidInput, "md.yaml scroll_speed must be an integer")
+                })?.max(1);
             } else if content == "styles:" {
                 in_styles = true;
             }
@@ -817,8 +822,8 @@ fn restore_tty(saved: &str) -> io::Result<()> {
     }
 }
 
-fn page(rendered: &str) -> io::Result<()> {
-    let pager = env::var("PAGER").unwrap_or_else(|_| "less -R".to_string());
+fn page(rendered: &str, scroll_speed: usize) -> io::Result<()> {
+    let pager = env::var("PAGER").unwrap_or_else(|_| format!("less -R --wheel-lines={scroll_speed}"));
     let words = shell_words(&pager).ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "invalid PAGER"))?;
     if words.is_empty() {
         return Err(io::Error::new(io::ErrorKind::InvalidInput, "empty PAGER"));

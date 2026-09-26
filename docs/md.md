@@ -28,12 +28,16 @@ to open a file, or `q` to quit.
 
 ## Configuration
 
-Select a style in `~/.config/md.yaml`:
+Select a style and configure the default pager in `~/.config/md.yaml`:
 
 ```yaml
 style: glow-dark
 width: 0
+scroll_speed: 4
 ```
+
+`scroll_speed` sets the number of mouse-wheel lines for the default `less`
+pager. It is ignored when `$PAGER` is explicitly set.
 
 Add or adjust a style block under `styles:` using the color fields and margin
 fields shown in the tracked example.
