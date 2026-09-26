@@ -9,8 +9,8 @@ symlink, or install `hermes-skills/`. The active directory contains the
 selected admin, research, and workflow skills:
 
 - `admin`, `computational-research`, `create-new-research-repo`,
-  `hydra-config-management`,
-  `report-writing`, `research-paper-writing`, and
+  `hydra-config-management`, `paper-fetching`, `report-writing`,
+  `research-paper-writing`, and
   `supervised-research-diagnostics`;
 - `start-slurm-job` and `training-run-analysis` (the Codex-imported skills);
 - `synthesized/agent-coordination`, `synthesized/arxiv-latex-sources`,
