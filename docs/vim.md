@@ -25,8 +25,9 @@ install -m 0644 ~/dotfiles/.vimrc ~/.vimrc
 
 The configuration enables syntax/filetype support, line numbers, visible
 whitespace, four-space indentation by default, two-space indentation for
-Markdown, incremental highlighted search, mouse support, wrapped-line movement,
-and a persistent status line. Makefiles retain real tabs.
+Markdown, no line numbers in Markdown, incremental highlighted search, mouse
+support, wrapped-line movement, and a persistent status line. Makefiles retain
+real tabs.
 
 ## Plugins
 

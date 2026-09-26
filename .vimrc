@@ -15,7 +15,7 @@ set tabstop=8       " a tab looks like 8 spaces
 set shiftwidth=4    " indentation uses 4 spaces
 set softtabstop=4   " pressing Tab inserts 4 spaces
 autocmd FileType make setlocal noexpandtab " Makefiles require real tabs for recipes.
-autocmd FileType markdown setlocal shiftwidth=2 softtabstop=2 " Markdown uses two-space indentation.
+autocmd FileType markdown setlocal shiftwidth=2 softtabstop=2 nonumber " Markdown uses two-space indentation without line numbers.
 
 " Search settings
 set hlsearch
