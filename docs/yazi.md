@@ -65,7 +65,7 @@ Symlink the repository configuration and install the declared packages:
 
 ```sh
 mkdir -p ~/.config/yazi
-for file in keymap.toml package.toml theme.toml yazi.toml; do
+for file in init.lua keymap.toml package.toml theme.toml yazi.toml; do
   ln -sfn ~/dotfiles/.config/yazi/$file ~/.config/yazi/$file
 done
 cd ~/.config/yazi && ya pkg install
