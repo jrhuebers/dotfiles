@@ -11,9 +11,9 @@ Use for source-backed paper collections. From this skill's directory, with Pytho
 
 ```bash
 python3 scripts/fetch_papers.py /path/to/papers 1706.03762 1810.04805
-python3 scripts/qa_corpus.py /path/to/papers
-python3 scripts/figindex.py /path/to/papers
 ```
+
+This single command fetches and flattens each paper, checks every paper in the destination corpus, and regenerates `FIGURES.md` for all available `.tex` files. If a fetch or QA check fails, it exits nonzero and does not rebuild the index; successfully fetched files remain for inspection. For checking or reindexing an existing corpus without fetching, run `python3 scripts/qa_corpus.py /path/to/papers` or `python3 scripts/figindex.py /path/to/papers` separately.
 
 The fetcher accepts bare modern arXiv IDs, checks titles/authors/version against the arXiv API, downloads the latest PDF and original source (polite ~3-second request spacing), safely extracts it in temporary staging, finds the largest real `\documentclass` main file, then runs `latexpand --keep-comments` from its directory (the historical `--empty-comments` destroys literal `%` inside verbatim). `flatten_tex.py` strips comments, reduces repeated blank lines to a single blank line outside verbatim/listing environments, preserves escaped `\%` and code whitespace inside those environments, and stamps provenance. Fetch refuses to overwrite existing papers; use a new directory to refresh and compare versions. When arXiv returns 404, PDF, or PS instead of LaTeX source, it keeps the PDF with an explicit `arxiv_<id>.source-unavailable.txt` marker; other download/processing failures fail rather than silently fabricating `.tex`.
 

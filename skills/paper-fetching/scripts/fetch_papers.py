@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""Fetch latest arXiv PDFs and original sources; flatten with latexpand and QA."""
+"""Fetch latest arXiv papers, verify the complete corpus, and index figures."""
 import argparse
 import gzip
 from html.parser import HTMLParser
 import io
 from pathlib import Path, PurePosixPath
 import re
+import subprocess
+import sys
 import tarfile
 import tempfile
 import time
@@ -171,6 +173,17 @@ def main() -> None:
         except Exception as exc:
             print(f"{aid}: ERROR: {exc}", flush=True)
             failed = True
+    # Check all papers in the destination, not just newly fetched ones.
+    aids = {path.stem.removeprefix("arxiv_") for path in args.outdir.glob("arxiv_*.pdf")}
+    aids.update(path.stem.removeprefix("arxiv_") for path in args.outdir.glob("arxiv_*.tex"))
+    for aid in sorted(aids):
+        errors = check_paper(args.outdir, aid)
+        print(f"{aid}: {'FAIL: ' + '; '.join(errors) if errors else 'corpus QA OK'}")
+        failed |= bool(errors)
+    if not failed and any(args.outdir.glob("arxiv_*.tex")):
+        # Regenerate one index covering both new and existing TeX papers.
+        index_script = Path(__file__).with_name("figindex.py")
+        subprocess.run([sys.executable, str(index_script), str(args.outdir)], check=True)
     if failed:
         raise SystemExit(1)
 

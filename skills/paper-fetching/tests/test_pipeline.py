@@ -10,7 +10,7 @@ from unittest.mock import patch
 import urllib.error
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from fetch_papers import extract_source, fetch_one
+from fetch_papers import extract_source, fetch_one, main as fetch_main
 from flatten_tex import collapse_blank_lines, find_main, flatten, strip_comments
 from qa_corpus import check_paper
 
@@ -83,6 +83,40 @@ class PipelineTests(unittest.TestCase):
             self.assertFalse((root / "arxiv_1706.03762.tex").exists())
             (root / "arxiv_1706.03762.source-unavailable.txt").write_text("arXiv 1706.03762v1 | source unavailable\n")
             self.assertTrue(check_paper(root, "1706.03762", "1706.03762v7"))
+
+    def test_one_command_fetches_checks_and_indexes_multiple_papers(self):
+        archive = io.BytesIO()
+        with tarfile.open(fileobj=archive, mode="w:gz") as tf:
+            tex = ("\\documentclass{article}\n\\begin{document}\n" + "paper text " * 60 +
+                   "\n\\begin{figure}\\includegraphics{plot.pdf}\\caption{Test caption}\\end{figure}\n\\end{document}\n").encode()
+            entry = tarfile.TarInfo("main.tex")
+            entry.size = len(tex)
+            tf.addfile(entry, io.BytesIO(tex))
+        ids = ("1706.03762", "1810.04805")
+        with tempfile.TemporaryDirectory() as d:
+            with patch("fetch_papers.metadata", side_effect=[(f"{aid}v1", "Title", "Author") for aid in ids]):
+                with patch("fetch_papers.request", side_effect=[b"%PDF-" + b"x" * 12000, archive.getvalue()] * 2):
+                    with patch.object(sys, "argv", ["fetch_papers.py", d, *ids]):
+                        fetch_main()
+            root = Path(d)
+            for aid in ids:
+                self.assertEqual(check_paper(root, aid, f"{aid}v1"), [])
+            index = (root / "FIGURES.md").read_text()
+            self.assertIn("Test caption", index)
+            self.assertIn("## 1706.03762", index)
+            self.assertIn("## 1810.04805", index)
+
+    def test_one_command_failure_is_nonzero_and_does_not_index(self):
+        with tempfile.TemporaryDirectory() as d:
+            ids = ("1706.03762", "1810.04805")
+            with patch("fetch_papers.metadata", side_effect=[(f"{aid}v1", "Title", "Author") for aid in ids]):
+                with patch("fetch_papers.request", side_effect=[b"%PDF-" + b"x" * 12000, b"", b"not a PDF"]):
+                    with patch.object(sys, "argv", ["fetch_papers.py", d, *ids]):
+                        with self.assertRaises(SystemExit) as stopped:
+                            fetch_main()
+            self.assertEqual(stopped.exception.code, 1)
+            self.assertEqual(check_paper(Path(d), ids[0], f"{ids[0]}v1"), [])
+            self.assertFalse((Path(d) / "FIGURES.md").exists())
 
     def test_bad_id_and_missing_qa(self):
         with tempfile.TemporaryDirectory() as d:
