@@ -26,7 +26,8 @@
     "npm:pi-btw",
     "npm:pi-simple-web-tools@0.1.0",
     "npm:@signalridge/pi-goal",
-    "npm:pi-subagents"
+    "npm:pi-subagents",
+    "npm:@ogulcancelik/pi-codex-compaction"
   ],
   "hideThinkingBlock": false
 }

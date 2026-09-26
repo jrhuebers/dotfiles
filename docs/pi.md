@@ -10,8 +10,8 @@ should not be enabled on personal machines:
 
 The cluster profile enables one package that is not in the personal profile:
 `git:github.com/jrhuebers/pi-slurm`. Both profiles include
-`git:github.com/jrhuebers/pi-whoami`, `npm:@signalridge/pi-goal`, and
-`npm:pi-subagents`. The goal package provides the
+`git:github.com/jrhuebers/pi-whoami`, `npm:@signalridge/pi-goal`,
+`npm:pi-subagents`, and `npm:@ogulcancelik/pi-codex-compaction`. The goal package provides the
 session-scoped `/goal` command and `goal_complete`, `goal_blocked`, and
 `goal_wait` tools for autonomous, verifiable
 completion. All other Pi settings and packages are currently identical, including
@@ -74,7 +74,8 @@ To install or remove a package in the live global Pi setup:
 ```sh
 pi install npm:pi-btw
 pi install npm:@signalridge/pi-goal
+pi install npm:@ogulcancelik/pi-codex-compaction
 pi remove npm:pi-btw
 ```
 
-After installation, verify it with `pi list` and restart Pi so the extension loads. The `pi-goal` package is included in both settings profiles; use `/goal` to start or manage a session-scoped autonomous goal. The extension's `/btw` thread can use the configured Pi model and coding tools; review third-party package source before updating it.
+After installation, verify it with `pi list` and restart Pi so the extension loads. The `pi-goal` package is included in both settings profiles; use `/goal` to start or manage a session-scoped autonomous goal. The `pi-codex-compaction` package is included in both profiles and uses OpenAI Codex native remote compaction when an applicable Codex model is active; no additional configuration is required. The extension's `/btw` thread can use the configured Pi model and coding tools; review third-party package source before updating it.

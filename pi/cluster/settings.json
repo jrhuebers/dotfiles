@@ -27,7 +27,8 @@
     "npm:pi-simple-web-tools@0.1.0",
     "git:github.com/jrhuebers/pi-slurm",
     "npm:@signalridge/pi-goal",
-    "npm:pi-subagents"
+    "npm:pi-subagents",
+    "npm:@ogulcancelik/pi-codex-compaction"
   ],
   "hideThinkingBlock": false
 }
