@@ -5,8 +5,8 @@ y() {
 	tmp="$(mktemp -t yazi-cwd.XXXXXX)" || return
 	command yazi "$@" --cwd-file="$tmp"
 
-	if IFS= read -r -d '' cwd < "$tmp" &&
-		[[ -n "$cwd" && "$cwd" != "$PWD" && -d "$cwd" ]]; then
+	IFS= read -r -d '' cwd < "$tmp" || :
+	if [[ -n "$cwd" && "$cwd" != "$PWD" && -d "$cwd" ]]; then
 		builtin cd -- "$cwd"
 	fi
 
