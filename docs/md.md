@@ -19,8 +19,9 @@ is no mouse handling or TUI document viewer.
 When given a directory—or no argument from an interactive terminal—`md` opens a
 small keyboard file picker. It recursively lists visible Markdown files while
 skipping hidden files and directories. The header shows a live count as files
-are discovered. Use arrow keys or `j`/`k`, press Enter to open a file, or `q`
-to quit.
+are discovered. Files are shown in pages; use arrow keys or `j`/`k` to move
+within and across pages, or `h`/`l` and left/right to change pages. A dot bar
+shows the active page. Press Enter to open a file, or `q` to quit.
 
 ## Configuration
 

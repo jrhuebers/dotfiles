@@ -133,7 +133,7 @@ fn main() {
         return;
     }
     if args.iter().any(|arg| arg == "--version") {
-        println!("md 0.3.5");
+        println!("md 0.3.6");
         return;
     }
 
@@ -572,7 +572,6 @@ fn is_markdown_file(path: &Path) -> bool {
 fn picker_loop(tty: &mut File, receiver: Receiver<PathBuf>) -> io::Result<Option<PathBuf>> {
     let mut files = Vec::new();
     let mut selected = 0usize;
-    let mut first_visible = 0usize;
     let mut scanning = true;
     let mut dirty = true;
     let mut last_draw = Instant::now() - Duration::from_secs(1);
@@ -599,7 +598,7 @@ fn picker_loop(tty: &mut File, receiver: Receiver<PathBuf>) -> io::Result<Option
             } else if !files.is_empty() {
                 selected = selected.min(files.len() - 1);
             }
-            draw_picker(&files, selected, &mut first_visible, scanning)?;
+            draw_picker(&files, selected, scanning)?;
             dirty = false;
             last_draw = Instant::now();
         }
@@ -608,12 +607,15 @@ fn picker_loop(tty: &mut File, receiver: Receiver<PathBuf>) -> io::Result<Option
             return Err(io::Error::new(io::ErrorKind::NotFound, "no Markdown files found"));
         }
         if let Some(key) = read_key(tty)? {
+            let visible = picker_visible_rows();
             match key {
                 Key::Up => selected = selected.saturating_sub(1),
                 Key::Down if !files.is_empty() => selected = (selected + 1).min(files.len() - 1),
+                Key::PreviousPage if !files.is_empty() => selected = page_move(selected, files.len(), visible, -1),
+                Key::NextPage if !files.is_empty() => selected = page_move(selected, files.len(), visible, 1),
                 Key::Enter if !files.is_empty() => return Ok(Some(files[selected].clone())),
                 Key::Quit => return Ok(None),
-                Key::Other | Key::Down | Key::Enter => {}
+                Key::Other | Key::Down | Key::Enter | Key::PreviousPage | Key::NextPage => {}
             }
         }
     }
@@ -623,6 +625,8 @@ fn picker_loop(tty: &mut File, receiver: Receiver<PathBuf>) -> io::Result<Option
 enum Key {
     Up,
     Down,
+    PreviousPage,
+    NextPage,
     Enter,
     Quit,
     Other,
@@ -636,6 +640,8 @@ fn read_key(tty: &mut File) -> io::Result<Option<Key>> {
     let key = match byte[0] {
         b'k' | 0x10 => Key::Up,
         b'j' | 0x0e => Key::Down,
+        b'h' => Key::PreviousPage,
+        b'l' => Key::NextPage,
         b'\r' | b'\n' => Key::Enter,
         b'q' | 0x03 | 0x1b => {
             if byte[0] == 0x1b {
@@ -644,6 +650,8 @@ fn read_key(tty: &mut File) -> io::Result<Option<Key>> {
                 match escape {
                     [b'[', b'A'] => return Ok(Some(Key::Up)),
                     [b'[', b'B'] => return Ok(Some(Key::Down)),
+                    [b'[', b'D'] => return Ok(Some(Key::PreviousPage)),
+                    [b'[', b'C'] => return Ok(Some(Key::NextPage)),
                     _ => {}
                 }
             }
@@ -654,20 +662,28 @@ fn read_key(tty: &mut File) -> io::Result<Option<Key>> {
     Ok(Some(key))
 }
 
-fn draw_picker(files: &[PathBuf], selected: usize, first_visible: &mut usize, scanning: bool) -> io::Result<()> {
-    let rows = terminal_rows().unwrap_or(24) as usize;
-    let visible = rows.saturating_sub(5).max(1);
-    if files.is_empty() {
-        *first_visible = 0;
+fn picker_visible_rows() -> usize {
+    terminal_rows().unwrap_or(24).saturating_sub(5).max(1) as usize
+}
+
+fn page_move(selected: usize, file_count: usize, visible: usize, direction: isize) -> usize {
+    let page = selected / visible;
+    let page_count = file_count.div_ceil(visible);
+    let target_page = if direction < 0 {
+        page.saturating_sub(1)
     } else {
-        if selected < *first_visible {
-            *first_visible = selected;
-        } else if selected >= *first_visible + visible {
-            *first_visible = selected + 1 - visible;
-        }
-        *first_visible = (*first_visible).min(files.len().saturating_sub(visible));
-    }
-    let first = *first_visible;
+        (page + 1).min(page_count.saturating_sub(1))
+    };
+    let cursor = selected % visible;
+    let target_start = target_page * visible;
+    let target_len = (file_count - target_start).min(visible);
+    target_start + cursor.min(target_len.saturating_sub(1))
+}
+
+fn draw_picker(files: &[PathBuf], selected: usize, scanning: bool) -> io::Result<()> {
+    let visible = picker_visible_rows();
+    let current_page = selected / visible;
+    let first = current_page * visible;
     let last = (first + visible).min(files.len());
 
     let mut screen = String::from("\x1b[2J\x1b[H");
@@ -692,9 +708,20 @@ fn draw_picker(files: &[PathBuf], selected: usize, first_visible: &mut usize, sc
         screen.push_str(RESET);
         screen.push('\n');
     }
+    let page_count = files.len().div_ceil(visible).max(1);
+    screen.push_str("\n ");
+    for page in 0..page_count {
+        if page == current_page {
+            screen.push_str("\x1b[38;5;240m●");
+        } else {
+            screen.push_str("\x1b[38;5;250m•");
+        }
+        screen.push(' ');
+    }
+    screen.push_str(RESET);
     screen.push_str("\n ");
     screen.push_str(DIM);
-    screen.push_str("↑/↓ or j/k  enter open  q quit");
+    screen.push_str("↑/↓ or j/k  ←/→ or h/l page  enter open  q quit");
     screen.push_str(RESET);
     print!("{screen}");
     io::stdout().flush()
