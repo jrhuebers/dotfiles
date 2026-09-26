@@ -20,14 +20,7 @@ mkdir -p ~/.config
 ln -sfn ~/md/.config/md.yaml ~/.config/md.yaml
 ```
 
-`md` prefers the `lessi` pager when it is installed and falls back to `less -R`:
-
-```sh
-sudo dnf install cargo
-cargo install lessi --locked --root ~/.local
-```
-
-The viewer can also use another pager through `$PAGER`. LaTeX-to-Unicode
+The viewer uses `$PAGER` when set and otherwise `less -R`. LaTeX-to-Unicode
 rendering is enabled by default and can be disabled with `render_latex: false`
 in `~/.config/md.yaml`.
 
