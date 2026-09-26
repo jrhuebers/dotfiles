@@ -1,5 +1,6 @@
 [mgr]
 prepend_keymap = [
+  { on = "<Enter>", run = "plugin cd-quit", desc = "Enter directory and quit" },
   { on = "e", run = 'shell --block -- if [ -n "${TMUX:-}" ]; then tmux new-window -c "%d1" "${EDITOR:-vi}" "%s1"; else "${EDITOR:-vi}" "%s1"; fi', desc = "Edit hovered file in a new tmux window" },
   { on = "o", run = 'shell -- case "%s1" in *.pdf|*.PDF) xdg-open "%s1" ;; *) if [ -n "${TMUX:-}" ]; then tmux new-window -c "%d1" "${EDITOR:-vi}" "%s1"; else "${EDITOR:-vi}" "%s1"; fi ;; esac', desc = "Open in new tmux window or xdg-open for PDFs" },
   { on = "O", run = 'shell -- case "%s1" in *.pdf|*.PDF) xdg-open "%s1" ;; *) if [ -n "${TMUX:-}" ]; then tmux new-window -d -c "%d1" "${EDITOR:-vi}" "%s1"; else "${EDITOR:-vi}" "%s1"; fi ;; esac', desc = "Open in background tmux window or xdg-open for PDFs" },
