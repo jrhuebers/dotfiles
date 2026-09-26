@@ -134,7 +134,7 @@ fn main() {
         return;
     }
     if args.iter().any(|arg| arg == "--version") {
-        println!("md 0.4.3");
+        println!("md 0.4.4");
         return;
     }
 
@@ -839,11 +839,23 @@ fn write_less_keymap(scroll_speed: usize) -> io::Result<PathBuf> {
         "#command\nj noaction {scroll_speed}j\nk noaction {scroll_speed}k\n\\kd noaction {scroll_speed}j\n\\ku noaction {scroll_speed}k\n"
     );
     for attempt in 0..100 {
-        let path = env::temp_dir().join(format!("md-lesskey-{}-{attempt}", std::process::id()));
-        match OpenOptions::new().write(true).create_new(true).open(&path) {
+        let base = env::temp_dir().join(format!("md-lesskey-{}-{attempt}", std::process::id()));
+        let source_path = base.with_extension("source");
+        let compiled_path = base.with_extension("compiled");
+        match OpenOptions::new().write(true).create_new(true).open(&source_path) {
             Ok(mut file) => {
                 file.write_all(source.as_bytes())?;
-                return Ok(path);
+                let status = Command::new("lesskey")
+                    .args(["-o", compiled_path.to_string_lossy().as_ref(), source_path.to_string_lossy().as_ref()])
+                    .stdout(Stdio::null())
+                    .stderr(Stdio::null())
+                    .status()?;
+                let _ = fs::remove_file(&source_path);
+                if status.success() {
+                    return Ok(compiled_path);
+                }
+                let _ = fs::remove_file(&compiled_path);
+                return Err(io::Error::new(io::ErrorKind::Other, "lesskey could not compile the pager keymap"));
             }
             Err(error) if error.kind() == io::ErrorKind::AlreadyExists => continue,
             Err(error) => return Err(error),
