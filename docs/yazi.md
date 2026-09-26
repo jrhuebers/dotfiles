@@ -71,7 +71,7 @@ done
 cd ~/.config/yazi && ya pkg install
 ```
 
-The repository retains `cd-quit.yazi` for a reversible diagnostic, but its Enter binding is **disabled** because intermittent input freezes persisted after changing Markdown pagers. Native Enter now opens files; use `l` to enter directories in Yazi (native Enter would invoke a directory opener). Deploy the shell wrapper; the plugin may remain installed but is not invoked by the current keymap:
+The repository provides `cd-quit.yazi`, a synchronous plugin bound to Enter. On a hovered directory, it saves that directory to the wrapper's selection file and quits Yazi; on a file, it emits Yazi's normal open action. Without the wrapper, Enter navigates into directories instead. Deploy the plugin and shell wrapper alongside the tracked configuration:
 
 ```sh
 mkdir -p ~/.config/yazi/plugins
@@ -85,20 +85,20 @@ The tracked Bash profile sources `~/.config/yazi/shell-wrapper.sh`; if the profi
 [ -r "$HOME/.config/yazi/shell-wrapper.sh" ] && . "$HOME/.config/yazi/shell-wrapper.sh"
 ```
 
-Use `y` rather than `yazi` to launch Yazi: **calling `yazi` directly does not change the parent shell**. Press `l` on a directory to enter it without quitting; press `q` afterward to have the wrapper change the parent shell into Yazi's current directory. `Q` intentionally suppresses the directory change. The Bash wrapper passes `--cwd-file` to Yazi and reads its entire path even though `read -d ''` returns nonzero for Yazi's non-NUL-terminated output. Its separate plugin selection file is currently unused. For another shell, install and source an equivalent wrapper in that shell's startup profile; sourcing the Bash profile is not a substitute.
+Use `y` rather than `yazi` to launch Yazi: **calling `yazi` directly does not change the parent shell**. Enter on a directory quits into that directory through the wrapper; `l` enters it without quitting. Pressing `q` quits into Yazi's current directory, while `Q` intentionally suppresses the directory change. The wrapper reads the plugin selection file first, then Yazi's `--cwd-file`; it reads paths even though `read -d ''` returns nonzero for non-NUL-terminated output. For another shell, install and source an equivalent wrapper in that shell's startup profile; sourcing the Bash profile is not a substitute.
 
 Verify in a new interactive Bash session (or after `source ~/.bashrc`):
 
 ```sh
 type y
 y
-# Hover over a directory, press l (stay in Yazi), then press q.
+# Hover over a directory and press Enter; Yazi should quit.
 pwd
 ```
 
-The directory reported by `pwd` should be the entered directory. If the shell does not change directories after `q`, check that `type y` reports a function and that you launched with `y`, not `yazi`.
+The directory reported by `pwd` should be the hovered directory. If Enter only navigates within Yazi, check that `type y` reports a function and that you launched with `y`, not `yazi`.
 
-The configuration contains the `vscode-light-modern` flavor, light/dark theme settings, an `e` keybinding that edits the hovered file, and `o`/`O` keybindings that send PDFs to `xdg-open` and open other files in the editor (using a new tmux window when running inside tmux). Pressing Enter on `.md` files uses the standalone `md` viewer with its built-in pager, including inside Herdr. The opener unsets any inherited `PAGER` for this invocation only. The interaction behind earlier intermittent Yazi and shell input freezes in Herdr was not confirmed; the custom Enter plugin remains disabled. The `md` source at commit `ed52c94` or later also avoids VMIN=0 terminal read timeouts, but that change alone did not eliminate the reported freezes. If an already-running Yazi instance remains unresponsive, exit and relaunch it to load the opener change. Yazi's default open action also sends PDFs to `xdg-open`. The editor is selected through the shell environment:
+The configuration contains the `vscode-light-modern` flavor, light/dark theme settings, an `e` keybinding that edits the hovered file, and `o`/`O` keybindings that send PDFs to `xdg-open` and open other files in the editor (using a new tmux window when running inside tmux). Pressing Enter on `.md` files uses the standalone `md` viewer with its built-in pager, including inside Herdr. The opener unsets any inherited `PAGER` for this invocation only. The interaction behind earlier intermittent Yazi and shell input freezes in Herdr was not confirmed; the custom Enter plugin has been re-enabled at the user's request. The `md` source at commit `ed52c94` or later also avoids VMIN=0 terminal read timeouts, but that change alone did not eliminate the reported freezes. If an already-running Yazi instance remains unresponsive, exit and relaunch it to load the opener change. Yazi's default open action also sends PDFs to `xdg-open`. The editor is selected through the shell environment:
 
 ```sh
 export EDITOR=vim
