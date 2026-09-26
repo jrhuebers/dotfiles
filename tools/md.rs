@@ -8,6 +8,8 @@ use std::sync::mpsc::{self, Receiver, TryRecvError};
 use std::thread;
 use std::time::{Duration, Instant};
 
+mod math;
+
 // The built-in defaults mirror Glamour's LightStyle and DarkStyle, which Glow uses.
 #[derive(Clone)]
 struct Theme {
@@ -133,7 +135,7 @@ fn main() {
         return;
     }
     if args.iter().any(|arg| arg == "--version") {
-        println!("md 0.5.0");
+        println!("md 0.6.1");
         return;
     }
 
@@ -255,6 +257,7 @@ fn render_markdown(input: &str, theme: &Theme, width: usize) -> String {
     let mut output = String::with_capacity(input.len() + input.len() / 8);
     let mut paragraph: Vec<String> = Vec::new();
     let mut in_code = false;
+    let mut math_block: Option<(String, String)> = None;
     let mut suppress_blank = false;
 
     for raw_line in input.lines() {
@@ -274,6 +277,19 @@ fn render_markdown(input: &str, theme: &Theme, width: usize) -> String {
             push_line(&mut output, &rendered, theme);
             continue;
         }
+        if let Some((closing, body)) = math_block.as_mut() {
+            if let Some(end) = line.find(closing.as_str()) {
+                body.push_str(&line[..end]);
+                let (_, body) = math_block.take().expect("math block exists");
+                push_math_display(&mut output, &body, theme);
+            } else {
+                if !body.is_empty() {
+                    body.push('\n');
+                }
+                body.push_str(line);
+            }
+            continue;
+        }
         if line.trim().is_empty() {
             flush_paragraph(&mut paragraph, &mut output, theme, width);
             if suppress_blank {
@@ -284,6 +300,17 @@ fn render_markdown(input: &str, theme: &Theme, width: usize) -> String {
             continue;
         }
         suppress_blank = false;
+        if let Some((opening, closing)) = display_math_delimiter(trimmed) {
+            let body_start = opening.len();
+            let rest = &trimmed[body_start..];
+            flush_paragraph(&mut paragraph, &mut output, theme, width);
+            if let Some(end) = rest.find(closing) {
+                push_math_display(&mut output, &rest[..end], theme);
+            } else {
+                math_block = Some((closing.to_string(), rest.to_string()));
+            }
+            continue;
+        }
         if let Some((level, heading)) = heading(trimmed) {
             flush_paragraph(&mut paragraph, &mut output, theme, width);
             let mut rendered = if level == 1 {
@@ -345,7 +372,28 @@ fn render_markdown(input: &str, theme: &Theme, width: usize) -> String {
     }
 
     flush_paragraph(&mut paragraph, &mut output, theme, width);
+    if let Some((_, body)) = math_block {
+        push_math_display(&mut output, &body, theme);
+    }
     output
+}
+
+fn display_math_delimiter(line: &str) -> Option<(&str, &str)> {
+    if line.starts_with("$$") {
+        Some(("$$", "$$"))
+    } else if line.starts_with("\\[") {
+        Some(("\\[", "\\]"))
+    } else {
+        None
+    }
+}
+
+fn push_math_display(output: &mut String, source: &str, theme: &Theme) {
+    for line in math::render_display(source) {
+        let rendered = format!("{}{}{}", fg(theme.normal_fg), line, RESET);
+        push_line(output, &rendered, theme);
+    }
+    push_line(output, "", theme);
 }
 
 fn flush_paragraph(paragraph: &mut Vec<String>, output: &mut String, theme: &Theme, width: usize) {
@@ -448,6 +496,26 @@ fn list_item(line: &str) -> Option<(usize, &str, &str)> {
     None
 }
 
+fn inline_math_at(input: &str, index: usize) -> Option<(&str, usize)> {
+    let rest = &input[index..];
+    let (opening, closing) = if rest.starts_with("\\(") {
+        ("\\(", "\\)")
+    } else if rest.starts_with('$')
+        && !rest.starts_with("$$")
+        && !rest[1..].chars().next().is_some_and(|character| character.is_whitespace())
+    {
+        ("$", "$")
+    } else {
+        return None;
+    };
+    let start = index + opening.len();
+    let end = input[start..].find(closing)? + start;
+    if end == start || input[start..end].contains('\n') {
+        return None;
+    }
+    Some((&input[start..end], end + closing.len() - index))
+}
+
 fn underscore_in_word(input: &str, index: usize) -> bool {
     let previous = input[..index].chars().next_back();
     let next = input[index + 1..].chars().next();
@@ -461,6 +529,11 @@ fn render_inline(input: &str, base_foreground: u8, theme: &Theme) -> String {
     let mut index = 0;
     while index < input.len() {
         let rest = &input[index..];
+        if let Some((source, consumed)) = inline_math_at(input, index) {
+            output.push_str(&math::render_inline(source));
+            index += consumed;
+            continue;
+        }
         if rest.starts_with("**") || rest.starts_with("__") {
             if rest.starts_with("__") && underscore_in_word(input, index) {
                 output.push_str("__");

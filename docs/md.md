@@ -16,7 +16,11 @@ while blank-line paragraph breaks remain. Every heading is followed by one
 empty line.
 
 Pager mode is always used: `$PAGER`, or `less -R` when `$PAGER` is unset. There
-is no mouse handling or TUI document viewer.
+is no mouse handling or TUI document viewer. Inline and display math using
+`$...$`, `\(...\)`, `$$...$$`, and `\[...\]` is translated to
+terminal-friendly Unicode, including common fractions, roots, scripts, Greek
+letters, operators, matrices, and cases. Unsupported TeX remains readable as
+source text.
 
 When given a directory—or no argument from an interactive terminal—`md` opens a
 small keyboard file picker. It recursively lists visible Markdown files while
