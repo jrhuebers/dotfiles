@@ -134,7 +134,7 @@ fn main() {
         return;
     }
     if args.iter().any(|arg| arg == "--version") {
-        println!("md 0.4.2");
+        println!("md 0.4.3");
         return;
     }
 
@@ -834,23 +834,66 @@ fn restore_tty(saved: &str) -> io::Result<()> {
     }
 }
 
+fn write_less_keymap(scroll_speed: usize) -> io::Result<PathBuf> {
+    let source = format!(
+        "#command\nj noaction {scroll_speed}j\nk noaction {scroll_speed}k\n\\kd noaction {scroll_speed}j\n\\ku noaction {scroll_speed}k\n"
+    );
+    for attempt in 0..100 {
+        let path = env::temp_dir().join(format!("md-lesskey-{}-{attempt}", std::process::id()));
+        match OpenOptions::new().write(true).create_new(true).open(&path) {
+            Ok(mut file) => {
+                file.write_all(source.as_bytes())?;
+                return Ok(path);
+            }
+            Err(error) if error.kind() == io::ErrorKind::AlreadyExists => continue,
+            Err(error) => return Err(error),
+        }
+    }
+    Err(io::Error::new(io::ErrorKind::AlreadyExists, "could not create temporary less keymap"))
+}
+
 fn page(rendered: &str, scroll_speed: usize) -> io::Result<()> {
-    let pager = env::var("PAGER").unwrap_or_else(|_| format!("less -R --wheel-lines={scroll_speed}"));
+    let use_default_pager = env::var_os("PAGER").is_none();
+    let keymap = if use_default_pager {
+        Some(write_less_keymap(scroll_speed)?)
+    } else {
+        None
+    };
+    let pager = if let Some(path) = &keymap {
+        format!("less -R --wheel-lines={scroll_speed} -k {}", path.display())
+    } else {
+        env::var("PAGER").unwrap_or_default()
+    };
     let words = shell_words(&pager).ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "invalid PAGER"))?;
     if words.is_empty() {
+        if let Some(path) = keymap {
+            let _ = fs::remove_file(path);
+        }
         return Err(io::Error::new(io::ErrorKind::InvalidInput, "empty PAGER"));
     }
 
-    let mut child = Command::new(&words[0])
+    let child = Command::new(&words[0])
         .args(&words[1..])
         .stdin(Stdio::piped())
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
-        .spawn()?;
+        .spawn();
+    let mut child = match child {
+        Ok(child) => child,
+        Err(error) => {
+            if let Some(path) = keymap {
+                let _ = fs::remove_file(path);
+            }
+            return Err(error);
+        }
+    };
     if let Some(mut stdin) = child.stdin.take() {
         let _ = stdin.write_all(rendered.as_bytes());
     }
     let status = child.wait()?;
+    if let Some(path) = keymap {
+        let _ = fs::remove_file(path);
+    }
     if status.success() {
         Ok(())
     } else {

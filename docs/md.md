@@ -38,8 +38,9 @@ width: 0
 scroll_speed: 4
 ```
 
-`scroll_speed` sets the number of mouse-wheel lines for the default `less`
-pager. It is ignored when `$PAGER` is explicitly set.
+`scroll_speed` sets the number of lines moved by `j`/`k`, the up/down arrows,
+and the mouse wheel in the default `less` pager. It is ignored when `$PAGER`
+is explicitly set.
 
 Add or adjust a style block under `styles:` using the color fields and margin
 fields shown in the tracked example.
