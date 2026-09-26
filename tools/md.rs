@@ -135,7 +135,7 @@ fn main() {
         return;
     }
     if args.iter().any(|arg| arg == "--version") {
-        println!("md 0.6.1");
+        println!("md 0.6.2");
         return;
     }
 
@@ -147,18 +147,35 @@ fn main() {
             std::process::exit(2);
         }
     };
-    let input = match read_input(&paths) {
-        Ok(input) => input,
-        Err(error) => {
-            eprintln!("md: {error}");
-            std::process::exit(2);
-        }
+    let editable_path = if paths.len() == 1 && paths[0] != "-" {
+        Some(PathBuf::from(&paths[0]))
+    } else {
+        None
     };
-    let rendered = render_markdown(&input, &theme, width);
-
-    if let Err(error) = page(&rendered) {
-        eprintln!("md: {error}");
-        std::process::exit(1);
+    loop {
+        let input = match read_input(&paths) {
+            Ok(input) => input,
+            Err(error) => {
+                eprintln!("md: {error}");
+                std::process::exit(2);
+            }
+        };
+        let rendered = render_markdown(&input, &theme, width);
+        match page(&rendered, editable_path.as_deref()) {
+            Ok(PageAction::Done) => break,
+            Ok(PageAction::Edit) => {
+                if let Some(path) = editable_path.as_deref() {
+                    if let Err(error) = run_editor(path) {
+                        eprintln!("md: {error}");
+                        std::process::exit(1);
+                    }
+                }
+            }
+            Err(error) => {
+                eprintln!("md: {error}");
+                std::process::exit(1);
+            }
+        }
     }
 }
 
@@ -313,6 +330,7 @@ fn render_markdown(input: &str, theme: &Theme, width: usize) -> String {
         }
         if let Some((level, heading)) = heading(trimmed) {
             flush_paragraph(&mut paragraph, &mut output, theme, width);
+            ensure_blank_line(&mut output, theme);
             let mut rendered = if level == 1 {
                 style(theme.h1_fg, Some(theme.h1_bg), true, false, false)
             } else {
@@ -414,6 +432,13 @@ fn push_line(output: &mut String, content: &str, theme: &Theme) {
     output.push_str(content);
     output.push_str(&" ".repeat(theme.margin_right));
     output.push('\n');
+}
+
+fn ensure_blank_line(output: &mut String, theme: &Theme) {
+    let blank = format!("{}{}\n", " ".repeat(theme.margin_left), " ".repeat(theme.margin_right));
+    if !output.ends_with(&blank) {
+        output.push_str(&blank);
+    }
 }
 
 fn wrap_text(text: &str, width: usize) -> Vec<String> {
@@ -613,14 +638,20 @@ fn select_paths(directory: &Path) -> io::Result<Option<Vec<String>>> {
     let mut tty = OpenOptions::new().read(true).write(true).open("/dev/tty")?;
     let saved = stty(&["-g"])?;
     stty(&["-icanon", "-echo", "min", "0", "time", "0"])?;
-    let selected = picker_loop(&mut tty, receiver)?;
+    let action = picker_loop(&mut tty, receiver)?;
     let _ = restore_tty(&saved);
     print!("\x1b[2J\x1b[H");
     io::stdout().flush()?;
 
-    Ok(selected.map(|path| {
-        vec![directory.join(path).to_string_lossy().into_owned()]
-    }))
+    match action {
+        Some(PickerAction::Open(path)) => Ok(Some(vec![directory.join(path).to_string_lossy().into_owned()])),
+        Some(PickerAction::Edit(path)) => {
+            let path = directory.join(path);
+            run_editor(&path)?;
+            Ok(Some(vec![path.to_string_lossy().into_owned()]))
+        }
+        None => Ok(None),
+    }
 }
 
 fn scan_markdown_files(directory: &Path, root: &Path, sender: &mpsc::Sender<PathBuf>) -> io::Result<()> {
@@ -654,7 +685,12 @@ fn is_markdown_file(path: &Path) -> bool {
     )
 }
 
-fn picker_loop(tty: &mut File, receiver: Receiver<PathBuf>) -> io::Result<Option<PathBuf>> {
+enum PickerAction {
+    Open(PathBuf),
+    Edit(PathBuf),
+}
+
+fn picker_loop(tty: &mut File, receiver: Receiver<PathBuf>) -> io::Result<Option<PickerAction>> {
     let mut files = Vec::new();
     let mut selected = 0usize;
     let mut scanning = true;
@@ -698,9 +734,10 @@ fn picker_loop(tty: &mut File, receiver: Receiver<PathBuf>) -> io::Result<Option
                 Key::Down if !files.is_empty() => selected = (selected + 1).min(files.len() - 1),
                 Key::PreviousPage if !files.is_empty() => selected = page_move(selected, files.len(), visible, -1),
                 Key::NextPage if !files.is_empty() => selected = page_move(selected, files.len(), visible, 1),
-                Key::Enter if !files.is_empty() => return Ok(Some(files[selected].clone())),
+                Key::Enter if !files.is_empty() => return Ok(Some(PickerAction::Open(files[selected].clone()))),
+                Key::Edit if !files.is_empty() => return Ok(Some(PickerAction::Edit(files[selected].clone()))),
                 Key::Quit => return Ok(None),
-                Key::Other | Key::Down | Key::Enter | Key::PreviousPage | Key::NextPage => {}
+                Key::Other | Key::Down | Key::Enter | Key::Edit | Key::PreviousPage | Key::NextPage => {}
             }
         } else {
             thread::sleep(Duration::from_millis(10));
@@ -715,6 +752,7 @@ enum Key {
     PreviousPage,
     NextPage,
     Enter,
+    Edit,
     Quit,
     Other,
 }
@@ -730,6 +768,7 @@ fn read_key(tty: &mut File) -> io::Result<Option<Key>> {
         b'h' => Key::PreviousPage,
         b'l' => Key::NextPage,
         b'\r' | b'\n' => Key::Enter,
+        b'e' => Key::Edit,
         b'q' | 0x03 | 0x1b => {
             if byte[0] == 0x1b {
                 let mut escape = [0u8; 2];
@@ -864,7 +903,7 @@ fn draw_picker(files: &[PathBuf], selected: usize, scanning: bool) -> io::Result
     screen.push_str(RESET);
     screen.push_str("\n ");
     screen.push_str(DIM);
-    screen.push_str(&truncate_terminal("↑/↓ or j/k  ←/→ or h/l page  enter open  q quit", columns.saturating_sub(1).max(1)));
+    screen.push_str(&truncate_terminal("↑/↓ or j/k  ←/→ or h/l page  enter open  e edit  q quit", columns.saturating_sub(1).max(1)));
     screen.push_str(RESET);
     print!("{screen}");
     io::stdout().flush()
@@ -902,25 +941,90 @@ fn restore_tty(saved: &str) -> io::Result<()> {
     }
 }
 
-fn page(rendered: &str) -> io::Result<()> {
-    let pager = env::var("PAGER").unwrap_or_else(|_| "less -R".to_string());
+enum PageAction {
+    Done,
+    Edit,
+}
+
+fn write_less_edit_keymap() -> io::Result<PathBuf> {
+    let base = env::temp_dir().join(format!("md-lesskey-{}", std::process::id()));
+    let source_path = base.with_extension("source");
+    let compiled_path = base.with_extension("compiled");
+    fs::write(&source_path, "#command\ne quit e\n")?;
+    let status = Command::new("lesskey")
+        .args(["-o", compiled_path.to_string_lossy().as_ref(), source_path.to_string_lossy().as_ref()])
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()?;
+    let _ = fs::remove_file(source_path);
+    if status.success() {
+        Ok(compiled_path)
+    } else {
+        let _ = fs::remove_file(&compiled_path);
+        Err(io::Error::new(io::ErrorKind::Other, "lesskey could not compile the editor keymap"))
+    }
+}
+
+fn run_editor(path: &Path) -> io::Result<()> {
+    let editor = env::var("VISUAL").or_else(|_| env::var("EDITOR")).unwrap_or_else(|_| "vi".to_string());
+    let words = shell_words(&editor).ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "invalid editor command"))?;
+    if words.is_empty() {
+        return Err(io::Error::new(io::ErrorKind::InvalidInput, "empty editor command"));
+    }
+    let status = Command::new(&words[0])
+        .args(&words[1..])
+        .arg(path)
+        .stdin(Stdio::inherit())
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .status()?;
+    if status.success() {
+        Ok(())
+    } else {
+        Err(io::Error::new(io::ErrorKind::Other, format!("editor exited with {status}")))
+    }
+}
+
+fn page(rendered: &str, editable_path: Option<&Path>) -> io::Result<PageAction> {
+    let use_default_pager = env::var_os("PAGER").is_none();
+    let keymap = if use_default_pager && editable_path.is_some() {
+        Some(write_less_edit_keymap()?)
+    } else {
+        None
+    };
+    let pager = if let Some(path) = &keymap {
+        format!("less -R -k {}", path.display())
+    } else {
+        env::var("PAGER").unwrap_or_else(|_| "less -R".to_string())
+    };
     let words = shell_words(&pager).ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "invalid PAGER"))?;
     if words.is_empty() {
+        if let Some(path) = keymap { let _ = fs::remove_file(path); }
         return Err(io::Error::new(io::ErrorKind::InvalidInput, "empty PAGER"));
     }
 
-    let mut child = Command::new(&words[0])
+    let mut child = match Command::new(&words[0])
         .args(&words[1..])
         .stdin(Stdio::piped())
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
-        .spawn()?;
+        .spawn()
+    {
+        Ok(child) => child,
+        Err(error) => {
+            if let Some(path) = keymap { let _ = fs::remove_file(path); }
+            return Err(error);
+        }
+    };
     if let Some(mut stdin) = child.stdin.take() {
         let _ = stdin.write_all(rendered.as_bytes());
     }
     let status = child.wait()?;
-    if status.success() {
-        Ok(())
+    if let Some(path) = keymap { let _ = fs::remove_file(path); }
+    if status.code() == Some('e' as i32) {
+        Ok(PageAction::Edit)
+    } else if status.success() {
+        Ok(PageAction::Done)
     } else {
         Err(io::Error::new(io::ErrorKind::Other, format!("pager exited with {status}")))
     }

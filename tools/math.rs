@@ -237,7 +237,10 @@ impl Parser {
                 format_root(&value)
             }
             "text" | "mbox" | "mathrm" | "mathbf" | "mathit" | "mathcal" | "mathfrak" | "operatorname" => self.parse_atom(),
-            "left" | "right" | "limits" | "nolimits" | "displaystyle" | "textstyle" => String::new(),
+            "mathbb" => blackboard(&self.parse_atom()),
+            "sin" | "cos" | "tan" | "cot" | "sec" | "csc" | "sinh" | "cosh" | "tanh" | "log" | "ln" | "exp" | "lim" | "min" | "max" | "det" | "ker" => command,
+            "left" | "right" | "limits" | "nolimits" | "displaystyle" | "textstyle"
+            | "big" | "Big" | "bigg" | "Bigg" | "bigl" | "Bigl" | "biggl" | "Biggl" | "bigr" | "Bigr" | "biggr" | "Biggr" => String::new(),
             "," | ";" | ":" | "!" => String::new(),
             "overline" | "bar" => accent(self.parse_atom(), '\u{0305}'),
             "hat" | "widehat" => accent(self.parse_atom(), '\u{0302}'),
@@ -274,7 +277,7 @@ fn accent(value: String, mark: char) -> String {
     if value.chars().count() == 1 {
         format!("{value}{mark}")
     } else {
-        format!("{value} (accented)")
+        value.chars().map(|character| format!("{character}{mark}")).collect()
     }
 }
 
@@ -309,6 +312,12 @@ fn subscript(character: char) -> Option<char> {
     })
 }
 
+fn blackboard(value: &str) -> String {
+    value.chars().map(|character| match character {
+        'C' => 'ℂ', 'H' => 'ℍ', 'N' => 'ℕ', 'P' => 'ℙ', 'Q' => 'ℚ', 'R' => 'ℝ', 'Z' => 'ℤ', _ => character,
+    }).collect()
+}
+
 fn command_symbol(command: &str) -> Option<String> {
     let symbol = match command {
         "alpha" => 'α', "beta" => 'β', "gamma" => 'γ', "delta" => 'δ', "epsilon" => 'ε',
@@ -318,15 +327,20 @@ fn command_symbol(command: &str) -> Option<String> {
         "phi" => 'φ', "varphi" => 'ϕ', "chi" => 'χ', "psi" => 'ψ', "omega" => 'ω',
         "Gamma" => 'Γ', "Delta" => 'Δ', "Theta" => 'Θ', "Lambda" => 'Λ', "Xi" => 'Ξ',
         "Pi" => 'Π', "Sigma" => 'Σ', "Upsilon" => 'Υ', "Phi" => 'Φ', "Psi" => 'Ψ', "Omega" => 'Ω',
-        "pm" => '±', "mp" => '∓', "times" => '×', "cdot" => '·', "ast" => '∗',
-        "le" | "leq" => '≤', "ge" | "geq" => '≥', "neq" => '≠', "approx" => '≈',
-        "equiv" => '≡', "sim" => '∼', "in" => '∈', "notin" => '∉', "subset" => '⊂', "subseteq" => '⊆',
-        "supset" => '⊃', "supseteq" => '⊇', "to" | "rightarrow" => '→', "leftarrow" => '←',
-        "leftrightarrow" => '↔', "Rightarrow" => '⇒', "Leftarrow" => '⇐', "Leftrightarrow" => '⇔',
-        "infty" => '∞', "partial" => '∂', "nabla" => '∇', "forall" => '∀', "exists" => '∃',
-        "land" => '∧', "lor" => '∨', "cup" => '∪', "cap" => '∩', "sum" => '∑', "prod" => '∏',
-        "int" => '∫', "oint" => '∮', "therefore" => '∴', "degree" => '°', "hbar" => 'ℏ',
-        "ell" => 'ℓ', "Re" => 'ℜ', "Im" => 'ℑ', _ => return None,
+        "pm" => '±', "mp" => '∓', "times" => '×', "div" => '÷', "cdot" => '·', "ast" => '∗', "star" => '⋆', "circ" => '∘', "bullet" => '•',
+        "oplus" => '⊕', "ominus" => '⊖', "otimes" => '⊗', "oslash" => '⊘', "odot" => '⊙', "bigcirc" => '○',
+        "le" | "leq" | "leqslant" => '≤', "ge" | "geq" | "geqslant" => '≥', "ne" | "neq" => '≠', "approx" => '≈',
+        "equiv" => '≡', "sim" => '∼', "simeq" => '≃', "cong" => '≅', "propto" => '∝', "parallel" => '∥', "perp" => '⊥',
+        "ll" => '≪', "gg" => '≫', "in" => '∈', "notin" => '∉', "ni" => '∋', "subset" => '⊂', "subseteq" => '⊆',
+        "supset" => '⊃', "supseteq" => '⊇', "to" | "rightarrow" | "longrightarrow" => '→', "leftarrow" | "longleftarrow" => '←',
+        "leftrightarrow" | "longleftrightarrow" => '↔', "Rightarrow" | "Longrightarrow" => '⇒', "Leftarrow" | "Longleftarrow" => '⇐', "Leftrightarrow" | "Longleftrightarrow" => '⇔',
+        "hookleftarrow" => '↩', "hookrightarrow" => '↪', "mapsto" => '↦', "uparrow" => '↑', "downarrow" => '↓',
+        "infty" => '∞', "partial" => '∂', "nabla" => '∇', "forall" => '∀', "exists" => '∃', "neg" => '¬',
+        "land" | "wedge" => '∧', "lor" | "vee" => '∨', "cup" => '∪', "cap" => '∩', "bigcap" => '⋂', "bigcup" => '⋃', "bigwedge" => '⋀', "bigvee" => '⋁',
+        "sum" => '∑', "prod" => '∏', "int" => '∫', "iint" => '∬', "iiint" => '∭', "oint" => '∮',
+        "therefore" => '∴', "because" => '∵', "angle" => '∠', "degree" => '°', "hbar" => 'ℏ',
+        "ldots" | "dots" => '…', "cdots" => '⋯', "vdots" => '⋮', "ddots" => '⋱', "ell" => 'ℓ', "Re" => 'ℜ', "Im" => 'ℑ',
+        "langle" => '⟨', "rangle" => '⟩', "lfloor" => '⌊', "rfloor" => '⌋', "lceil" => '⌈', "rceil" => '⌉', _ => return None,
     };
     Some(symbol.to_string())
 }

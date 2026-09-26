@@ -28,9 +28,13 @@ skipping hidden files and directories. The header shows a live count as files
 are discovered. Files are shown in pages; use arrow keys or `j`/`k` to move
 within and across pages, or `h`/`l` and left/right to change pages. A dot bar
 shows the active page. Long paths are middle-truncated to one terminal row,
-so both their beginning and filename remain visible. The page dots and key
-hint stay at the bottom of the terminal even on a short final page. Press Enter
-to open a file, or `q` to quit.
+so both their beginning and filename remain visible. Press `e` to edit the
+selected file, or Enter to open it. The page dots and key hint stay at the
+bottom of the terminal even on a short final page; press `q` to quit.
+
+When viewing a single file in the default `less` pager, press `e` to open the
+file in `$VISUAL`, `$EDITOR`, or `vi`. The document is re-rendered after the
+editor exits. This edit key is available with the default pager only.
 
 ## Configuration
 
