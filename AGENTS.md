@@ -22,7 +22,6 @@ documentation belongs in `~/admin-docs/`, not in this repository.
 - [`docs/device-profiles.md`](docs/device-profiles.md) — Cluster versus personal-device configuration profiles and on/off matrix.
 - [`docs/git.md`](docs/git.md) — Global Git author identity and installation/query commands.
 - [`docs/hermes-skills.md`](docs/hermes-skills.md) — Archived Hermes skills boundary, use, promotion, and removal.
-- [`docs/md.md`](docs/md.md) — User-local Markdown viewer with pager-only terminal rendering.
 - [`docs/mdformat.md`](docs/mdformat.md) — Markdown formatter installation, alias, and pre-commit configuration.
 - [`docs/herdr.md`](docs/herdr.md) — Herdr terminal multiplexer usage and current local configuration.
 - [`docs/cloc.md`](docs/cloc.md) — Required cloc source-code line counter installation on every machine.
