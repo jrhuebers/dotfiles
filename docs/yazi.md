@@ -71,7 +71,7 @@ done
 cd ~/.config/yazi && ya pkg install
 ```
 
-The repository also provides `cd-quit.yazi`, a synchronous local plugin that makes Enter enter a hovered directory and quit Yazi, allowing the shell wrapper to change into that directory. Emitting both actions from one synchronous entry avoids the fleeting unfinished-tasks prompt caused by quitting from a directory-change event subscription. Deploy the plugin and shell wrapper alongside the tracked configuration:
+The repository also provides `cd-quit.yazi`, a synchronous local plugin that makes Enter on a hovered directory save its path to a separate temporary selection file and quit Yazi without first loading that directory. The wrapper changes into that selected directory after Yazi exits. This avoids the fleeting unfinished-tasks prompt caused by quitting while Yazi is still processing a `cd` action. If Yazi is launched without the wrapper, Enter navigates into the directory normally. Deploy the plugin and shell wrapper alongside the tracked configuration:
 
 ```sh
 mkdir -p ~/.config/yazi/plugins
@@ -85,7 +85,7 @@ The tracked Bash profile sources `~/.config/yazi/shell-wrapper.sh`; if the profi
 [ -r "$HOME/.config/yazi/shell-wrapper.sh" ] && . "$HOME/.config/yazi/shell-wrapper.sh"
 ```
 
-Use `y` rather than `yazi` to launch Yazi. The wrapper passes `--cwd-file` to Yazi and changes the parent shell's directory after Yazi exits. It reads the whole cwd file even when `read -d ''` returns nonzero because Yazi does not terminate the path with NUL. Entering a directory with Enter quits Yazi into that directory; pressing `q` still quits into Yazi's current directory, while `Q` intentionally suppresses the directory change.
+Use `y` rather than `yazi` to launch Yazi. The wrapper passes `--cwd-file` to Yazi for normal quits and gives the plugin a separate per-invocation selection file for Enter; the selected path takes precedence when present. The wrapper reads the whole path even when `read -d ''` returns nonzero because Yazi does not terminate paths with NUL. Enter on a directory quits Yazi into that directory; pressing `q` still quits into Yazi's current directory, while `Q` intentionally suppresses the directory change.
 
 The configuration contains the `vscode-light-modern` flavor, light/dark theme settings, an `e` keybinding that edits the hovered file, and `o`/`O` keybindings that send PDFs to `xdg-open` and open other files in the editor (using a new tmux window when running inside tmux). Pressing Enter on `.md` files uses the standalone `md` viewer; Yazi blocks until the pager exits. Yazi's default open action also sends PDFs to `xdg-open`. The editor is selected through the shell environment:
 
