@@ -86,7 +86,6 @@ impl Theme {
 struct Config {
     style: String,
     width: usize,
-    scroll_speed: usize,
     themes: HashMap<String, Theme>,
 }
 
@@ -95,14 +94,14 @@ impl Config {
         let mut themes = HashMap::new();
         themes.insert("glow-light".to_string(), Theme::glow_light());
         themes.insert("glow-dark".to_string(), Theme::glow_dark());
-        Self { style: "glow-light".to_string(), width: 0, scroll_speed: 4, themes }
+        Self { style: "glow-light".to_string(), width: 0, themes }
     }
 
-    fn theme(self) -> io::Result<(Theme, usize, usize)> {
+    fn theme(self) -> io::Result<(Theme, usize)> {
         let theme = self.themes.get(&self.style).cloned().ok_or_else(|| {
             io::Error::new(io::ErrorKind::InvalidInput, format!("unknown md style: {}", self.style))
         })?;
-        Ok((theme, self.width, self.scroll_speed))
+        Ok((theme, self.width))
     }
 }
 
@@ -122,7 +121,7 @@ fn main() {
             std::process::exit(2);
         }
     };
-    let (theme, configured_width, scroll_speed) = config;
+    let (theme, configured_width) = config;
     let width = if configured_width == 0 {
         terminal_columns().unwrap_or(80) as usize
     } else {
@@ -134,7 +133,7 @@ fn main() {
         return;
     }
     if args.iter().any(|arg| arg == "--version") {
-        println!("md 0.4.4");
+        println!("md 0.5.0");
         return;
     }
 
@@ -155,7 +154,7 @@ fn main() {
     };
     let rendered = render_markdown(&input, &theme, width);
 
-    if let Err(error) = page(&rendered, scroll_speed) {
+    if let Err(error) = page(&rendered) {
         eprintln!("md: {error}");
         std::process::exit(1);
     }
@@ -196,10 +195,6 @@ fn parse_config(contents: &str) -> io::Result<Config> {
                 config.width = value.trim().parse().map_err(|_| {
                     io::Error::new(io::ErrorKind::InvalidInput, "md.yaml width must be an integer")
                 })?;
-            } else if let Some(value) = content.strip_prefix("scroll_speed:") {
-                config.scroll_speed = value.trim().parse::<usize>().map_err(|_| {
-                    io::Error::new(io::ErrorKind::InvalidInput, "md.yaml scroll_speed must be an integer")
-                })?.max(1);
             } else if content == "styles:" {
                 in_styles = true;
             }
@@ -834,78 +829,23 @@ fn restore_tty(saved: &str) -> io::Result<()> {
     }
 }
 
-fn write_less_keymap(scroll_speed: usize) -> io::Result<PathBuf> {
-    let source = format!(
-        "#command\nj noaction {scroll_speed}j\nk noaction {scroll_speed}k\n\\kd noaction {scroll_speed}j\n\\ku noaction {scroll_speed}k\n"
-    );
-    for attempt in 0..100 {
-        let base = env::temp_dir().join(format!("md-lesskey-{}-{attempt}", std::process::id()));
-        let source_path = base.with_extension("source");
-        let compiled_path = base.with_extension("compiled");
-        match OpenOptions::new().write(true).create_new(true).open(&source_path) {
-            Ok(mut file) => {
-                file.write_all(source.as_bytes())?;
-                let status = Command::new("lesskey")
-                    .args(["-o", compiled_path.to_string_lossy().as_ref(), source_path.to_string_lossy().as_ref()])
-                    .stdout(Stdio::null())
-                    .stderr(Stdio::null())
-                    .status()?;
-                let _ = fs::remove_file(&source_path);
-                if status.success() {
-                    return Ok(compiled_path);
-                }
-                let _ = fs::remove_file(&compiled_path);
-                return Err(io::Error::new(io::ErrorKind::Other, "lesskey could not compile the pager keymap"));
-            }
-            Err(error) if error.kind() == io::ErrorKind::AlreadyExists => continue,
-            Err(error) => return Err(error),
-        }
-    }
-    Err(io::Error::new(io::ErrorKind::AlreadyExists, "could not create temporary less keymap"))
-}
-
-fn page(rendered: &str, scroll_speed: usize) -> io::Result<()> {
-    let use_default_pager = env::var_os("PAGER").is_none();
-    let keymap = if use_default_pager {
-        Some(write_less_keymap(scroll_speed)?)
-    } else {
-        None
-    };
-    let pager = if let Some(path) = &keymap {
-        format!("less -R --wheel-lines={scroll_speed} -k {}", path.display())
-    } else {
-        env::var("PAGER").unwrap_or_default()
-    };
+fn page(rendered: &str) -> io::Result<()> {
+    let pager = env::var("PAGER").unwrap_or_else(|_| "less -R".to_string());
     let words = shell_words(&pager).ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "invalid PAGER"))?;
     if words.is_empty() {
-        if let Some(path) = keymap {
-            let _ = fs::remove_file(path);
-        }
         return Err(io::Error::new(io::ErrorKind::InvalidInput, "empty PAGER"));
     }
 
-    let child = Command::new(&words[0])
+    let mut child = Command::new(&words[0])
         .args(&words[1..])
         .stdin(Stdio::piped())
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
-        .spawn();
-    let mut child = match child {
-        Ok(child) => child,
-        Err(error) => {
-            if let Some(path) = keymap {
-                let _ = fs::remove_file(path);
-            }
-            return Err(error);
-        }
-    };
+        .spawn()?;
     if let Some(mut stdin) = child.stdin.take() {
         let _ = stdin.write_all(rendered.as_bytes());
     }
     let status = child.wait()?;
-    if let Some(path) = keymap {
-        let _ = fs::remove_file(path);
-    }
     if status.success() {
         Ok(())
     } else {
