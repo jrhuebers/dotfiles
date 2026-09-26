@@ -1,1 +1,0 @@
-require("cd-quit"):setup()

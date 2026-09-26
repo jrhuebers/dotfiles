@@ -65,13 +65,13 @@ Symlink the repository configuration and install the declared packages:
 
 ```sh
 mkdir -p ~/.config/yazi
-for file in init.lua keymap.toml package.toml theme.toml yazi.toml; do
+for file in keymap.toml package.toml theme.toml yazi.toml; do
   ln -sfn ~/dotfiles/.config/yazi/$file ~/.config/yazi/$file
 done
 cd ~/.config/yazi && ya pkg install
 ```
 
-The repository also provides `cd-quit.yazi`, a local plugin that makes Enter enter a hovered directory and quit Yazi, allowing the shell wrapper to change into that directory. Deploy the plugin and shell wrapper alongside the tracked configuration:
+The repository also provides `cd-quit.yazi`, a synchronous local plugin that makes Enter enter a hovered directory and quit Yazi, allowing the shell wrapper to change into that directory. Emitting both actions from one synchronous entry avoids the fleeting unfinished-tasks prompt caused by quitting from a directory-change event subscription. Deploy the plugin and shell wrapper alongside the tracked configuration:
 
 ```sh
 mkdir -p ~/.config/yazi/plugins
