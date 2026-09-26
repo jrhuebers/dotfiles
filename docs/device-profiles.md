@@ -40,7 +40,7 @@ node.
 | Vim | optional | optional | optional | optional | `.vimrc` is shared. See [`vim.md`](vim.md). |
 | Git | optional | optional | optional | optional | `.gitconfig` is shared. See [`git.md`](git.md). |
 | GitHub CLI (`gh`) | **on** | **on** | **on** | **on** | Install the CLI on every supported machine. See [`git.md`](git.md). |
-| Glow | **on** | **on** | **on** | **on** | Install Glow on every supported profile and deploy the shared configuration. See [`glow.md`](glow.md). |
+| md | **on** | **on** | **on** | **on** | Install the user-local pager-only Markdown viewer on every supported profile. See [`md.md`](md.md). |
 | Yazi | **on** | **on** | **on** | **on** | Install Yazi on every supported profile and deploy the shared configuration. See [`yazi.md`](yazi.md). |
 | bat | **on** | **on** | **on** | **on** | Install the terminal viewer on every supported profile. See [`bat.md`](bat.md). |
 | tiktoken | **on** | **on** | **on** | **on** | Install the user-local Python package on every supported machine where Python is available. See [`tiktoken.md`](tiktoken.md). |
