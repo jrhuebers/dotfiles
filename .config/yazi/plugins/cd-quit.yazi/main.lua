@@ -1,3 +1,5 @@
+--- @sync entry
+
 local M = { pending_quit = false }
 
 function M:setup()
@@ -8,7 +10,6 @@ function M:setup()
 	end)
 end
 
---- @sync entry
 function M:entry()
 	local h = cx.active.current.hovered
 	if not h then return end
