@@ -1,41 +1,20 @@
 ---
 name: paper-fetching
-description: Fetch arXiv papers with their LaTeX sources and produce a traceable, LLM-readable corpus.
+description: Fetch current arXiv PDFs and original LaTeX, flatten source for reading, and verify a paper corpus.
 author: huebers
 platforms: [linux, macos]
 ---
 
 # Paper Fetching
 
-Use when collecting papers for a research corpus. Prefer source-backed extraction over PDF-only text extraction.
+Use for source-backed paper collections. From this skill's directory, with Python 3 and `latexpand` (TeX Live or CTAN) installed:
 
-## arXiv workflow
-
-1. Verify each ID, title, and author list against the arXiv API; do not trust IDs from memory.
-2. Download the latest PDF and source using the bare ID:
-   `curl -sL https://arxiv.org/pdf/<id> -o arxiv_<id>.pdf`
-   and `curl -sL -A "research-assistant/0.1" https://arxiv.org/e-print/<id> -o src/<id>.tar.gz`.
-3. Record the concrete version from `https://export.arxiv.org/api/query?id_list=<id>`; rate-limit arXiv requests to about one per three seconds.
-4. Safely extract the source, find the `.tex` file containing `\documentclass`, and run from its directory:
-   `latexpand --empty-comments main.tex > arxiv_<id>.tex`.
-5. Apply a verbatim-aware comment stripper that preserves escaped `\%` and `verbatim`, `lstlisting`, `minted`, and similar environments. Add a provenance header with ID, version, tool, main file, and fetch date.
-
-Keep the original source tarball as canonical; the flattened `.tex` is derived. Run `figindex.py` afterward to make captions searchable. Use PDF text extraction only for quick searches, not as the primary reading format.
-
-## Layout and policy
-
-```text
-papers/
-  arxiv_<id>.pdf
-  arxiv_<id>.tex
-  src/<id>.tar.gz
+```bash
+python3 scripts/fetch_papers.py /path/to/papers 1706.03762 1810.04805
+python3 scripts/qa_corpus.py /path/to/papers
+python3 scripts/figindex.py /path/to/papers
 ```
 
-Stage downloads before copying them into project `papers/` directories, which are normally gitignored. For non-arXiv papers, retain the PDF only and verify that the downloaded file is actually a PDF.
+The fetcher accepts bare modern arXiv IDs, checks titles/authors/version against the arXiv API, downloads the latest PDF and original source (polite ~3-second request spacing), safely extracts it in temporary staging, finds the largest real `\documentclass` main file, then runs `latexpand --keep-comments` from its directory (the historical `--empty-comments` destroys literal `%` inside verbatim). `flatten_tex.py` strips comments while preserving escaped `\%` and verbatim environments, and stamps provenance. Fetch refuses to overwrite existing papers; use a new directory to refresh and compare versions. When arXiv returns 404, PDF, or PS instead of LaTeX source, it keeps the PDF with an explicit `arxiv_<id>.source-unavailable.txt` marker; other download/processing failures fail rather than silently fabricating `.tex`.
 
-## Pitfalls
-
-- Do not guess `main.tex`; filenames vary and small stubs may delegate to the real document.
-- Run `latexpand` from the source directory so relative `\input` and `\include` paths resolve.
-- Keep PDFs as visual ground truth and tarballs for reproducibility.
-- Use a Slurm GPU allocation only for optional image OCR; downloading and flattening are ordinary CPU work.
+Each paper yields `arxiv_<id>.pdf`, `arxiv_<id>.tex`, and `src/<id>.tar.gz` (or `.tex.gz`/`.tex` for single-file originals). Original source is canonical; flattened TeX is the primary LLM reading copy, PDF is visual ground truth. The figure index makes captions searchable but is not image OCR. Stage before copying into a project's normally gitignored `papers/`; verify the title of each PDF against API metadata before citing. Do not infer authors or IDs from memory. GPU OCR is optional and belongs in a scheduled Slurm job, not this fetch workflow.
