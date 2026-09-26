@@ -1,9 +1,13 @@
 [opener]
+md = [
+  { run = "md %s1", desc = "View Markdown with md", block = true, for = "linux" },
+]
 pdf = [
   { run = "xdg-open %s1", desc = "Open PDF", orphan = true, for = "linux" },
 ]
 
 [open]
 prepend_rules = [
+  { url = "*.md", use = "md" },
   { mime = "application/pdf", use = "pdf" },
 ]
