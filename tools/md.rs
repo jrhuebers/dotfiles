@@ -133,7 +133,7 @@ fn main() {
         return;
     }
     if args.iter().any(|arg| arg == "--version") {
-        println!("md 0.3.9");
+        println!("md 0.4.0");
         return;
     }
 
@@ -760,6 +760,9 @@ fn draw_picker(files: &[PathBuf], selected: usize, scanning: bool) -> io::Result
         }
         screen.push_str(&truncate_terminal(&path.to_string_lossy(), columns.saturating_sub(3).max(1)));
         screen.push_str(RESET);
+        screen.push('\n');
+    }
+    for _ in last - first..visible {
         screen.push('\n');
     }
     let page_count = files.len().div_ceil(visible).max(1);
