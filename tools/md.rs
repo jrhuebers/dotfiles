@@ -4,6 +4,9 @@ use std::fs::{self, File, OpenOptions};
 use std::io::{self, IsTerminal, Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
+use std::sync::mpsc::{self, Receiver, TryRecvError};
+use std::thread;
+use std::time::{Duration, Instant};
 
 // The built-in defaults mirror Glamour's LightStyle and DarkStyle, which Glow uses.
 #[derive(Clone)]
@@ -130,7 +133,7 @@ fn main() {
         return;
     }
     if args.iter().any(|arg| arg == "--version") {
-        println!("md 0.3.1");
+        println!("md 0.3.2");
         return;
     }
 
@@ -518,17 +521,16 @@ fn render_inline(input: &str, base_foreground: u8, theme: &Theme) -> String {
 }
 
 fn select_paths(directory: &Path) -> io::Result<Option<Vec<String>>> {
-    let mut files = Vec::new();
-    collect_markdown_files(directory, directory, &mut files)?;
-    files.sort_by(|left, right| left.to_string_lossy().cmp(&right.to_string_lossy()));
-    if files.is_empty() {
-        return Err(io::Error::new(io::ErrorKind::NotFound, "no Markdown files found"));
-    }
+    let (sender, receiver) = mpsc::channel();
+    let root = directory.to_path_buf();
+    thread::spawn(move || {
+        let _ = scan_markdown_files(&root, &root, &sender);
+    });
 
     let mut tty = OpenOptions::new().read(true).write(true).open("/dev/tty")?;
     let saved = stty(&["-g"])?;
-    stty(&["-icanon", "-echo", "min", "1", "time", "0"])?;
-    let selected = picker_loop(&mut tty, &files)?;
+    stty(&["-icanon", "-echo", "min", "0", "time", "1"])?;
+    let selected = picker_loop(&mut tty, receiver)?;
     let _ = restore_tty(&saved);
     print!("\x1b[2J\x1b[H");
     io::stdout().flush()?;
@@ -538,8 +540,12 @@ fn select_paths(directory: &Path) -> io::Result<Option<Vec<String>>> {
     }))
 }
 
-fn collect_markdown_files(directory: &Path, root: &Path, files: &mut Vec<PathBuf>) -> io::Result<()> {
-    for entry in fs::read_dir(directory)? {
+fn scan_markdown_files(directory: &Path, root: &Path, sender: &mpsc::Sender<PathBuf>) -> io::Result<()> {
+    let entries = match fs::read_dir(directory) {
+        Ok(entries) => entries,
+        Err(error) => return Err(error),
+    };
+    for entry in entries {
         let entry = entry?;
         let path = entry.path();
         let name = entry.file_name();
@@ -547,9 +553,12 @@ fn collect_markdown_files(directory: &Path, root: &Path, files: &mut Vec<PathBuf
             continue;
         }
         if path.is_dir() {
-            collect_markdown_files(&path, root, files)?;
+            let _ = scan_markdown_files(&path, root, sender);
         } else if path.is_file() && is_markdown_file(&path) {
-            files.push(path.strip_prefix(root).unwrap_or(&path).to_path_buf());
+            let relative = path.strip_prefix(root).unwrap_or(&path).to_path_buf();
+            if sender.send(relative).is_err() {
+                return Ok(());
+            }
         }
     }
     Ok(())
@@ -562,17 +571,51 @@ fn is_markdown_file(path: &Path) -> bool {
     )
 }
 
-fn picker_loop(tty: &mut File, files: &[PathBuf]) -> io::Result<Option<PathBuf>> {
+fn picker_loop(tty: &mut File, receiver: Receiver<PathBuf>) -> io::Result<Option<PathBuf>> {
+    let mut files = Vec::new();
     let mut selected = 0usize;
+    let mut scanning = true;
+    let mut dirty = true;
+    let mut last_draw = Instant::now() - Duration::from_secs(1);
+
     loop {
-        draw_picker(files, selected)?;
-        let key = read_key(tty)?;
-        match key {
-            Key::Up => selected = selected.saturating_sub(1),
-            Key::Down => selected = (selected + 1).min(files.len() - 1),
-            Key::Enter => return Ok(Some(files[selected].clone())),
-            Key::Quit => return Ok(None),
-            Key::Other => {}
+        let selected_path = files.get(selected).cloned();
+        loop {
+            match receiver.try_recv() {
+                Ok(path) => {
+                    files.push(path);
+                    dirty = true;
+                }
+                Err(TryRecvError::Empty) => break,
+                Err(TryRecvError::Disconnected) => {
+                    scanning = false;
+                    break;
+                }
+            }
+        }
+        if dirty || last_draw.elapsed() >= Duration::from_millis(100) {
+            files.sort_by(|left, right| left.to_string_lossy().cmp(&right.to_string_lossy()));
+            if let Some(path) = selected_path {
+                selected = files.iter().position(|candidate| *candidate == path).unwrap_or(0);
+            } else if !files.is_empty() {
+                selected = selected.min(files.len() - 1);
+            }
+            draw_picker(&files, selected, scanning)?;
+            dirty = false;
+            last_draw = Instant::now();
+        }
+
+        if !scanning && files.is_empty() {
+            return Err(io::Error::new(io::ErrorKind::NotFound, "no Markdown files found"));
+        }
+        if let Some(key) = read_key(tty)? {
+            match key {
+                Key::Up => selected = selected.saturating_sub(1),
+                Key::Down if !files.is_empty() => selected = (selected + 1).min(files.len() - 1),
+                Key::Enter if !files.is_empty() => return Ok(Some(files[selected].clone())),
+                Key::Quit => return Ok(None),
+                Key::Other | Key::Down | Key::Enter => {}
+            }
         }
     }
 }
@@ -586,30 +629,33 @@ enum Key {
     Other,
 }
 
-fn read_key(tty: &mut File) -> io::Result<Key> {
+fn read_key(tty: &mut File) -> io::Result<Option<Key>> {
     let mut byte = [0u8; 1];
-    tty.read_exact(&mut byte)?;
-    match byte[0] {
-        b'k' | 0x10 => Ok(Key::Up),
-        b'j' | 0x0e => Ok(Key::Down),
-        b'\r' | b'\n' => Ok(Key::Enter),
+    if tty.read(&mut byte)? == 0 {
+        return Ok(None);
+    }
+    let key = match byte[0] {
+        b'k' | 0x10 => Key::Up,
+        b'j' | 0x0e => Key::Down,
+        b'\r' | b'\n' => Key::Enter,
         b'q' | 0x03 | 0x1b => {
             if byte[0] == 0x1b {
                 let mut escape = [0u8; 2];
                 tty.read_exact(&mut escape)?;
                 match escape {
-                    [b'[', b'A'] => return Ok(Key::Up),
-                    [b'[', b'B'] => return Ok(Key::Down),
+                    [b'[', b'A'] => return Ok(Some(Key::Up)),
+                    [b'[', b'B'] => return Ok(Some(Key::Down)),
                     _ => {}
                 }
             }
-            Ok(Key::Quit)
+            Key::Quit
         }
-        _ => Ok(Key::Other),
-    }
+        _ => Key::Other,
+    };
+    Ok(Some(key))
 }
 
-fn draw_picker(files: &[PathBuf], selected: usize) -> io::Result<()> {
+fn draw_picker(files: &[PathBuf], selected: usize, scanning: bool) -> io::Result<()> {
     let rows = terminal_rows().unwrap_or(24) as usize;
     let visible = rows.saturating_sub(5).max(1);
     let max_first = files.len().saturating_sub(visible);
@@ -621,7 +667,12 @@ fn draw_picker(files: &[PathBuf], selected: usize) -> io::Result<()> {
     screen.push_str(&style(PICKER_H1_FG, Some(PICKER_H1_BG), true, false, false));
     screen.push_str(" md ");
     screen.push_str(RESET);
-    screen.push_str(" select a Markdown file\n\n");
+    screen.push_str(" select a Markdown file  ");
+    screen.push_str(&format!("{} file{} found", files.len(), if files.len() == 1 { "" } else { "s" }));
+    if scanning {
+        screen.push_str(" (searching…)");
+    }
+    screen.push_str("\n\n");
     for (index, path) in files.iter().enumerate().skip(first).take(last - first) {
         screen.push(' ');
         if index == selected {
@@ -647,13 +698,13 @@ fn terminal_columns() -> Option<u16> {
             return Some(columns);
         }
     }
-    let output = Command::new("stty").args(["-F", "/dev/tty", "columns"]).output().ok()?;
-    String::from_utf8_lossy(&output.stdout).trim().parse().ok()
+    let output = Command::new("stty").args(["-F", "/dev/tty", "size"]).output().ok()?;
+    String::from_utf8_lossy(&output.stdout).split_whitespace().nth(1)?.parse().ok()
 }
 
 fn terminal_rows() -> Option<u16> {
-    let output = Command::new("stty").args(["-F", "/dev/tty", "rows"]).output().ok()?;
-    String::from_utf8_lossy(&output.stdout).trim().parse().ok()
+    let output = Command::new("stty").args(["-F", "/dev/tty", "size"]).output().ok()?;
+    String::from_utf8_lossy(&output.stdout).split_whitespace().next()?.parse().ok()
 }
 
 fn stty(arguments: &[&str]) -> io::Result<String> {
