@@ -1,21 +1,109 @@
 use std::env;
+use std::collections::HashMap;
 use std::fs::{self, File, OpenOptions};
 use std::io::{self, IsTerminal, Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
-// These are the colors from Glamour's built-in LightStyle, which Glow uses.
-const NORMAL_FG: u8 = 234;
-const HEADING_FG: u8 = 27;
-const H1_FG: u8 = 228;
-const H1_BG: u8 = 63;
-const RULE_FG: u8 = 249;
-const LINK_FG: u8 = 36;
-const LINK_TEXT_FG: u8 = 29;
-const INLINE_CODE_FG: u8 = 203;
-const INLINE_CODE_BG: u8 = 254;
-const CODE_BLOCK_FG: u8 = 242;
+// The built-in defaults mirror Glamour's LightStyle and DarkStyle, which Glow uses.
+#[derive(Clone)]
+struct Theme {
+    normal_fg: u8,
+    heading_fg: u8,
+    h1_fg: u8,
+    h1_bg: u8,
+    rule_fg: u8,
+    link_fg: u8,
+    link_text_fg: u8,
+    inline_code_fg: u8,
+    inline_code_bg: u8,
+    code_block_fg: u8,
+    margin_left: usize,
+    margin_right: usize,
+}
 
+impl Theme {
+    fn glow_light() -> Self {
+        Self {
+            normal_fg: 234,
+            heading_fg: 27,
+            h1_fg: 228,
+            h1_bg: 63,
+            rule_fg: 249,
+            link_fg: 36,
+            link_text_fg: 29,
+            inline_code_fg: 203,
+            inline_code_bg: 254,
+            code_block_fg: 242,
+            margin_left: 1,
+            margin_right: 1,
+        }
+    }
+
+    fn glow_dark() -> Self {
+        Self {
+            normal_fg: 252,
+            heading_fg: 39,
+            h1_fg: 228,
+            h1_bg: 63,
+            rule_fg: 240,
+            link_fg: 30,
+            link_text_fg: 35,
+            inline_code_fg: 203,
+            inline_code_bg: 236,
+            code_block_fg: 244,
+            margin_left: 1,
+            margin_right: 1,
+        }
+    }
+
+    fn set(&mut self, key: &str, value: &str) {
+        let parsed = match value.parse::<u8>() {
+            Ok(value) => value,
+            Err(_) => return,
+        };
+        match key {
+            "normal_fg" => self.normal_fg = parsed,
+            "heading_fg" => self.heading_fg = parsed,
+            "h1_fg" => self.h1_fg = parsed,
+            "h1_bg" => self.h1_bg = parsed,
+            "rule_fg" => self.rule_fg = parsed,
+            "link_fg" => self.link_fg = parsed,
+            "link_text_fg" => self.link_text_fg = parsed,
+            "inline_code_fg" => self.inline_code_fg = parsed,
+            "inline_code_bg" => self.inline_code_bg = parsed,
+            "code_block_fg" => self.code_block_fg = parsed,
+            "margin_left" => self.margin_left = parsed as usize,
+            "margin_right" => self.margin_right = parsed as usize,
+            _ => {}
+        }
+    }
+}
+
+struct Config {
+    style: String,
+    width: usize,
+    themes: HashMap<String, Theme>,
+}
+
+impl Config {
+    fn default() -> Self {
+        let mut themes = HashMap::new();
+        themes.insert("glow-light".to_string(), Theme::glow_light());
+        themes.insert("glow-dark".to_string(), Theme::glow_dark());
+        Self { style: "glow-light".to_string(), width: 0, themes }
+    }
+
+    fn theme(self) -> io::Result<(Theme, usize)> {
+        let theme = self.themes.get(&self.style).cloned().ok_or_else(|| {
+            io::Error::new(io::ErrorKind::InvalidInput, format!("unknown md style: {}", self.style))
+        })?;
+        Ok((theme, self.width))
+    }
+}
+
+const PICKER_H1_FG: u8 = 228;
+const PICKER_H1_BG: u8 = 63;
 const RESET: &str = "\x1b[0m";
 const BOLD: &str = "\x1b[1m";
 const ITALIC: &str = "\x1b[3m";
@@ -23,13 +111,26 @@ const UNDERLINE: &str = "\x1b[4m";
 const DIM: &str = "\x1b[2m";
 
 fn main() {
+    let config = match load_config().and_then(Config::theme) {
+        Ok(config) => config,
+        Err(error) => {
+            eprintln!("md: {error}");
+            std::process::exit(2);
+        }
+    };
+    let (theme, configured_width) = config;
+    let width = if configured_width == 0 {
+        terminal_columns().unwrap_or(80) as usize
+    } else {
+        configured_width
+    };
     let args: Vec<String> = env::args().skip(1).collect();
     if args.iter().any(|arg| arg == "-h" || arg == "--help") {
         println!("Usage: md [FILE ...]\n\nRender Markdown and read it in a pager. Use - for standard input.\nWhen given a directory, select a Markdown file interactively.");
         return;
     }
     if args.iter().any(|arg| arg == "--version") {
-        println!("md 0.2.0");
+        println!("md 0.3.0");
         return;
     }
 
@@ -48,12 +149,69 @@ fn main() {
             std::process::exit(2);
         }
     };
-    let rendered = render_markdown(&input);
+    let rendered = render_markdown(&input, &theme, width);
 
     if let Err(error) = page(&rendered) {
         eprintln!("md: {error}");
         std::process::exit(1);
     }
+}
+
+fn load_config() -> io::Result<Config> {
+    let path = if let Ok(directory) = env::var("XDG_CONFIG_HOME") {
+        PathBuf::from(directory).join("md.yaml")
+    } else {
+        let home = env::var("HOME").unwrap_or_else(|_| ".".to_string());
+        PathBuf::from(home).join(".config/md.yaml")
+    };
+    if !path.exists() {
+        return Ok(Config::default());
+    }
+
+    let contents = fs::read_to_string(&path)?;
+    parse_config(&contents)
+}
+
+fn parse_config(contents: &str) -> io::Result<Config> {
+    let mut config = Config::default();
+    let mut in_styles = false;
+    let mut current_style: Option<String> = None;
+
+    for raw_line in contents.lines() {
+        let line = raw_line.split('#').next().unwrap_or("").trim_end();
+        if line.trim().is_empty() {
+            continue;
+        }
+        let indent = line.chars().take_while(|character| *character == ' ').count();
+        let content = line.trim();
+        if indent == 0 {
+            current_style = None;
+            if let Some(value) = content.strip_prefix("style:") {
+                config.style = value.trim().trim_matches(['"', '\'']).to_string();
+            } else if let Some(value) = content.strip_prefix("width:") {
+                config.width = value.trim().parse().map_err(|_| {
+                    io::Error::new(io::ErrorKind::InvalidInput, "md.yaml width must be an integer")
+                })?;
+            } else if content == "styles:" {
+                in_styles = true;
+            }
+            continue;
+        }
+        if in_styles && indent == 2 && content.ends_with(':') {
+            let name = content.trim_end_matches(':').trim().to_string();
+            config.themes.entry(name.clone()).or_insert_with(Theme::glow_light);
+            current_style = Some(name);
+            continue;
+        }
+        if in_styles && indent >= 4 {
+            if let (Some(name), Some((key, value))) = (current_style.as_ref(), content.split_once(':')) {
+                if let Some(theme) = config.themes.get_mut(name) {
+                    theme.set(key.trim(), value.trim());
+                }
+            }
+        }
+    }
+    Ok(config)
 }
 
 fn choose_paths(args: &[String]) -> io::Result<Option<Vec<String>>> {
@@ -90,7 +248,7 @@ fn read_input(paths: &[String]) -> io::Result<String> {
     Ok(combined)
 }
 
-fn render_markdown(input: &str) -> String {
+fn render_markdown(input: &str, theme: &Theme, width: usize) -> String {
     let mut output = String::with_capacity(input.len() + input.len() / 8);
     let mut paragraph: Vec<String> = Vec::new();
     let mut in_code = false;
@@ -100,98 +258,125 @@ fn render_markdown(input: &str) -> String {
         let trimmed = line.trim_start();
 
         if is_fence(trimmed) {
-            flush_paragraph(&mut paragraph, &mut output);
+            flush_paragraph(&mut paragraph, &mut output, theme, width);
             in_code = !in_code;
             continue;
         }
         if in_code {
-            output.push_str("  ");
-            output.push_str(&fg(CODE_BLOCK_FG));
-            output.push_str(line);
-            output.push_str(RESET);
-            output.push('\n');
+            let mut rendered = String::from("  ");
+            rendered.push_str(&fg(theme.code_block_fg));
+            rendered.push_str(line);
+            rendered.push_str(RESET);
+            push_line(&mut output, &rendered, theme);
             continue;
         }
         if line.trim().is_empty() {
-            flush_paragraph(&mut paragraph, &mut output);
-            if !output.ends_with("\n\n") && !output.is_empty() {
-                output.push('\n');
-            }
+            flush_paragraph(&mut paragraph, &mut output, theme, width);
+            push_line(&mut output, "", theme);
             continue;
         }
         if let Some((level, heading)) = heading(trimmed) {
-            flush_paragraph(&mut paragraph, &mut output);
-            if level == 1 {
-                output.push_str(&style(H1_FG, Some(H1_BG), true, false, false));
-                output.push(' ');
-                output.push_str(&render_inline(heading.trim(), H1_FG));
-                output.push(' ');
+            flush_paragraph(&mut paragraph, &mut output, theme, width);
+            let mut rendered = if level == 1 {
+                style(theme.h1_fg, Some(theme.h1_bg), true, false, false)
             } else {
-                output.push_str(&style(HEADING_FG, None, true, false, false));
-                output.push_str(&render_inline(heading.trim(), HEADING_FG));
+                style(theme.heading_fg, None, true, false, false)
+            };
+            if level == 1 {
+                rendered.push(' ');
+            } else {
+                // Glow keeps the Markdown heading marker for H2 through H6.
+                rendered.push_str(&"#".repeat(level));
+                rendered.push(' ');
             }
-            output.push_str(RESET);
-            output.push('\n');
+            rendered.push_str(&render_inline(heading.trim(), if level == 1 { theme.h1_fg } else { theme.heading_fg }, theme));
+            if level == 1 {
+                rendered.push(' ');
+            }
+            rendered.push_str(RESET);
+            push_line(&mut output, &rendered, theme);
             if level > 1 {
-                output.push('\n');
+                push_line(&mut output, "", theme);
             }
             continue;
         }
         if is_rule(trimmed) {
-            flush_paragraph(&mut paragraph, &mut output);
-            output.push_str(&fg(RULE_FG));
-            output.push_str("────────────────────────────────────────");
-            output.push_str(RESET);
-            output.push('\n');
+            flush_paragraph(&mut paragraph, &mut output, theme, width);
+            let rendered = format!("{}────────────────────────────────────────{}", fg(theme.rule_fg), RESET);
+            push_line(&mut output, &rendered, theme);
             continue;
         }
         if let Some(content) = list_item(trimmed) {
-            flush_paragraph(&mut paragraph, &mut output);
-            output.push_str(&fg(NORMAL_FG));
-            output.push_str(content.0);
-            output.push_str(&render_inline(content.1, NORMAL_FG));
-            output.push_str(RESET);
-            output.push('\n');
+            flush_paragraph(&mut paragraph, &mut output, theme, width);
+            let prefix_width = content.0.chars().count();
+            let available = width.saturating_sub(theme.margin_left + theme.margin_right + prefix_width).max(1);
+            for (index, chunk) in wrap_text(content.1, available).iter().enumerate() {
+                let prefix = if index == 0 {
+                    content.0.to_string()
+                } else {
+                    " ".repeat(prefix_width)
+                };
+                let rendered = format!("{}{}{}", fg(theme.normal_fg), prefix, render_inline(chunk, theme.normal_fg, theme));
+                push_line(&mut output, &format!("{}{}", rendered, RESET), theme);
+            }
             continue;
         }
         if let Some(content) = trimmed.strip_prefix("> ").or_else(|| trimmed.strip_prefix('>')) {
-            flush_paragraph(&mut paragraph, &mut output);
-            output.push_str(&fg(NORMAL_FG));
-            output.push_str(DIM);
-            output.push_str("│ ");
-            output.push_str(RESET);
-            output.push_str(&render_inline(content.trim(), NORMAL_FG));
-            output.push_str(RESET);
-            output.push('\n');
+            flush_paragraph(&mut paragraph, &mut output, theme, width);
+            let prefix_width = 2;
+            let available = width.saturating_sub(theme.margin_left + theme.margin_right + prefix_width).max(1);
+            for (index, chunk) in wrap_text(content.trim(), available).iter().enumerate() {
+                let prefix = if index == 0 { "│ " } else { "  " };
+                let rendered = format!("{}{}{}{}", fg(theme.normal_fg), DIM, prefix, render_inline(chunk, theme.normal_fg, theme));
+                push_line(&mut output, &format!("{}{}", rendered, RESET), theme);
+            }
             continue;
         }
         paragraph.push(line.trim().to_string());
     }
 
-    flush_paragraph(&mut paragraph, &mut output);
-    add_margins(&output)
+    flush_paragraph(&mut paragraph, &mut output, theme, width);
+    output
 }
 
-fn flush_paragraph(paragraph: &mut Vec<String>, output: &mut String) {
+fn flush_paragraph(paragraph: &mut Vec<String>, output: &mut String, theme: &Theme, width: usize) {
     if paragraph.is_empty() {
         return;
     }
     let joined = paragraph.join(" ");
-    output.push_str(&render_inline(&joined, NORMAL_FG));
-    output.push_str(RESET);
-    output.push('\n');
+    let available = width.saturating_sub(theme.margin_left + theme.margin_right).max(1);
+    for chunk in wrap_text(&joined, available) {
+        let rendered = format!("{}{}{}", fg(theme.normal_fg), render_inline(&chunk, theme.normal_fg, theme), RESET);
+        push_line(output, &rendered, theme);
+    }
     paragraph.clear();
 }
 
-fn add_margins(rendered: &str) -> String {
-    let mut output = String::with_capacity(rendered.len() + rendered.lines().count() * 2);
-    for line in rendered.split_inclusive('\n') {
-        output.push(' ');
-        output.push_str(line.trim_end_matches('\n'));
-        output.push(' ');
-        output.push('\n');
+fn push_line(output: &mut String, content: &str, theme: &Theme) {
+    output.push_str(&" ".repeat(theme.margin_left));
+    output.push_str(content);
+    output.push_str(&" ".repeat(theme.margin_right));
+    output.push('\n');
+}
+
+fn wrap_text(text: &str, width: usize) -> Vec<String> {
+    let mut lines = Vec::new();
+    let mut current = String::new();
+    for word in text.split_whitespace() {
+        if current.is_empty() {
+            current.push_str(word);
+        } else if current.chars().count() + 1 + word.chars().count() <= width {
+            current.push(' ');
+            current.push_str(word);
+        } else {
+            lines.push(std::mem::take(&mut current));
+            current.push_str(word);
+        }
     }
-    output
+    if !current.is_empty() || lines.is_empty() {
+        lines.push(current);
+    }
+    lines
 }
 
 fn fg(color: u8) -> String {
@@ -251,17 +436,29 @@ fn list_item(line: &str) -> Option<(&str, &str)> {
     None
 }
 
-fn render_inline(input: &str, base_foreground: u8) -> String {
+fn underscore_in_word(input: &str, index: usize) -> bool {
+    let previous = input[..index].chars().next_back();
+    let next = input[index + 1..].chars().next();
+    previous.is_some_and(|character| character.is_alphanumeric())
+        && next.is_some_and(|character| character.is_alphanumeric())
+}
+
+fn render_inline(input: &str, base_foreground: u8, theme: &Theme) -> String {
     let mut output = String::with_capacity(input.len() + 16);
     output.push_str(&fg(base_foreground));
     let mut index = 0;
     while index < input.len() {
         let rest = &input[index..];
         if rest.starts_with("**") || rest.starts_with("__") {
+            if rest.starts_with("__") && underscore_in_word(input, index) {
+                output.push_str("__");
+                index += 2;
+                continue;
+            }
             let marker = &input[index..index + 2];
             if let Some(end) = input[index + 2..].find(marker) {
                 output.push_str(BOLD);
-                output.push_str(&render_inline(&input[index + 2..index + 2 + end], base_foreground));
+                output.push_str(&render_inline(&input[index + 2..index + 2 + end], base_foreground, theme));
                 output.push_str(&restore(base_foreground));
                 index += end + 4;
             } else {
@@ -272,7 +469,7 @@ fn render_inline(input: &str, base_foreground: u8) -> String {
         }
         if rest.starts_with('`') {
             if let Some(end) = input[index + 1..].find('`') {
-                output.push_str(&style(INLINE_CODE_FG, Some(INLINE_CODE_BG), false, false, false));
+                output.push_str(&style(theme.inline_code_fg, Some(theme.inline_code_bg), false, false, false));
                 output.push(' ');
                 output.push_str(&input[index + 1..index + 1 + end]);
                 output.push(' ');
@@ -286,9 +483,9 @@ fn render_inline(input: &str, base_foreground: u8) -> String {
                 let close = index + 1 + close;
                 if let Some(end) = input[close + 2..].find(')') {
                     let end = close + 2 + end;
-                    output.push_str(&style(LINK_TEXT_FG, None, true, false, true));
+                    output.push_str(&style(theme.link_text_fg, None, true, false, true));
                     output.push_str(&input[index + 1..close]);
-                    output.push_str(&style(LINK_FG, None, false, false, true));
+                    output.push_str(&style(theme.link_fg, None, false, false, true));
                     output.push_str(" <");
                     output.push_str(&input[close + 2..end]);
                     output.push_str(">");
@@ -299,6 +496,11 @@ fn render_inline(input: &str, base_foreground: u8) -> String {
             }
         }
         if rest.starts_with('*') || rest.starts_with('_') {
+            if rest.starts_with('_') && underscore_in_word(input, index) {
+                output.push('_');
+                index += 1;
+                continue;
+            }
             let marker = &input[index..index + 1];
             if let Some(end) = input[index + 1..].find(marker) {
                 output.push_str(ITALIC);
@@ -418,7 +620,7 @@ fn draw_picker(files: &[PathBuf], selected: usize) -> io::Result<()> {
 
     let mut screen = String::from("\x1b[2J\x1b[H");
     screen.push(' ');
-    screen.push_str(&style(H1_FG, Some(H1_BG), true, false, false));
+    screen.push_str(&style(PICKER_H1_FG, Some(PICKER_H1_BG), true, false, false));
     screen.push_str(" md ");
     screen.push_str(RESET);
     screen.push_str(" select a Markdown file\n\n");
@@ -439,6 +641,17 @@ fn draw_picker(files: &[PathBuf], selected: usize) -> io::Result<()> {
     screen.push_str(RESET);
     print!("{screen}");
     io::stdout().flush()
+}
+
+fn terminal_columns() -> Option<u16> {
+    if let Ok(columns) = env::var("COLUMNS") {
+        if let Ok(columns) = columns.parse() {
+            return Some(columns);
+        }
+    }
+    let output = Command::new("stty").args(["-F", "/dev/tty", "size"]).output().ok()?;
+    let text = String::from_utf8_lossy(&output.stdout);
+    text.split_whitespace().nth(1)?.parse().ok()
 }
 
 fn terminal_rows() -> Option<u16> {

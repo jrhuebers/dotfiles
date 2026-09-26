@@ -1,17 +1,37 @@
 # md
 
 `md` is a small compiled Markdown viewer for terminal use. It renders Markdown
-and sends it to a pager; it has no Glow or configuration-file dependency.
+and sends it to a pager; it has no Glow dependency.
 
-The renderer hardcodes Glow's LightStyle colors, one space of left and right
-margin, no mouse handling, pager mode, no file browser when files are supplied,
-and reflow of single newlines while retaining paragraph breaks. The pager is
-`$PAGER`, or `less -R` when `$PAGER` is unset.
+The configuration is `~/.config/md.yaml`, normally a symlink to the tracked
+`.config/md.yaml`. It contains named style blocks and a root-level `style`
+selection. The included `glow-light` and `glow-dark` styles use Glow/Glamour's
+matching colors. `margin_left` and `margin_right` are independently
+configurable; both default to one space.
+
+`width: 0` follows the terminal width. Paragraphs are reflowed to that width,
+and wrapped list continuation lines are indented beneath their bullet. Single
+newlines are reflowed while blank-line paragraph breaks remain.
+
+Pager mode is always used: `$PAGER`, or `less -R` when `$PAGER` is unset. There
+is no mouse handling or TUI document viewer.
 
 When given a directory—or no argument from an interactive terminal—`md` opens a
 small keyboard file picker. It recursively lists visible Markdown files while
 skipping hidden files and directories. Use arrow keys or `j`/`k`, press Enter
 to open a file, or `q` to quit.
+
+## Configuration
+
+Select a style in `~/.config/md.yaml`:
+
+```yaml
+style: glow-dark
+width: 0
+```
+
+Add or adjust a style block under `styles:` using the color fields and margin
+fields shown in the tracked example.
 
 ## Build and install on Linux
 
@@ -21,6 +41,13 @@ library and builds to a native user-local binary:
 ```sh
 mkdir -p ~/.local/bin
 rustc -O -C strip=symbols ~/dotfiles/tools/md.rs -o ~/.local/bin/md
+```
+
+Deploy the tracked configuration:
+
+```sh
+mkdir -p ~/.config
+ln -sfn ~/dotfiles/.config/md.yaml ~/.config/md.yaml
 ```
 
 Keep `~/.local/bin` in `PATH`. Verify the installation with:
@@ -38,5 +65,5 @@ more Markdown paths; `-` reads standard input.
 ## Removal
 
 ```sh
-rm -f ~/.local/bin/md
+rm -f ~/.local/bin/md ~/.config/md.yaml
 ```
