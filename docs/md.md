@@ -1,13 +1,17 @@
 # md
 
-`md` is a small compiled Markdown viewer for terminal use. It deliberately has
-only one display mode: render Markdown and send it to a pager. It does not use
-Glow, a TUI, or a configuration file.
+`md` is a small compiled Markdown viewer for terminal use. It renders Markdown
+and sends it to a pager; it has no Glow or configuration-file dependency.
 
-The renderer hardcodes the settings previously used for Glow: light terminal
-styling, no mouse handling, pager mode enabled, no file browser, and reflow of
-single newlines while retaining paragraph breaks. The pager is `$PAGER`, or
-`less -R` when `$PAGER` is unset.
+The renderer hardcodes Glow's LightStyle colors, one space of left and right
+margin, no mouse handling, pager mode, no file browser when files are supplied,
+and reflow of single newlines while retaining paragraph breaks. The pager is
+`$PAGER`, or `less -R` when `$PAGER` is unset.
+
+When given a directory—or no argument from an interactive terminal—`md` opens a
+small keyboard file picker. It recursively lists visible Markdown files while
+skipping hidden files and directories. Use arrow keys or `j`/`k`, press Enter
+to open a file, or `q` to quit.
 
 ## Build and install on Linux
 
@@ -24,6 +28,7 @@ Keep `~/.local/bin` in `PATH`. Verify the installation with:
 ```sh
 md --version
 md README.md
+md .
 printf '# Heading\n\nMarkdown from stdin.\n' | md -
 ```
 
