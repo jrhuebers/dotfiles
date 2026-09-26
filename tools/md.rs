@@ -130,7 +130,7 @@ fn main() {
         return;
     }
     if args.iter().any(|arg| arg == "--version") {
-        println!("md 0.3.0");
+        println!("md 0.3.1");
         return;
     }
 
@@ -295,9 +295,6 @@ fn render_markdown(input: &str, theme: &Theme, width: usize) -> String {
             }
             rendered.push_str(RESET);
             push_line(&mut output, &rendered, theme);
-            if level > 1 {
-                push_line(&mut output, "", theme);
-            }
             continue;
         }
         if is_rule(trimmed) {
@@ -615,7 +612,8 @@ fn read_key(tty: &mut File) -> io::Result<Key> {
 fn draw_picker(files: &[PathBuf], selected: usize) -> io::Result<()> {
     let rows = terminal_rows().unwrap_or(24) as usize;
     let visible = rows.saturating_sub(5).max(1);
-    let first = selected.saturating_sub(visible - 1).min(files.len() - visible.min(files.len()));
+    let max_first = files.len().saturating_sub(visible);
+    let first = selected.saturating_sub(visible.saturating_sub(1)).min(max_first);
     let last = (first + visible).min(files.len());
 
     let mut screen = String::from("\x1b[2J\x1b[H");
@@ -649,15 +647,13 @@ fn terminal_columns() -> Option<u16> {
             return Some(columns);
         }
     }
-    let output = Command::new("stty").args(["-F", "/dev/tty", "size"]).output().ok()?;
-    let text = String::from_utf8_lossy(&output.stdout);
-    text.split_whitespace().nth(1)?.parse().ok()
+    let output = Command::new("stty").args(["-F", "/dev/tty", "columns"]).output().ok()?;
+    String::from_utf8_lossy(&output.stdout).trim().parse().ok()
 }
 
 fn terminal_rows() -> Option<u16> {
-    let output = Command::new("stty").args(["-F", "/dev/tty", "size"]).output().ok()?;
-    let text = String::from_utf8_lossy(&output.stdout);
-    text.split_whitespace().next()?.parse().ok()
+    let output = Command::new("stty").args(["-F", "/dev/tty", "rows"]).output().ok()?;
+    String::from_utf8_lossy(&output.stdout).trim().parse().ok()
 }
 
 fn stty(arguments: &[&str]) -> io::Result<String> {

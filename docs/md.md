@@ -5,8 +5,8 @@ and sends it to a pager; it has no Glow dependency.
 
 The configuration is `~/.config/md.yaml`, normally a symlink to the tracked
 `.config/md.yaml`. It contains named style blocks and a root-level `style`
-selection. The included `glow-light` and `glow-dark` styles use Glow/Glamour's
-matching colors. `margin_left` and `margin_right` are independently
+selection. The included `md-light`, `glow-light`, and `glow-dark` styles use
+Glow/Glamour colors; `md-light` uses a black code-block foreground. `margin_left` and `margin_right` are independently
 configurable; both default to one space.
 
 `width: 0` follows the terminal width. Paragraphs are reflowed to that width,
