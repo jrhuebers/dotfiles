@@ -133,7 +133,7 @@ fn main() {
         return;
     }
     if args.iter().any(|arg| arg == "--version") {
-        println!("md 0.3.2");
+        println!("md 0.3.3");
         return;
     }
 
@@ -470,9 +470,7 @@ fn render_inline(input: &str, base_foreground: u8, theme: &Theme) -> String {
         if rest.starts_with('`') {
             if let Some(end) = input[index + 1..].find('`') {
                 output.push_str(&style(theme.inline_code_fg, Some(theme.inline_code_bg), false, false, false));
-                output.push(' ');
                 output.push_str(&input[index + 1..index + 1 + end]);
-                output.push(' ');
                 output.push_str(&restore(base_foreground));
                 index += end + 2;
                 continue;
