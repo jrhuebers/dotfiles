@@ -16,5 +16,6 @@ export EDITOR=vim
 export VISUAL=vim
 
 alias ls='ls --color=auto'
+alias mdclean='mdformat --wrap no'
 alias squeue='squeue --format="%.18i %.9P %.30j %.8u %.2t %.10M %.6D %R"'
 alias attach='tmux -S "$HOME/.tmux/tmp/default" attach'

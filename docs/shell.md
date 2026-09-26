@@ -7,8 +7,8 @@ in [`device-profiles.md`](device-profiles.md) before deploying either one.
 
 `.bashrc` is a portable Bash configuration. It adds `$HOME/.local/bin` to
 `PATH` if needed, configures the prompt, enables colored `ls` output, and
-provides generic tmux attachment and `squeue` display aliases. It does not
-override `HOME` or assume a shared filesystem.
+provides generic Markdown cleanup (`mdclean`), tmux attachment, and `squeue`
+display aliases. It does not override `HOME` or assume a shared filesystem.
 
 From a Linux checkout, install it with:
 
@@ -21,7 +21,7 @@ After installation, verify it with:
 
 ```sh
 bash -n ~/.bashrc
-bash -ic 'printf "%s\\n" "$PATH"; alias ls attach squeue'
+bash -ic 'printf "%s\\n" "$PATH"; alias ls mdclean attach squeue'
 ```
 
 Start a new Bash login session to use it. Verify that the configured path is
