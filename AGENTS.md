@@ -28,6 +28,7 @@ documentation belongs in `~/admin-docs/`, not in this repository.
 - [`docs/open-in-cursor.md`](docs/open-in-cursor.md) — macOS Finder service for opening files and folders in Cursor.
 - [`docs/pi-simple-web-tools.md`](docs/pi-simple-web-tools.md) — Pi web-search/fetch extension setup with Exa authentication.
 - [`docs/linux-keyboard-layout.md`](docs/linux-keyboard-layout.md) — User-level Linux GNOME/Wayland XKB layout for German characters on a British keyboard.
+- [`docs/md.md`](docs/md.md) — Standalone `md` Markdown viewer, its replacement of Glow, installation, pager selection, and verification.
 - [`docs/pi.md`](docs/pi.md) — Pi agent configuration snapshots, deployment, refresh, and verification.
 - [`docs/shell.md`](docs/shell.md) — Cluster Bash and personal macOS Zsh startup profiles.
 - [`docs/ssh.md`](docs/ssh.md) — Personal SSH client configuration deployment and verification.
