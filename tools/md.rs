@@ -134,7 +134,7 @@ fn main() {
         return;
     }
     if args.iter().any(|arg| arg == "--version") {
-        println!("md 0.4.1");
+        println!("md 0.4.2");
         return;
     }
 
@@ -260,6 +260,7 @@ fn render_markdown(input: &str, theme: &Theme, width: usize) -> String {
     let mut output = String::with_capacity(input.len() + input.len() / 8);
     let mut paragraph: Vec<String> = Vec::new();
     let mut in_code = false;
+    let mut suppress_blank = false;
 
     for raw_line in input.lines() {
         let line = raw_line.strip_suffix('\r').unwrap_or(raw_line);
@@ -280,9 +281,14 @@ fn render_markdown(input: &str, theme: &Theme, width: usize) -> String {
         }
         if line.trim().is_empty() {
             flush_paragraph(&mut paragraph, &mut output, theme, width);
-            push_line(&mut output, "", theme);
+            if suppress_blank {
+                suppress_blank = false;
+            } else {
+                push_line(&mut output, "", theme);
+            }
             continue;
         }
+        suppress_blank = false;
         if let Some((level, heading)) = heading(trimmed) {
             flush_paragraph(&mut paragraph, &mut output, theme, width);
             let mut rendered = if level == 1 {
@@ -303,6 +309,8 @@ fn render_markdown(input: &str, theme: &Theme, width: usize) -> String {
             }
             rendered.push_str(RESET);
             push_line(&mut output, &rendered, theme);
+            push_line(&mut output, "", theme);
+            suppress_blank = true;
             continue;
         }
         if is_rule(trimmed) {
@@ -311,17 +319,18 @@ fn render_markdown(input: &str, theme: &Theme, width: usize) -> String {
             push_line(&mut output, &rendered, theme);
             continue;
         }
-        if let Some(content) = list_item(trimmed) {
+        if let Some((depth, marker, content)) = list_item(line) {
             flush_paragraph(&mut paragraph, &mut output, theme, width);
-            let prefix_width = content.0.chars().count();
+            let prefix = format!("{}{}", "  ".repeat(depth), marker);
+            let prefix_width = prefix.chars().count();
             let available = width.saturating_sub(theme.margin_left + theme.margin_right + prefix_width).max(1);
-            for (index, chunk) in wrap_text(content.1, available).iter().enumerate() {
-                let prefix = if index == 0 {
-                    content.0.to_string()
+            for (index, chunk) in wrap_text(content, available).iter().enumerate() {
+                let line_prefix = if index == 0 {
+                    prefix.clone()
                 } else {
                     " ".repeat(prefix_width)
                 };
-                let rendered = format!("{}{}{}", fg(theme.normal_fg), prefix, render_inline(chunk, theme.normal_fg, theme));
+                let rendered = format!("{}{}{}", fg(theme.normal_fg), line_prefix, render_inline(chunk, theme.normal_fg, theme));
                 push_line(&mut output, &format!("{}{}", rendered, RESET), theme);
             }
             continue;
@@ -430,13 +439,16 @@ fn is_rule(line: &str) -> bool {
             || compact.chars().all(|character| character == '_'))
 }
 
-fn list_item(line: &str) -> Option<(&str, &str)> {
-    if let Some(content) = line.strip_prefix("- ").or_else(|| line.strip_prefix("* ")).or_else(|| line.strip_prefix("+ ")) {
-        return Some(("• ", content));
+fn list_item(line: &str) -> Option<(usize, &str, &str)> {
+    let indent = line.chars().take_while(|character| *character == ' ' || *character == '\t').count();
+    let content = &line[indent..];
+    let depth = indent.saturating_add(1) / 2;
+    if let Some(item) = content.strip_prefix("- ").or_else(|| content.strip_prefix("* ")).or_else(|| content.strip_prefix("+ ")) {
+        return Some((depth, "• ", item));
     }
-    let dot = line.find(". ")?;
-    if dot > 0 && line[..dot].chars().all(|character| character.is_ascii_digit()) {
-        return Some((&line[..dot + 2], &line[dot + 2..]));
+    let dot = content.find(". ")?;
+    if dot > 0 && content[..dot].chars().all(|character| character.is_ascii_digit()) {
+        return Some((depth, &content[..dot + 2], &content[dot + 2..]));
     }
     None
 }
