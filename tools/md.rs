@@ -133,7 +133,7 @@ fn main() {
         return;
     }
     if args.iter().any(|arg| arg == "--version") {
-        println!("md 0.3.4");
+        println!("md 0.3.5");
         return;
     }
 
@@ -675,7 +675,7 @@ fn draw_picker(files: &[PathBuf], selected: usize, first_visible: &mut usize, sc
     screen.push_str(&style(PICKER_H1_FG, Some(PICKER_H1_BG), true, false, false));
     screen.push_str(" md ");
     screen.push_str(RESET);
-    screen.push_str(" select a Markdown file  ");
+    screen.push_str(" select a Markdown file  │  ");
     screen.push_str(&format!("{} file{} found", files.len(), if files.len() == 1 { "" } else { "s" }));
     if scanning {
         screen.push_str(" (searching…)");
