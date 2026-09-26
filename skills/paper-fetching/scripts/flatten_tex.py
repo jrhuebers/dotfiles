@@ -35,6 +35,32 @@ def strip_comments(text: str) -> str:
     return "".join(out)
 
 
+def collapse_blank_lines(text: str) -> str:
+    """Reduce outside-code runs of blank lines to one; preserve verbatim contents."""
+    out = []
+    verbatim = None
+    blank_lines = 0
+    for line in text.splitlines(keepends=True):
+        was_verbatim = verbatim is not None
+        for match in TOKEN.finditer(line):
+            token = match.group()
+            if token.startswith(r"\begin{") and match.group(1) in VERBATIM and verbatim is None:
+                verbatim = match.group(1)
+            elif token.startswith(r"\end{") and match.group(1) == verbatim:
+                verbatim = None
+        if was_verbatim or verbatim is not None:
+            blank_lines = 0
+            out.append(line)
+        elif not line.strip():
+            blank_lines += 1
+            if blank_lines <= 1:
+                out.append(line)
+        else:
+            blank_lines = 0
+            out.append(line)
+    return "".join(out)
+
+
 def find_main(root: Path) -> Path:
     candidates = []
     for path in root.rglob("*.tex"):
@@ -61,10 +87,10 @@ def flatten(root: Path, aid: str, version: str, output: Path) -> Path:
     warnings = run.stderr.decode(errors="replace")
     if re.search(r"(?:not found|cannot open|no such file|can't open)", warnings, re.I):
         raise RuntimeError(f"latexpand unresolved input: {warnings[:1000]}")
-    clean = strip_comments(run.stdout.decode("utf-8", errors="replace"))
+    clean = collapse_blank_lines(strip_comments(run.stdout.decode("utf-8", errors="replace")))
     if not DOC.search(clean) or len(clean) < 200:
         raise ValueError("flattened LaTeX is empty or missing documentclass")
-    header = (f"% arXiv {aid} (latest: {version}) | flattened+comment-stripped by latexpand --keep-comments + flatten_tex.py\n"
+    header = (f"% arXiv {aid} (latest: {version}) | flattened+comments-stripped+blank-lines-collapsed by latexpand --keep-comments + flatten_tex.py\n"
               f"% main: {main.relative_to(root)} | fetched: {date.today().isoformat()}\n")
     output.write_text(header + clean, encoding="utf-8")
     return main

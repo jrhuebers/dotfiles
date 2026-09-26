@@ -11,7 +11,7 @@ import urllib.error
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from fetch_papers import extract_source, fetch_one
-from flatten_tex import find_main, flatten, strip_comments
+from flatten_tex import collapse_blank_lines, find_main, flatten, strip_comments
 from qa_corpus import check_paper
 
 
@@ -19,6 +19,12 @@ class PipelineTests(unittest.TestCase):
     def test_comments(self):
         text = "a% drop\n\\% keep\n\\\\% drop\n\\begin{verbatim}\nraw%keep\n\\end{verbatim}\nb%drop"
         self.assertEqual(strip_comments(text), "a\n\\% keep\n\\\\\n\\begin{verbatim}\nraw%keep\n\\end{verbatim}\nb")
+
+    def test_collapse_blank_lines_preserves_verbatim(self):
+        self.assertEqual(collapse_blank_lines("A\n\n\n\n\nB\n"), "A\n\nB\n")
+        text = "before\n\n\n\\begin{verbatim}\n\n\n\nraw%line\n\\end{verbatim}\n\n\nend\n"
+        expected = "before\n\n\\begin{verbatim}\n\n\n\nraw%line\n\\end{verbatim}\n\nend\n"
+        self.assertEqual(collapse_blank_lines(text), expected)
 
     def test_main_largest(self):
         with tempfile.TemporaryDirectory() as d:
