@@ -20,7 +20,7 @@ For Linux x86_64, install the official release archive after verifying its
 published SHA-256 checksum:
 
 ```sh
-version=0.6.16
+version=0.6.39
 archive="md-v${version}-x86_64-unknown-linux-gnu.tar.gz"
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
