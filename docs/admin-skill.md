@@ -24,7 +24,10 @@ Then complete `~/.pi/agent/skills/admin/SKILL.md` **on that machine**:
    package/service, network, storage, and local-documentation facts.
 2. Keep only the shared-cluster or personal-device/server section that applies.
 3. Add the machine's safe operational boundaries, routine checks, and rollback
-   procedures.
+   procedures. For a shared cluster, explicitly distinguish substantial or
+   intensive workloads that must use Slurm from short lightweight operations
+   that can use an existing user allocation; prohibit intensive work on the
+   shared login node and avoid nested job submissions for routine tasks.
 4. Remove the provisioning-template notice and change the front-matter
    description to describe the completed local skill.
 

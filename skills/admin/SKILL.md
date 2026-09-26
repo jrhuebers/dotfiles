@@ -33,8 +33,12 @@ description: TEMPLATE — complete this skill during machine provisioning with t
 
 - **Cluster role:** [login/access host, compute host, controller, or other —
   verified, not inferred from Slurm client commands]
-- **Scheduler policy:** [how work is submitted, permitted read-only checks,
-  and prohibited scheduler or other-user actions]
+- **Scheduler policy:** Submit substantial or intensive work through Slurm;
+  do not run intensive CPU, memory, or GPU operations on a shared login node.
+  Lightweight, short operations may run in an existing user-owned allocation
+  (including mission-control); do not submit a nested job just because Slurm
+  is available. Specify local submission, read-only check, and prohibited
+  scheduler or other-user actions.
 - **Service-change policy:** [authorization and documented procedure required
   before system-wide changes]
 - **Package policy:** [user-local versus system package rules]
