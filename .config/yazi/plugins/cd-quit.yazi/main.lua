@@ -8,6 +8,7 @@ function M:setup()
 	end)
 end
 
+--- @sync entry
 function M:entry()
 	local h = cx.active.current.hovered
 	if not h then return end
