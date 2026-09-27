@@ -26,7 +26,8 @@ def build_index(root: Path) -> None:
         authors = one_line(record["authors"])
         lines.append(f"| [{aid}]({directory}/{aid}.pdf) | {version} | {title} | {authors} | `{directory}/` |")
     for record, directory in rows:
-        lines.extend(["", f"## {one_line(record['arxiv_id'])}: {one_line(record['title'])}", "", f"- directory: `{directory}/`", f"- authors: {one_line(record['authors'])}", f"- version: {one_line(record['version'])}", "- abstract:", record.get("abstract", "").strip() or "_(no abstract recorded)_"])
+        abstract = one_line(record.get("abstract", "").strip() or "_(no abstract recorded)_")
+        lines.extend(["", f"## {one_line(record['arxiv_id'])}: {one_line(record['title'])}", "", f"- directory: `{directory}/`", f"- authors: {one_line(record['authors'])}", f"- version: {one_line(record['version'])}", f"- abstract: {abstract}"])
     (root / "INDEX.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"{root}: {len(rows)} papers -> {root / 'INDEX.md'}")
 
