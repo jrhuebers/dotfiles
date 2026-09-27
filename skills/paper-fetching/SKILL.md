@@ -1,20 +1,16 @@
 ---
 name: paper-fetching
-description: Fetch current arXiv PDFs and original LaTeX, flatten source for reading, and verify a paper corpus.
-author: huebers
-platforms: [linux, macos]
+description: Fetch arXiv PDFs and LaTeX sources into a verified, readable paper corpus. Use when collecting papers for research.
 ---
 
-# Paper Fetching
+# Paper fetching
 
-Use for source-backed paper collections. From this skill's directory, with Python 3 and `latexpand` (TeX Live or CTAN) installed:
+With Python 3 and `latexpand` installed, run from this skill's directory:
 
 ```bash
 python3 scripts/fetch_papers.py /path/to/papers 1706.03762 1810.04805
 ```
 
-This single command fetches and flattens each paper, checks every paper in the destination corpus, and regenerates `FIGURES.md` for all available `.tex` files. If a fetch or QA check fails, it exits nonzero and does not rebuild the index; successfully fetched files remain for inspection. For checking or reindexing an existing corpus without fetching, run `python3 scripts/qa_corpus.py /path/to/papers` or `python3 scripts/figindex.py /path/to/papers` separately.
+Use bare arXiv IDs. The command fetches the latest PDF and original source, flattens and cleans the LaTeX, verifies the destination corpus, and builds `FIGURES.md` from figure captions. Each source-backed paper gets `arxiv_<id>.pdf`, `arxiv_<id>.tex`, and `src/<id>.tar.gz` (or the original single-file source format). If source is unavailable, it keeps the PDF with a `.source-unavailable.txt` marker.
 
-The fetcher accepts bare modern arXiv IDs, checks titles/authors/version against the arXiv API, downloads the latest PDF and original source (polite ~3-second request spacing), safely extracts it in temporary staging, finds the largest real `\documentclass` main file, then runs `latexpand --keep-comments` from its directory (the historical `--empty-comments` destroys literal `%` inside verbatim). `flatten_tex.py` strips comments, reduces repeated blank lines to a single blank line outside verbatim/listing environments, preserves escaped `\%` and code whitespace inside those environments, and stamps provenance. Fetch refuses to overwrite existing papers; use a new directory to refresh and compare versions. When arXiv returns 404, PDF, or PS instead of LaTeX source, it keeps the PDF with an explicit `arxiv_<id>.source-unavailable.txt` marker; other download/processing failures fail rather than silently fabricating `.tex`.
-
-Each paper yields `arxiv_<id>.pdf`, `arxiv_<id>.tex`, and `src/<id>.tar.gz` (or `.tex.gz`/`.tex` for single-file originals). Original source is canonical; flattened TeX is the primary LLM reading copy, PDF is visual ground truth. The figure index makes captions searchable but is not image OCR. Stage before copying into a project's normally gitignored `papers/`; verify the title of each PDF against API metadata before citing. Do not infer authors or IDs from memory. GPU OCR is optional and belongs in a scheduled Slurm job, not this fetch workflow.
+The command never overwrites an existing paper. A fetch or QA failure exits nonzero and leaves successful downloads for inspection without rebuilding the figure index. For existing files only, run `scripts/qa_corpus.py` or `scripts/figindex.py` separately.
