@@ -13,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from fetch_papers import extract_source, fetch_one, main as fetch_main
 from flatten_tex import collapse_blank_lines, find_main, flatten, strip_comments
 from qa_corpus import check_paper
+from refindex import build_index
 
 
 class PipelineTests(unittest.TestCase):
@@ -88,10 +89,14 @@ class PipelineTests(unittest.TestCase):
         archive = io.BytesIO()
         with tarfile.open(fileobj=archive, mode="w:gz") as tf:
             tex = ("\\documentclass{article}\n\\begin{document}\n" + "paper text " * 60 +
-                   "\n\\begin{figure}\\includegraphics{plot.pdf}\\caption{Test caption}\\end{figure}\n\\end{document}\n").encode()
+                   "\n\\cite{demo2026}\\bibliography{refs}\n\\begin{figure}\\includegraphics{plot.pdf}\\caption{Test caption}\\end{figure}\n\\end{document}\n").encode()
             entry = tarfile.TarInfo("main.tex")
             entry.size = len(tex)
             tf.addfile(entry, io.BytesIO(tex))
+            bbl = b"\\begin{thebibliography}{1}\n\\bibitem{demo2026} Demo Author. Demo title. 2026.\n\\end{thebibliography}\n"
+            entry = tarfile.TarInfo("refs.bbl")
+            entry.size = len(bbl)
+            tf.addfile(entry, io.BytesIO(bbl))
         ids = ("1706.03762", "1810.04805")
         with tempfile.TemporaryDirectory() as d:
             with patch("fetch_papers.metadata", side_effect=[(f"{aid}v1", "Title", "Author") for aid in ids]):
@@ -102,9 +107,12 @@ class PipelineTests(unittest.TestCase):
             for aid in ids:
                 self.assertEqual(check_paper(root, aid, f"{aid}v1"), [])
             index = (root / "FIGURES.md").read_text()
+            references = (root / "REFERENCES.md").read_text()
             self.assertIn("Test caption", index)
             self.assertIn("## 1706.03762", index)
             self.assertIn("## 1810.04805", index)
+            self.assertIn("`demo2026`", references)
+            self.assertIn("Demo title", references)
 
     def test_one_command_failure_is_nonzero_and_does_not_index(self):
         with tempfile.TemporaryDirectory() as d:
@@ -117,6 +125,23 @@ class PipelineTests(unittest.TestCase):
             self.assertEqual(stopped.exception.code, 1)
             self.assertEqual(check_paper(Path(d), ids[0], f"{ids[0]}v1"), [])
             self.assertFalse((Path(d) / "FIGURES.md").exists())
+
+    def test_reference_index_falls_back_to_bib(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            (root / "arxiv_1706.03762.tex").write_text(r"\documentclass{article}\bibliography{refs}")
+            (root / "src").mkdir()
+            archive = io.BytesIO()
+            with tarfile.open(fileobj=archive, mode="w:gz") as tf:
+                bib = b"@article{bibkey, author={A. Author}, title={Bib title}, year={2026}}\n"
+                entry = tarfile.TarInfo("refs.bib")
+                entry.size = len(bib)
+                tf.addfile(entry, io.BytesIO(bib))
+            (root / "src" / "1706.03762.tar.gz").write_bytes(archive.getvalue())
+            build_index(str(root))
+            references = (root / "REFERENCES.md").read_text()
+            self.assertIn("`bibkey`", references)
+            self.assertIn("Bib title", references)
 
     def test_bad_id_and_missing_qa(self):
         with tempfile.TemporaryDirectory() as d:

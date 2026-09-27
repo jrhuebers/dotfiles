@@ -183,7 +183,9 @@ def main() -> None:
     if not failed and any(args.outdir.glob("arxiv_*.tex")):
         # Regenerate one index covering both new and existing TeX papers.
         index_script = Path(__file__).with_name("figindex.py")
+        references_script = Path(__file__).with_name("refindex.py")
         subprocess.run([sys.executable, str(index_script), str(args.outdir)], check=True)
+        subprocess.run([sys.executable, str(references_script), str(args.outdir)], check=True)
     if failed:
         raise SystemExit(1)
 
