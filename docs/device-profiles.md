@@ -44,6 +44,7 @@ node.
 | Yazi | **on** | **on** | **on** | **on** | Install Yazi on every supported profile and deploy the shared configuration. See [`yazi.md`](yazi.md). |
 | bat | **on** | **on** | **on** | **on** | Install the terminal viewer on every supported profile. See [`bat.md`](bat.md). |
 | tiktoken | **on** | **on** | **on** | **on** | Install the user-local Python package on every supported machine where Python is available. See [`tiktoken.md`](tiktoken.md). |
+| latexpand | **on (required)** | optional | optional | optional | Install it through user-local TeX Live on every compute-cluster setup. See [`latexpand.md`](latexpand.md). |
 | VS Code settings | **off** | optional | optional | **off** | `VSCode/settings.json` is a GUI workstation configuration. It may be used by a local editor client connected to a cluster. See [`vscode.md`](vscode.md). |
 | Zed settings, tasks, themes | **off** | optional | optional | **off** | `zed/` is a GUI workstation configuration. Its default agent is local Ollama, which must not be assumed on a cluster or server. See [`zed.md`](zed.md). |
 | Linux keyboard layout | **off** | optional for GNOME/Wayland | **off** | **off** | Install `.config/xkb/symbols/custom` only on a Linux graphical machine using the documented desktop integration. See [`linux-keyboard-layout.md`](linux-keyboard-layout.md). |
