@@ -6,6 +6,8 @@ import tarfile
 from datetime import date
 from pathlib import Path
 
+from qa_corpus import source_files
+
 BIBITEM = re.compile(r"\\bibitem(?:\[[^]]*\])?\{([^}]+)\}")
 BIBENTRY = re.compile(r"@[A-Za-z]+\s*\{\s*([^,\s]+)\s*,")
 
@@ -59,8 +61,9 @@ def selected_bbls(tex, names):
 
 
 def read_archive_sources(paper, aid, tex):
-    archive = paper / f"{aid}.tar.gz"
-    if not archive.is_file():
+    source = source_files(paper, aid)
+    archive = source[0] if len(source) == 1 and source[0].name.endswith(".tar.gz") else None
+    if archive is None:
         return [], []
     entries = []
     available = []

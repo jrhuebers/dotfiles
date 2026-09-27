@@ -11,7 +11,7 @@ import urllib.error
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from fetch_papers import extract_source, fetch_one, main as fetch_main
-from figindex import strip_tex_noise
+from figindex import build_index as build_figure_index, strip_tex_noise
 from flatten_tex import collapse_blank_lines, find_main, flatten, strip_comments
 from qa_corpus import check_paper
 from refindex import build_index
@@ -89,6 +89,58 @@ class PipelineTests(unittest.TestCase):
             self.assertFalse((paper / "1706.03762.tex").exists())
             (paper / "source-unavailable.txt").write_text("arXiv 1706.03762v1 | source unavailable\n")
             self.assertTrue(check_paper(paper, "1706.03762", "1706.03762v7"))
+
+    def test_plain_tex_source_is_preserved_separately_from_flattened_tex(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            source = (b"\\documentclass{article}\n\\begin{document}\n" +
+                      b"plain source text " * 60 + b"\n\\end{document}\n")
+            with patch("fetch_papers.metadata", return_value=("1706.03762v1", "Title", ["Author"], "Abstract")):
+                with patch("fetch_papers.request", side_effect=[b"%PDF-" + b"x" * 12000, source]):
+                    fetch_one(root, "1706.03762")
+            paper = root / "1706.03762"
+            self.assertEqual(check_paper(paper, "1706.03762", "1706.03762v1"), [])
+            self.assertEqual((paper / "1706.03762.source.tex").read_bytes(), source)
+            self.assertTrue((paper / "1706.03762.tex").is_file())
+
+    def test_gzipped_single_tex_source_is_preserved(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            source = (b"\\documentclass{article}\n\\begin{document}\n" +
+                      b"compressed source text " * 60 + b"\n\\end{document}\n")
+            compressed = gzip.compress(source)
+            with patch("fetch_papers.metadata", return_value=("1706.03762v1", "Title", ["Author"], "Abstract")):
+                with patch("fetch_papers.request", side_effect=[b"%PDF-" + b"x" * 12000, compressed]):
+                    fetch_one(root, "1706.03762")
+            paper = root / "1706.03762"
+            self.assertEqual(check_paper(paper, "1706.03762", "1706.03762v1"), [])
+            self.assertEqual((paper / "1706.03762.tex.gz").read_bytes(), compressed)
+
+    def test_duplicate_fetch_is_rejected_without_mutating_existing_paper(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            source = (b"\\documentclass{article}\n\\begin{document}\n" +
+                      b"paper text " * 60 + b"\n\\end{document}\n")
+            with patch("fetch_papers.metadata", return_value=("1706.03762v1", "Title", ["Author"], "Abstract")):
+                with patch("fetch_papers.request", side_effect=[b"%PDF-" + b"x" * 12000, source]):
+                    fetch_one(root, "1706.03762")
+            paper = root / "1706.03762"
+            before = {path: path.read_bytes() for path in paper.rglob("*") if path.is_file()}
+            with self.assertRaises(FileExistsError):
+                fetch_one(root, "1706.03762")
+            after = {path: path.read_bytes() for path in paper.rglob("*") if path.is_file()}
+            self.assertEqual(before, after)
+
+    def test_plain_source_figure_index_reports_actual_source_name(self):
+        with tempfile.TemporaryDirectory() as d:
+            paper = Path(d) / "1706.03762"
+            paper.mkdir()
+            tex = ("\\documentclass{article}\n\\begin{document}\n" + "text " * 60 +
+                   "\\begin{figure}\\includegraphics{plot}\\caption{Caption}\\end{figure}\n\\end{document}\n")
+            (paper / "1706.03762.tex").write_text(tex)
+            (paper / "1706.03762.source.tex").write_text(tex)
+            build_figure_index(paper)
+            self.assertIn("- source: 1706.03762.source.tex ->", (paper / "FIGURES.md").read_text())
 
     def test_one_command_fetches_checks_and_indexes_multiple_papers(self):
         archive = io.BytesIO()

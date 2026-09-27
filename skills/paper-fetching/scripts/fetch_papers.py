@@ -163,7 +163,9 @@ def fetch_one(outdir: Path, aid: str) -> None:
         extracted = stage / "extracted"
         kind = extract_source(source, extracted)
         (stage / f"{aid}.pdf").write_bytes(pdf)
-        original_name = f"{aid}.tar.gz" if kind == "tar.gz" else f"{aid}.{kind}"
+        # Keep a standalone plain-TeX source distinct from the flattened output.
+        # The compressed single-file form already has a distinct .tex.gz suffix.
+        original_name = f"{aid}.tar.gz" if kind == "tar.gz" else (f"{aid}.source.tex" if kind == "tex" else f"{aid}.{kind}")
         (stage / original_name).write_bytes(source)
         flatten(extracted, aid, version, stage / f"{aid}.tex")
         (stage / "metadata.json").write_text(json.dumps({"arxiv_id": aid, "version": version, "title": title, "authors": authors, "abstract": abstract}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

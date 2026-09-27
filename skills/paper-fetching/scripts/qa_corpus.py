@@ -6,6 +6,12 @@ import re
 import tarfile
 
 
+def source_files(directory: Path, aid: str) -> list[Path]:
+    excluded = {f"{aid}.pdf", f"{aid}.tex"}
+    return sorted(path for path in directory.iterdir()
+                  if path.is_file() and path.name.startswith(f"{aid}.") and path.name not in excluded)
+
+
 def check_paper(directory: Path, aid: str | None = None, version: str | None = None) -> list[str]:
     aid = aid or directory.name
     errors = []
@@ -37,7 +43,7 @@ def check_paper(directory: Path, aid: str | None = None, version: str | None = N
             errors.append("missing/mismatched version header")
         if re.search(r"\\(?:input|include)\s*\{[^}]+\}", text):
             errors.append("unexpanded TeX input/include")
-    originals = [path for path in directory.iterdir() if path.is_file() and path.name.startswith(f"{aid}.") and path.name not in {f"{aid}.pdf", f"{aid}.tex"}]
+    originals = source_files(directory, aid)
     if len(originals) != 1 or originals[0].stat().st_size == 0:
         errors.append("missing or ambiguous original source")
     elif originals[0].name.endswith(".tar.gz"):

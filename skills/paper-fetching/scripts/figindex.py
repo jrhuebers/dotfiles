@@ -7,6 +7,8 @@ import sys
 from datetime import date
 from pathlib import Path
 
+from qa_corpus import source_files
+
 
 def brace_match(text, start):
     depth = 0
@@ -78,6 +80,8 @@ def build_index(paper):
         return
     tex = tex_path.read_text(encoding="utf-8", errors="replace")
     figures = parse_figures(tex)
+    source = source_files(paper, aid)
+    source_name = source[0].name if len(source) == 1 else f"{aid}.tar.gz"
     lines = [f"# Figures — {aid}", "", f"Generated {date.today()} from {tex_path.name}. Figure numbers are source order, not necessarily PDF numbering.", ""]
     no_caption = no_image = 0
     for number, figure in enumerate(figures, 1):
@@ -91,7 +95,7 @@ def build_index(paper):
             for target in figure["images"]:
                 materialized = locate_image(paper, target)
                 lines.append(f"- image: {materialized or '_(not materialized; embedded or unavailable)_'}")
-                lines.append(f"- source: {aid}.tar.gz -> {target}")
+                lines.append(f"- source: {source_name} -> {target}")
         else:
             lines.append("- image: _(embedded in TeX or unavailable)_")
         lines.append(f"- caption: {figure['caption'] or '_(no caption)_'}")

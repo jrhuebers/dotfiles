@@ -22,7 +22,7 @@ papers/
     metadata.json          # API metadata used to regenerate INDEX.md
     <arxiv-id>.pdf
     <arxiv-id>.tex
-    <arxiv-id>.tar.gz      # canonical original source archive
+    <arxiv-id>.tar.gz      # original source archive (or .source.tex/.tex.gz for single-file sources)
     FIGURES.md             # captions and direct materialized image paths
     REFERENCES.md          # citation keys and bibliography entries
     figures/               # extracted image assets
@@ -31,4 +31,4 @@ papers/
 
 Treat `papers/` as generated, read-only corpus data. Do not manually edit, delete, rename, or overwrite any PDF, TeX, archive, metadata, index, figure, or bibliography file there. To change a corpus, fetch into a new directory or use the bundled index/QA scripts to regenerate derived files.
 
-If source is unavailable, the paper directory contains the PDF, metadata, and `source-unavailable.txt` instead. A fetch or QA failure exits nonzero and leaves successful directories for inspection without rebuilding indexes. For existing papers only, run `scripts/qa_corpus.py`, `scripts/figindex.py`, `scripts/refindex.py`, or `scripts/index.py` separately.
+If source is unavailable, the paper directory contains the PDF, metadata, and `source-unavailable.txt` instead. A fetch or QA failure exits nonzero and leaves successful directories for inspection without rebuilding indexes. When adding papers to an existing corpus, the command retains every existing paper directory and regenerates `INDEX.md` from all paper-local metadata; do not hand-edit generated index files. For existing papers only, run `scripts/qa_corpus.py`, `scripts/figindex.py`, `scripts/refindex.py`, or `scripts/index.py` separately.
