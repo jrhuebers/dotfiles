@@ -10,6 +10,12 @@ def one_line(value: str) -> str:
     return " ".join(value.split()).replace("|", "\\|")
 
 
+def author_line(value) -> str:
+    if isinstance(value, list):
+        return "; ".join(one_line(author) for author in value)
+    return one_line(str(value).replace(", ", "; "))
+
+
 def build_index(root: Path) -> None:
     rows = []
     for paper in sorted(path for path in root.iterdir() if path.is_dir()):
@@ -23,11 +29,11 @@ def build_index(root: Path) -> None:
         aid = one_line(record["arxiv_id"])
         version = one_line(record["version"])
         title = one_line(record["title"])
-        authors = one_line(record["authors"])
+        authors = author_line(record["authors"])
         lines.append(f"| [{aid}]({directory}/{aid}.pdf) | {version} | {title} | {authors} | `{directory}/` |")
     for record, directory in rows:
         abstract = one_line(record.get("abstract", "").strip() or "_(no abstract recorded)_")
-        lines.extend(["", f"## {one_line(record['arxiv_id'])}: {one_line(record['title'])}", "", f"- directory: `{directory}/`", f"- authors: {one_line(record['authors'])}", f"- version: {one_line(record['version'])}", f"- abstract: {abstract}"])
+        lines.extend(["", f"## {one_line(record['arxiv_id'])}: {one_line(record['title'])}", "", f"- directory: `{directory}/`", f"- authors: {author_line(record['authors'])}", f"- version: {one_line(record['version'])}", f"- abstract: {abstract}"])
     (root / "INDEX.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"{root}: {len(rows)} papers -> {root / 'INDEX.md'}")
 

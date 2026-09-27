@@ -55,7 +55,7 @@ class AbsMetadata(HTMLParser):
                 self.values.setdefault(fields["name"], []).append(fields.get("content", ""))
 
 
-def metadata(aid: str) -> tuple[str, str, str, str]:
+def metadata(aid: str) -> tuple[str, str, list[str], str]:
     url = "https://export.arxiv.org/api/query?" + urllib.parse.urlencode({"id_list": aid, "max_results": 1})
     try:
         feed = ET.fromstring(request(url))
@@ -64,7 +64,7 @@ def metadata(aid: str) -> tuple[str, str, str, str]:
             raise ValueError(f"arXiv ID not found: {aid}")
         version = entry.findtext(f"{ATOM}id", "").rsplit("/", 1)[-1]
         title = " ".join(entry.findtext(f"{ATOM}title", "").split())
-        authors = ", ".join(" ".join(a.findtext(f"{ATOM}name", "").split()) for a in entry.findall(f"{ATOM}author"))
+        authors = [" ".join(a.findtext(f"{ATOM}name", "").split()) for a in entry.findall(f"{ATOM}author")]
         abstract = " ".join(entry.findtext(f"{ATOM}summary", "").split())
     except urllib.error.HTTPError as exc:
         if exc.code not in (406, 429, 502, 503):
@@ -75,7 +75,7 @@ def metadata(aid: str) -> tuple[str, str, str, str]:
         versions = [int(v) for v in re.findall(rf"arxiv\.org/abs/{re.escape(aid)}v(\d+)", html)]
         version = f"{aid}v{max(versions)}" if versions else ""
         title = " ".join(parser.values.get("citation_title", [""])[0].split())
-        authors = ", ".join(parser.values.get("citation_author", []))
+        authors = parser.values.get("citation_author", [])
         abstract = " ".join(parser.values.get("citation_abstract", [""])[0].split())
     if not re.fullmatch(re.escape(aid) + r"v\d+", version) or not title or not authors:
         raise ValueError(f"missing or inconsistent arXiv metadata for {aid}")
@@ -138,7 +138,8 @@ def fetch_one(outdir: Path, aid: str) -> None:
     if paper_dir.exists():
         raise FileExistsError(f"paper directory already exists for {aid}; use a new directory to refresh it")
     version, title, authors, abstract = metadata(aid)
-    print(f"{aid}: {version}: {title} — {authors}", flush=True)
+    author_text = "; ".join(authors) if isinstance(authors, list) else str(authors).replace(", ", "; ")
+    print(f"{aid}: {version}: {title} — {author_text}", flush=True)
     pdf = request(f"https://arxiv.org/pdf/{aid}")
     if not pdf.startswith(b"%PDF-"):
         raise ValueError("PDF endpoint did not return a PDF")
