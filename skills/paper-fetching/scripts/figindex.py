@@ -24,6 +24,10 @@ def brace_match(text, start):
 
 def strip_tex_noise(text):
     text = re.sub(r"\\label\{[^}]*\}", "", text)
+    text = re.sub(r"\\(?:textbf|textit|emph|textrm|texttt)\{([^{}]*)\}", r"\1", text)
+    text = text.replace("``", "“").replace("''", "”")
+    text = re.sub(r"`([^`\n]+)'", r"“\1”", text)
+    text = text.replace(r"\textasciitilde", "~").replace(r"\%", "%").replace(r"\&", "&")
     return re.sub(r"\s+", " ", text.replace("\n", " ")).strip()
 
 

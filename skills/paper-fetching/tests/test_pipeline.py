@@ -11,12 +11,16 @@ import urllib.error
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from fetch_papers import extract_source, fetch_one, main as fetch_main
+from figindex import strip_tex_noise
 from flatten_tex import collapse_blank_lines, find_main, flatten, strip_comments
 from qa_corpus import check_paper
 from refindex import build_index
 
 
 class PipelineTests(unittest.TestCase):
+    def test_caption_tex_normalization(self):
+        self.assertEqual(strip_tex_noise(r"The verb `making' and \textbf{Top}."), "The verb “making” and Top.")
+
     def test_comments(self):
         text = "a% drop\n\\% keep\n\\\\% drop\n\\begin{verbatim}\nraw%keep\n\\end{verbatim}\nb%drop"
         self.assertEqual(strip_comments(text), "a\n\\% keep\n\\\\\n\\begin{verbatim}\nraw%keep\n\\end{verbatim}\nb")
