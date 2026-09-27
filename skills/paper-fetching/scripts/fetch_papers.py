@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Fetch latest arXiv papers, verify the complete corpus, and index figures."""
+"""Fetch latest arXiv papers into one self-contained directory per paper."""
 import argparse
 import gzip
 from html.parser import HTMLParser
 import io
 from pathlib import Path, PurePosixPath
 import re
+import shutil
 import subprocess
 import sys
 import tarfile
@@ -23,6 +24,8 @@ UA = "paper-fetching/0.1 (research corpus; contact: https://github.com/jrhuebers
 ID = re.compile(r"\d{4}\.\d{4,5}$")
 ATOM = "{http://www.w3.org/2005/Atom}"
 MAX_BYTES = 100_000_000
+IMAGE_EXTENSIONS = {".bmp", ".eps", ".gif", ".jpeg", ".jpg", ".pdf", ".png", ".ps", ".svg", ".tif", ".tiff", ".webp"}
+BIB_EXTENSIONS = {".bib", ".bbl", ".bst", ".bcf"}
 _last_request = 0.0
 
 
@@ -64,7 +67,6 @@ def metadata(aid: str) -> tuple[str, str, str]:
     except urllib.error.HTTPError as exc:
         if exc.code not in (406, 429, 502, 503):
             raise
-        # arXiv's API occasionally returns 406 for particular valid IDs.
         html = request(f"https://arxiv.org/abs/{aid}").decode("utf-8", errors="replace")
         parser = AbsMetadata()
         parser.feed(html)
@@ -78,29 +80,27 @@ def metadata(aid: str) -> tuple[str, str, str]:
 
 
 def extract_source(data: bytes, root: Path) -> str:
-    """Only regular, bounded tar members; never links, device nodes or traversals."""
+    """Extract only regular, bounded tar members; reject links and traversals."""
     root.mkdir()
     if data.startswith(b"\x1f\x8b"):
         try:
             with tarfile.open(fileobj=io.BytesIO(data), mode="r:gz") as tf:
-                members = tf.getmembers()
                 total = 0
-                for m in members:
-                    name = PurePosixPath(m.name)
-                    if (name.is_absolute() or ".." in name.parts or not m.name or
-                            not (m.isdir() or m.isfile())):
-                        raise ValueError(f"unsafe source member: {m.name}")
-                    if m.isfile():
-                        total += m.size
-                        if total > MAX_BYTES or m.size > MAX_BYTES:
+                for member in tf.getmembers():
+                    name = PurePosixPath(member.name)
+                    if (name.is_absolute() or ".." in name.parts or not member.name or
+                            not (member.isdir() or member.isfile())):
+                        raise ValueError(f"unsafe source member: {member.name}")
+                    if member.isfile():
+                        total += member.size
+                        if total > MAX_BYTES or member.size > MAX_BYTES:
                             raise ValueError("source archive too large")
-                        dest = root.joinpath(*name.parts)
-                        dest.parent.mkdir(parents=True, exist_ok=True)
-                        with tf.extractfile(m) as src, dest.open("wb") as out:
-                            out.write(src.read())
+                        destination = root.joinpath(*name.parts)
+                        destination.parent.mkdir(parents=True, exist_ok=True)
+                        with tf.extractfile(member) as source, destination.open("wb") as output:
+                            output.write(source.read())
                 return "tar.gz"
         except tarfile.ReadError:
-            # A single gzip-compressed .tex rather than a tar archive.
             text = gzip.decompress(data)
             if len(text) > MAX_BYTES or b"\\documentclass" not in text:
                 raise ValueError("gzip source is not LaTeX")
@@ -112,16 +112,28 @@ def extract_source(data: bytes, root: Path) -> str:
     raise ValueError("arXiv source is neither tar.gz nor LaTeX (PDF/PS or error page?)")
 
 
+def copy_assets(source_root: Path, paper_dir: Path) -> None:
+    for path in source_root.rglob("*"):
+        if not path.is_file():
+            continue
+        relative = path.relative_to(source_root)
+        if path.suffix.lower() in IMAGE_EXTENSIONS:
+            destination = paper_dir / "figures" / relative
+        elif path.suffix.lower() in BIB_EXTENSIONS:
+            destination = paper_dir / "bibliography" / relative
+        else:
+            continue
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(path, destination)
+
+
 def fetch_one(outdir: Path, aid: str) -> None:
     if not ID.fullmatch(aid):
         raise ValueError(f"invalid bare modern arXiv ID: {aid}")
     outdir.mkdir(parents=True, exist_ok=True)
-    (outdir / "src").mkdir(exist_ok=True)
-    pdf_path = outdir / f"arxiv_{aid}.pdf"
-    tex_path = outdir / f"arxiv_{aid}.tex"
-    src_path = outdir / "src" / f"{aid}.tar.gz"
-    if any(p.exists() for p in (pdf_path, tex_path, src_path, outdir / f"arxiv_{aid}.source-unavailable.txt")):
-        raise FileExistsError(f"artifacts already exist for {aid}; use a new directory to fetch the latest version")
+    paper_dir = outdir / aid
+    if paper_dir.exists():
+        raise FileExistsError(f"paper directory already exists for {aid}; use a new directory to refresh it")
     version, title, authors = metadata(aid)
     print(f"{aid}: {version}: {title} — {authors}", flush=True)
     pdf = request(f"https://arxiv.org/pdf/{aid}")
@@ -134,38 +146,39 @@ def fetch_one(outdir: Path, aid: str) -> None:
             raise
         source = b""
     if not source or source.startswith((b"%PDF-", b"%!PS")):
-        # No author LaTeX source: retain the PDF, mark the absence explicitly.
-        pdf_path.write_bytes(pdf)
-        (outdir / f"arxiv_{aid}.source-unavailable.txt").write_text(
+        paper_dir.mkdir(parents=True)
+        (paper_dir / f"{aid}.pdf").write_bytes(pdf)
+        (paper_dir / "source-unavailable.txt").write_text(
             f"arXiv {version} | source unavailable (404/PDF/PS); PDF only\n", encoding="utf-8")
         print(f"{aid}: PDF-only; author LaTeX source unavailable", flush=True)
         return
     with tempfile.TemporaryDirectory(prefix=".paper-fetch-", dir=outdir) as tmp:
-        stage = Path(tmp)
-        (stage / "src").mkdir()
-        kind = extract_source(source, stage / "extracted")
-        if kind == "tar.gz":
-            (stage / "src" / f"{aid}.tar.gz").write_bytes(source)
-        else:
-            # A canonical original download, not a fabricated tarball.
-            (stage / "src" / f"{aid}.{kind}").write_bytes(source)
-        (stage / f"arxiv_{aid}.pdf").write_bytes(pdf)
-        flatten(stage / "extracted", aid, version, stage / f"arxiv_{aid}.tex")
+        stage = Path(tmp) / aid
+        stage.mkdir(parents=True, exist_ok=True)
+        extracted = stage / "extracted"
+        kind = extract_source(source, extracted)
+        (stage / f"{aid}.pdf").write_bytes(pdf)
+        original_name = f"{aid}.tar.gz" if kind == "tar.gz" else f"{aid}.{kind}"
+        (stage / original_name).write_bytes(source)
+        flatten(extracted, aid, version, stage / f"{aid}.tex")
+        copy_assets(extracted, stage)
+        shutil.rmtree(extracted)
         errors = check_paper(stage, aid, version=version)
         if errors:
             raise ValueError("QA failed: " + "; ".join(errors))
-        for p in (stage / f"arxiv_{aid}.pdf", stage / f"arxiv_{aid}.tex"):
-            p.replace(outdir / p.name)
-        for p in (stage / "src").iterdir():
-            p.replace(outdir / "src" / p.name)
-    print(f"{aid}: PDF, flattened TeX and original {kind} saved in {outdir}", flush=True)
+        stage.replace(paper_dir)
+    print(f"{aid}: PDF, flattened TeX, source archive, figures and bibliography saved in {paper_dir}", flush=True)
+
+
+def paper_dirs(outdir: Path) -> list[Path]:
+    return sorted(path for path in outdir.iterdir() if path.is_dir() and any(path.glob("*.pdf"))) if outdir.exists() else []
 
 
 def main() -> None:
-    p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("outdir", type=Path)
-    p.add_argument("ids", nargs="+")
-    args = p.parse_args()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("outdir", type=Path)
+    parser.add_argument("ids", nargs="+")
+    args = parser.parse_args()
     failed = False
     for aid in args.ids:
         try:
@@ -173,19 +186,15 @@ def main() -> None:
         except Exception as exc:
             print(f"{aid}: ERROR: {exc}", flush=True)
             failed = True
-    # Check all papers in the destination, not just newly fetched ones.
-    aids = {path.stem.removeprefix("arxiv_") for path in args.outdir.glob("arxiv_*.pdf")}
-    aids.update(path.stem.removeprefix("arxiv_") for path in args.outdir.glob("arxiv_*.tex"))
-    for aid in sorted(aids):
-        errors = check_paper(args.outdir, aid)
+    for paper_dir in paper_dirs(args.outdir):
+        aid = paper_dir.name
+        errors = check_paper(paper_dir, aid)
         print(f"{aid}: {'FAIL: ' + '; '.join(errors) if errors else 'corpus QA OK'}")
         failed |= bool(errors)
-    if not failed and any(args.outdir.glob("arxiv_*.tex")):
-        # Regenerate one index covering both new and existing TeX papers.
-        index_script = Path(__file__).with_name("figindex.py")
-        references_script = Path(__file__).with_name("refindex.py")
-        subprocess.run([sys.executable, str(index_script), str(args.outdir)], check=True)
-        subprocess.run([sys.executable, str(references_script), str(args.outdir)], check=True)
+    if not failed and paper_dirs(args.outdir):
+        scripts = Path(__file__).parent
+        subprocess.run([sys.executable, str(scripts / "figindex.py"), str(args.outdir)], check=True)
+        subprocess.run([sys.executable, str(scripts / "refindex.py"), str(args.outdir)], check=True)
     if failed:
         raise SystemExit(1)
 

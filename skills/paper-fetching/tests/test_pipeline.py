@@ -80,10 +80,11 @@ class PipelineTests(unittest.TestCase):
             with patch("fetch_papers.metadata", return_value=("1706.03762v7", "Title", "Author")):
                 with patch("fetch_papers.request", side_effect=[b"%PDF-" + b"x" * 12000, error]):
                     fetch_one(root, "1706.03762")
-            self.assertEqual(check_paper(root, "1706.03762", "1706.03762v7"), [])
-            self.assertFalse((root / "arxiv_1706.03762.tex").exists())
-            (root / "arxiv_1706.03762.source-unavailable.txt").write_text("arXiv 1706.03762v1 | source unavailable\n")
-            self.assertTrue(check_paper(root, "1706.03762", "1706.03762v7"))
+            paper = root / "1706.03762"
+            self.assertEqual(check_paper(paper, "1706.03762", "1706.03762v7"), [])
+            self.assertFalse((paper / "1706.03762.tex").exists())
+            (paper / "source-unavailable.txt").write_text("arXiv 1706.03762v1 | source unavailable\n")
+            self.assertTrue(check_paper(paper, "1706.03762", "1706.03762v7"))
 
     def test_one_command_fetches_checks_and_indexes_multiple_papers(self):
         archive = io.BytesIO()
@@ -105,12 +106,16 @@ class PipelineTests(unittest.TestCase):
                         fetch_main()
             root = Path(d)
             for aid in ids:
-                self.assertEqual(check_paper(root, aid, f"{aid}v1"), [])
-            index = (root / "FIGURES.md").read_text()
-            references = (root / "REFERENCES.md").read_text()
+                paper = root / aid
+                self.assertEqual(check_paper(paper, aid, f"{aid}v1"), [])
+                self.assertTrue((paper / "FIGURES.md").is_file())
+                self.assertTrue((paper / "REFERENCES.md").is_file())
+                self.assertFalse((paper / "extracted").exists())
+            index = (root / ids[0] / "FIGURES.md").read_text()
+            references = (root / ids[0] / "REFERENCES.md").read_text()
             self.assertIn("Test caption", index)
-            self.assertIn("## 1706.03762", index)
-            self.assertIn("## 1810.04805", index)
+            self.assertIn("# Figures — 1706.03762", index)
+            self.assertIn("# Figures — 1810.04805", (root / ids[1] / "FIGURES.md").read_text())
             self.assertIn("`demo2026`", references)
             self.assertIn("Demo title", references)
 
@@ -123,21 +128,22 @@ class PipelineTests(unittest.TestCase):
                         with self.assertRaises(SystemExit) as stopped:
                             fetch_main()
             self.assertEqual(stopped.exception.code, 1)
-            self.assertEqual(check_paper(Path(d), ids[0], f"{ids[0]}v1"), [])
-            self.assertFalse((Path(d) / "FIGURES.md").exists())
+            self.assertEqual(check_paper(Path(d) / ids[0], ids[0], f"{ids[0]}v1"), [])
+            self.assertFalse(any(Path(d).glob("*/FIGURES.md")))
 
     def test_reference_index_falls_back_to_bib(self):
         with tempfile.TemporaryDirectory() as d:
-            root = Path(d)
-            (root / "arxiv_1706.03762.tex").write_text(r"\documentclass{article}\bibliography{refs}")
-            (root / "src").mkdir()
+            root = Path(d) / "1706.03762"
+            root.mkdir()
+            (root / "1706.03762.tex").write_text(r"\documentclass{article}\bibliography{refs}")
+            (root / "bibliography").mkdir()
             archive = io.BytesIO()
             with tarfile.open(fileobj=archive, mode="w:gz") as tf:
                 bib = b"@article{bibkey, author={A. Author}, title={Bib title}, year={2026}}\n"
                 entry = tarfile.TarInfo("refs.bib")
                 entry.size = len(bib)
                 tf.addfile(entry, io.BytesIO(bib))
-            (root / "src" / "1706.03762.tar.gz").write_bytes(archive.getvalue())
+            (root / "1706.03762.tar.gz").write_bytes(archive.getvalue())
             build_index(str(root))
             references = (root / "REFERENCES.md").read_text()
             self.assertIn("`bibkey`", references)

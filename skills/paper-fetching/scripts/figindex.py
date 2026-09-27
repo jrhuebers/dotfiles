@@ -1,127 +1,110 @@
 #!/usr/bin/env python3
-"""Build a figure-caption index from a flattened .tex corpus.
-
-For each papers dir: parse arxiv_<id>.tex (or any *_*.tex), find figure environments,
-extract (source-order number, label, includegraphics target, caption text),
-and write FIGURES.md next to the corpus.
-
-Captions are text, so this makes every figure searchable/quotable by a
-text-only LLM. The includegraphics target + src tarball path let a future
-vision pass locate the actual image file.
-
-Validated on 457 real figures: multi-image figures joined with "; ",
-subfigure-only composites flagged as no-caption, TikZ-drawn figures correctly
-reported as no external file.
-
-Usage: python3 figindex.py <papers_dir> [papers_dir2 ...]
-"""
+"""Build one searchable figure index inside each paper directory."""
+import glob
 import os
 import re
 import sys
-import glob
 from datetime import date
+from pathlib import Path
 
 
 def brace_match(text, start):
-    """Index of matching '}' for the '{' at text[start]; -1 if unbalanced."""
     depth = 0
-    i = start
-    n = len(text)
-    while i < n:
-        c = text[i]
-        if c == "\\":
-            i += 2
+    for i in range(start, len(text)):
+        if text[i] == "\\":
             continue
-        if c == "{":
+        if text[i] == "{":
             depth += 1
-        elif c == "}":
+        elif text[i] == "}":
             depth -= 1
             if depth == 0:
                 return i
-        i += 1
     return -1
 
 
-def strip_tex_noise(s):
-    s = re.sub(r"\\label\{[^}]*\}", "", s)
-    s = s.replace("\n", " ")
-    s = re.sub(r"\s+", " ", s).strip()
-    return s
+def strip_tex_noise(text):
+    text = re.sub(r"\\label\{[^}]*\}", "", text)
+    return re.sub(r"\s+", " ", text.replace("\n", " ")).strip()
 
 
 def parse_figures(tex):
-    figs = []
-    env_re = re.compile(r"\\begin\{(figure\*?)\}(.*?)\\end\{\1\}", re.S)
-    for m in env_re.finditer(tex):
-        body = m.group(2)
-        incs = [p.strip() for p in
-                re.findall(r"\\includegraphics(?:\[[^\]]*\])?\{([^}]*)\}", body)]
-        capm = re.search(r"\\caption(?:\[[^\]]*\])?\{", body)
+    figures = []
+    environment = re.compile(r"\\begin\{(figure\*?)\}(.*?)\\end\{\1\}", re.S)
+    for match in environment.finditer(tex):
+        body = match.group(2)
+        images = [target.strip() for target in re.findall(r"\\includegraphics(?:\[[^]]*\])?\{([^}]*)\}", body)]
+        caption_match = re.search(r"\\caption(?:\[[^]]*\])?\{", body)
         caption = ""
-        if capm:
-            end = brace_match(body, capm.end() - 1)
+        if caption_match:
+            end = brace_match(body, caption_match.end() - 1)
             if end != -1:
-                caption = strip_tex_noise(body[capm.end():end])
-        labm = re.search(r"\\label\{([^}]*)\}", body)
-        figs.append({
-            "includegraphics": incs,
-            "caption": caption,
-            "label": labm.group(1) if labm else "",
-        })
-    return figs
+                caption = strip_tex_noise(body[caption_match.end():end])
+        label_match = re.search(r"\\label\{([^}]*)\}", body)
+        figures.append({"images": images, "caption": caption, "label": label_match.group(1) if label_match else ""})
+    return figures
+
+
+def paper_dirs(paths):
+    for raw in paths:
+        root = Path(raw)
+        if any(root.glob("*.tex")):
+            yield root
+        else:
+            yield from sorted(path for path in root.iterdir() if path.is_dir() and any(path.glob("*.tex")))
+
+
+def locate_image(paper, target):
+    clean = target.strip().lstrip("./")
+    direct = paper / "figures" / clean
+    if direct.is_file():
+        return direct.relative_to(paper).as_posix()
+    for extension in (".pdf", ".png", ".jpg", ".jpeg", ".eps", ".svg"):
+        candidate = paper / "figures" / f"{clean}{extension}"
+        if candidate.is_file():
+            return candidate.relative_to(paper).as_posix()
+    matches = list((paper / "figures").rglob(Path(clean).name)) if (paper / "figures").is_dir() else []
+    return matches[0].relative_to(paper).as_posix() if len(matches) == 1 else None
+
+
+def build_index(paper):
+    aid = paper.name
+    tex_path = next(iter(sorted(paper.glob("*.tex"))), None)
+    if tex_path is None:
+        print(f"{paper}: no tex file, skipped")
+        return
+    tex = tex_path.read_text(encoding="utf-8", errors="replace")
+    figures = parse_figures(tex)
+    lines = [f"# Figures — {aid}", "", f"Generated {date.today()} from {tex_path.name}. Figure numbers are source order, not necessarily PDF numbering.", ""]
+    no_caption = no_image = 0
+    for number, figure in enumerate(figures, 1):
+        if not figure["caption"]:
+            no_caption += 1
+        if not figure["images"]:
+            no_image += 1
+        label = f" ({figure['label']})" if figure["label"] else ""
+        lines.append(f"## Figure {number}{label}")
+        if figure["images"]:
+            for target in figure["images"]:
+                materialized = locate_image(paper, target)
+                lines.append(f"- image: {materialized or '_(not materialized; embedded or unavailable)_'}")
+                lines.append(f"- source: {aid}.tar.gz -> {target}")
+        else:
+            lines.append("- image: _(embedded in TeX or unavailable)_")
+        lines.append(f"- caption: {figure['caption'] or '_(no caption)_'}")
+        lines.append("")
+    if not figures:
+        lines.append("_(no figure environments found)_")
+    (paper / "FIGURES.md").write_text("\n".join(lines), encoding="utf-8")
+    print(f"{paper}: {len(figures)} figures -> {paper / 'FIGURES.md'}")
+    print(f"   (no caption: {no_caption}, no includegraphics: {no_image})")
 
 
 def main():
     dirs = sys.argv[1:]
     if not dirs:
-        sys.exit("usage: figindex.py <papers_dir> [papers_dir2 ...]")
-    for pdir in dirs:
-        texs = sorted(glob.glob(os.path.join(pdir, "arxiv_*.tex")))
-        if not texs:
-            texs = sorted(glob.glob(os.path.join(pdir, "*.tex")))
-        if not texs:
-            print(f"{pdir}: no tex files, skipped")
-            continue
-        proj = os.path.basename(os.path.dirname(pdir))
-        lines = [f"# Figures index — {proj}",
-                 "",
-                 f"Generated {date.today()} from flattened .tex sources. Figure N "
-                 "= source order, not LaTeX numbering. includegraphics target + "
-                 "src tarball locate the actual image file.",
-                 ""]
-        total = nocap = noinc = 0
-        for tex_path in texs:
-            base = os.path.basename(tex_path)
-            pid = base[:-4] if base.endswith(".tex") else base
-            if base.startswith("arxiv_"):
-                pid = base[6:-4]
-            with open(tex_path, encoding="utf-8", errors="replace") as f:
-                tex = f.read()
-            figs = parse_figures(tex)
-            total += len(figs)
-            lines.append(f"## {pid}")
-            if not figs:
-                lines.append("_(no figure environments found)_")
-                lines.append("")
-                continue
-            for i, fig in enumerate(figs, 1):
-                if not fig["caption"]:
-                    nocap += 1
-                if not fig["includegraphics"]:
-                    noinc += 1
-                tgt = "; ".join(fig["includegraphics"]) if fig["includegraphics"] else "_(none)_"
-                tarball = f"src/{pid}.tar.gz -> " if os.path.exists(
-                    os.path.join(pdir, "src", f"{pid}.tar.gz")) else ""
-                label = f" ({fig['label']})" if fig["label"] else ""
-                lines.append(f"### Figure {i}{label}")
-                lines.append(f"- image: {tarball}{tgt}")
-                lines.append(f"- caption: {fig['caption'] or '_(no caption)_'}")
-            lines.append("")
-        out = os.path.join(pdir, "FIGURES.md")
-        with open(out, "w", encoding="utf-8") as f:
-            f.write("\n".join(lines))
-        print(f"{pdir}: {total} figures across {len(texs)} papers -> {out}")
-        print(f"   (no caption: {nocap}, no includegraphics: {noinc})")
+        raise SystemExit("usage: figindex.py <papers_dir> [papers_dir2 ...]")
+    for paper in paper_dirs(dirs):
+        build_index(paper)
 
 
 if __name__ == "__main__":
