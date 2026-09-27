@@ -77,7 +77,7 @@ class PipelineTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             root = Path(d)
             error = urllib.error.HTTPError("https://arxiv.org/e-print/1706.03762", 404, "Not Found", {}, None)
-            with patch("fetch_papers.metadata", return_value=("1706.03762v7", "Title", "Author")):
+            with patch("fetch_papers.metadata", return_value=("1706.03762v7", "Title", "Author", "Abstract")):
                 with patch("fetch_papers.request", side_effect=[b"%PDF-" + b"x" * 12000, error]):
                     fetch_one(root, "1706.03762")
             paper = root / "1706.03762"
@@ -100,7 +100,7 @@ class PipelineTests(unittest.TestCase):
             tf.addfile(entry, io.BytesIO(bbl))
         ids = ("1706.03762", "1810.04805")
         with tempfile.TemporaryDirectory() as d:
-            with patch("fetch_papers.metadata", side_effect=[(f"{aid}v1", "Title", "Author") for aid in ids]):
+            with patch("fetch_papers.metadata", side_effect=[(f"{aid}v1", "Title", "Author", "Abstract") for aid in ids]):
                 with patch("fetch_papers.request", side_effect=[b"%PDF-" + b"x" * 12000, archive.getvalue()] * 2):
                     with patch.object(sys, "argv", ["fetch_papers.py", d, *ids]):
                         fetch_main()
@@ -116,13 +116,17 @@ class PipelineTests(unittest.TestCase):
             self.assertIn("Test caption", index)
             self.assertIn("# Figures — 1706.03762", index)
             self.assertIn("# Figures — 1810.04805", (root / ids[1] / "FIGURES.md").read_text())
+            corpus_index = (root / "INDEX.md").read_text()
+            self.assertIn("| 1706.03762v1 |", corpus_index)
+            self.assertIn("Abstract", corpus_index)
+            self.assertTrue((root / ids[0] / "metadata.json").is_file())
             self.assertIn("`demo2026`", references)
             self.assertIn("Demo title", references)
 
     def test_one_command_failure_is_nonzero_and_does_not_index(self):
         with tempfile.TemporaryDirectory() as d:
             ids = ("1706.03762", "1810.04805")
-            with patch("fetch_papers.metadata", side_effect=[(f"{aid}v1", "Title", "Author") for aid in ids]):
+            with patch("fetch_papers.metadata", side_effect=[(f"{aid}v1", "Title", "Author", "Abstract") for aid in ids]):
                 with patch("fetch_papers.request", side_effect=[b"%PDF-" + b"x" * 12000, b"", b"not a PDF"]):
                     with patch.object(sys, "argv", ["fetch_papers.py", d, *ids]):
                         with self.assertRaises(SystemExit) as stopped:
