@@ -61,6 +61,8 @@ The current installed version is `26.9.1`; the RCP cluster installation was veri
 
 The repository is the source of truth for Yazi configuration. Local configuration files under `~/.config/yazi/` should be symlinks to the corresponding tracked files under `~/dotfiles/.config/yazi/`; do not copy these files. Generated package content, such as installed flavors, remains local.
 
+The manager layout uses `[mgr] ratio = [1, 3, 4]` in parent/current/preview order, making the middle column slightly narrower and giving the preview column the extra space.
+
 Symlink the repository configuration and install the declared packages:
 
 ```sh
