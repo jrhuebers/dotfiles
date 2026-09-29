@@ -24,15 +24,15 @@ split across this repository.
 
 The live cluster setup provides named runtime profiles through a user-local wrapper at `~/.local/bin/pi`; the original Pi launcher is preserved as `~/.local/bin/pi.real`.
 
-`pi --research` uses normal Pi resource discovery and therefore loads the full configured setup.
+`pi --research` sets `PI_CODING_AGENT_DIR` to the dedicated `~/.pi/research` user agent directory and uses normal Pi resource discovery. This profile contains separate settings and session storage; user-local model and authentication files, installed package stores, skills, and extensions may be linked to the ordinary `~/.pi/agent` installation. Its `AGENTS.md` loads a separately maintained research-prompt collection through the context-include extension, and its `pi-codex-subagents/agents/` directory exposes reviewer/editor templates. The profile's settings must allow the prompt collection's path for context includes; child templates must explicitly read any guidelines they need because pi-codex-subagents disables context-file discovery in children. Keep secrets user-local and never commit `auth.json` or `models.json`.
 
 `pi --basic` disables discovered extensions, prompt templates, and themes, then explicitly loads the configured allowed extensions; it leaves skill discovery enabled so all user, project, and package skills remain available.
 
 The basic profile intentionally excludes `pi-slurm`, `pi-subagents`, and `pi-btw` extensions, while retaining skills supplied by those packages.
 
-The installed profile definitions are `~/.pi/profiles/basic.json` and `~/.pi/profiles/research.json`; the wrapper requires `jq` and forwards ordinary Pi CLI flags unchanged.
+The installed profile definitions are `~/.pi/profiles/basic.json` and `~/.pi/profiles/research.json`; the wrapper requires `jq` and forwards ordinary Pi CLI flags unchanged. A profile's optional `agentDir` key selects an existing absolute directory (or `~/` path) through `PI_CODING_AGENT_DIR`; it does not redirect a working directory's project `.pi/` configuration. Without `agentDir`, the default user agent directory remains in use. The research settings are independent of the ordinary settings, so synchronize non-secret package/settings changes deliberately rather than assuming they propagate.
 
-The profile JSON files currently use absolute paths into the local Pi package store, so regenerate or adapt their extension paths when deploying this setup to another machine rather than copying them unchanged.
+The basic profile JSON currently uses absolute paths into the local Pi package store, so regenerate or adapt its extension paths when deploying this setup to another machine rather than copying them unchanged. The research profile and its symlinked prompt collection must likewise be provisioned per host. Verify the selection with `pi --research --version`, `pi --research --list-models GLM-5.3-Flash`, and a short prompt checking that the research guidelines and role templates are visible. To revert the research profile without deleting sessions, remove `agentDir` from its profile JSON.
 
 ## Refresh the repository copies
 
