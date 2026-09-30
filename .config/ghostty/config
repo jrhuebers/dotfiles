@@ -1,0 +1,6 @@
+# Light appearance independent of macOS dark mode.
+theme = TokyoNight Day
+window-theme = light
+
+# Steady cursor by default (applications can override via terminal escapes).
+cursor-style-blink = false
