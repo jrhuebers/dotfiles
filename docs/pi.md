@@ -74,6 +74,20 @@ mkdir -p ~/.pi/agent
 cp -p ~/dotfiles/pi/$PI_PROFILE/settings.json ~/.pi/agent/settings.json
 ```
 
+On a fresh workstation with an already-working Pi setup, preserve the local
+`deviceId`, `lastChangelogVersion`, `defaultProvider`, and `defaultModel` when
+merging the personal profile. The tracked model is a snapshot and may not be
+available to the new machine's account; do not overwrite working authentication
+or force an unavailable model. Keep this merged settings file local, rather
+than refreshing the repository snapshot from it.
+
+For current installer-managed Pi, reconcile configured packages with
+`pi update --extensions` (plain `pi update` updates Pi itself), then `pi list`.
+Pinned packages may require an explicit `pi install SOURCE` on a fresh machine.
+Verify `pi --help` for startup diagnostics without making an AI request. Existing
+Node.js from the standalone Pi installer may be used; verify `node` and `npm`
+are available in a new login shell.
+
 Do not install the cluster profile on a personal device: it registers Slurm
 commands that are unavailable or inappropriate there. Restart Pi after
 configuration changes so it reloads the files. Verify the selected profile with:

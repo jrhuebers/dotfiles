@@ -26,6 +26,9 @@ macOS with Homebrew:
 brew install cloc
 ```
 
+On Apple Silicon use native Homebrew under `/opt/homebrew`; version `2.10`
+was verified on arm64 macOS. No host-specific configuration is required.
+
 On Ubuntu hosts where `sudo` is unavailable, install the Debian package and
 its Perl dependencies in the user-local tree:
 

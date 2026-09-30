@@ -21,6 +21,14 @@ exists.
 | **Personal headless server** | A personal server, including the Oracle server when it is not used as a desktop | Use personal Pi settings and optional terminal tools. Do not deploy GUI, GNOME, Finder, or macOS shell configuration. |
 | **Other or unsupported platform** | For example, a native Windows installation | No deployment profile exists. Do not infer that POSIX dotfiles or desktop integrations apply; document and add a profile first. |
 
+An institution-managed macOS work/research laptop uses the **Personal macOS**
+configuration profile as a workstation, but is not assumed to be personally
+owned. Preserve institutional MDM, security controls, and administrative
+boundaries; record ownership and policy locally in `~/admin-docs/`. Verify the
+hardware with `system_profiler SPHardwareDataType` and use native arm64 tools
+on Apple Silicon. Do not install optional GUI applications or large TeX/model
+stacks merely because their configurations exist in this repository.
+
 If the role is unclear, verify it first. In particular, the presence of Slurm
 commands does not by itself establish that a host is a cluster login or compute
 node.
@@ -33,7 +41,7 @@ node.
 | Pi model configuration | local | local | local | local | Configure `~/.pi/agent/models.json` per machine when custom providers/models are needed; do not track credentials or machine-specific model endpoints here. |
 | Pi web tools | optional | optional | optional | optional | The package is currently in both Pi profiles, but each machine needs its own Exa credential and must allow outbound access. Follow [`pi-simple-web-tools.md`](pi-simple-web-tools.md). |
 | Bash startup | optional | optional | **off** | optional | `.bashrc` is a portable Linux Bash configuration; it does not override `HOME` or assume a shared filesystem. See [`shell.md`](shell.md). |
-| Zsh startup | **off** | **off** | **on, after review** | **off** | `.zshrc` contains macOS `/Users/...` and Antigravity paths; do not copy it unchanged to Linux. See [`shell.md`](shell.md). |
+| Zsh startup | **off** | **off** | **on, after review** | **off** | `.zshrc` uses macOS shell conventions and optional home-relative Antigravity paths; do not copy it unchanged to Linux. See [`shell.md`](shell.md). |
 | SSH client config | optional | **on** when accessing the cluster | **on** when accessing the cluster | optional | `.ssh/config` is a client-side convenience configuration, not a server or compute-node setting. Never track private keys. See [`ssh.md`](ssh.md). |
 | tmux | **on** | optional | optional | optional | The shared `.tmux.conf` is portable; create a small host wrapper for the per-machine status style. See [`tmux.md`](tmux.md). |
 | Herdr | **on** | **on** | **on** | **on** | Standard terminal multiplexer for coding-agent workspaces on every supported profile. Use the shared leader/configuration documented in [`herdr.md`](herdr.md). |

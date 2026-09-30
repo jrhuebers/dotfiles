@@ -57,6 +57,13 @@ ssh -G <configured-alias>
 ssh <configured-alias>
 ```
 
+On a fresh workstation, `ssh -G` verification does not prove remote access.
+Record VPN/reachability and authorization as unverified until tested. If the
+tracked key already exists, retain it without reading its contents and check
+its mode is 600. Do not create or copy a replacement key during deployment.
+The repository does not define `oracle`; do not invent its hostname when
+setting up `lts2-via-oracle`.
+
 Do not print or commit private keys, authentication agents, passwords, or host
 credentials.
 

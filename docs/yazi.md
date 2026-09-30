@@ -55,6 +55,11 @@ cp yazi-*/yazi yazi-*/ya ~/.local/bin/
 chmod +x ~/.local/bin/yazi ~/.local/bin/ya
 ```
 
+On macOS, retrieve the archive digest using `gh release view --repo
+sxyazi/yazi --json assets` (the matching asset's `digest` field), then compare
+it with `shasum -a 256 ARCHIVE` before unpacking. Version `26.9.1` was also
+verified on Apple Silicon macOS; use native arm64 binaries, not Rosetta.
+
 The current installed version is `26.9.1`; the RCP cluster installation was verified on 2026-09-22. Bash completions from the archive go in `~/.local/share/bash-completion/completions/`.
 
 ## Configure
@@ -89,7 +94,7 @@ The tracked Bash profile sources `~/.config/yazi/shell-wrapper.sh`; if the profi
 [ -r "$HOME/.config/yazi/shell-wrapper.sh" ] && . "$HOME/.config/yazi/shell-wrapper.sh"
 ```
 
-Use `y` rather than `yazi` to launch Yazi: **calling `yazi` directly does not change the parent shell**. Press `l` on a directory to enter it, then `q` to quit into Yazi's current directory; `Q` intentionally suppresses the directory change. The wrapper reads Yazi's `--cwd-file`; it reads paths even though `read -d ''` returns nonzero for non-NUL-terminated output. It saves the terminal mode before launching Yazi and restores it on return, so a shell does not inherit an accidental no-echo/noncanonical mode after a blocked opener or Yazi exit. This recovery applies to `y`, not bare `yazi`, and does not repair a Yazi process still running with the wrong mode. For another shell, install and source an equivalent wrapper in that shell's startup profile; sourcing the Bash profile is not a substitute.
+Use `y` rather than `yazi` to launch Yazi: **calling `yazi` directly does not change the parent shell**. Press `l` on a directory to enter it, then `q` to quit into Yazi's current directory; `Q` intentionally suppresses the directory change. The wrapper reads Yazi's `--cwd-file`; it reads paths even though `read -d ''` returns nonzero for non-NUL-terminated output. It saves the terminal mode before launching Yazi and restores it on return, so a shell does not inherit an accidental no-echo/noncanonical mode after a blocked opener or Yazi exit. This recovery applies to `y`, not bare `yazi`, and does not repair a Yazi process still running with the wrong mode. The same tracked wrapper works in Zsh and is sourced by the macOS `.zshrc`; sourcing the Bash profile is not a substitute.
 
 Verify in a new interactive Bash session (or after `source ~/.bashrc`):
 
@@ -102,7 +107,7 @@ pwd
 
 The directory reported by `pwd` should be the entered directory. If the shell does not change directories after `q`, check that `type y` reports a function and that you launched with `y`, not `yazi`.
 
-The configuration contains the `vscode-light-modern` flavor, light/dark theme settings, an `e` keybinding that edits the hovered file, and `o`/`O` keybindings that send PDFs to `xdg-open` and open other files in the editor (using a new tmux window when running inside tmux). Pressing Enter on `.md` files uses the standalone `md` viewer with its built-in pager, including inside Herdr. The opener unsets any inherited `PAGER` for this invocation only. The interaction behind earlier intermittent Yazi and shell input freezes in Herdr was not confirmed; the old `cd-quit.yazi` plugin is no longer installed or used. The `md` source at commit `ed52c94` or later also avoids VMIN=0 terminal read timeouts, but that change alone did not eliminate the reported freezes. If an already-running Yazi instance remains unresponsive, exit and relaunch it to load the opener change. Yazi's default open action also sends PDFs to `xdg-open`. The editor is selected through the shell environment:
+The configuration contains the `vscode-light-modern` flavor, light/dark theme settings, an `e` keybinding that edits the hovered file, and `o`/`O` keybindings that send PDFs to `xdg-open` and open other files in the editor (using a new tmux window when running inside tmux). Pressing Enter on `.md` files uses the standalone `md` viewer with its built-in pager, including inside Herdr. The opener unsets any inherited `PAGER` for this invocation only. The interaction behind earlier intermittent Yazi and shell input freezes in Herdr was not confirmed; the old `cd-quit.yazi` plugin is no longer installed or used. The `md` source at commit `ed52c94` or later also avoids VMIN=0 terminal read timeouts, but that change alone did not eliminate the reported freezes. If an already-running Yazi instance remains unresponsive, exit and relaunch it to load the opener change. On Linux, PDF actions use `xdg-open`; on macOS, both the PDF opener and `o`/`O` use native `open`. Markdown's `md` opener is registered for both Linux and macOS. Keep these platform-specific opener entries when refreshing the shared symlinks. The editor is selected through the shell environment:
 
 ```sh
 export EDITOR=vim

@@ -6,7 +6,16 @@ alias python='python3'
 alias pip='pip3'
 
 
-. "$HOME/.local/bin/env"
+# User-local tools and the standalone Pi installer.
+typeset -U path PATH
+path=("$HOME/.local/bin" "$HOME/.pi/agent/bin" $path)
+[ ! -r "$HOME/.local/bin/env" ] || . "$HOME/.local/bin/env"
 
-# Added by Antigravity
-export PATH="/Users/jhuebers/.antigravity/antigravity/bin:$PATH"
+# Optional Antigravity installation on this Mac.
+if [ -d "$HOME/.antigravity/antigravity/bin" ]; then
+    path=("$HOME/.antigravity/antigravity/bin" $path)
+fi
+
+export EDITOR=vim
+export VISUAL=vim
+[ ! -r "$HOME/.config/yazi/shell-wrapper.sh" ] || . "$HOME/.config/yazi/shell-wrapper.sh"

@@ -71,6 +71,13 @@ alias cat='bat --paging=never'
 Do not enable that alias in scripts or in a shared profile without checking
 compatibility first.
 
+## Apple Silicon macOS
+
+Use native Homebrew (`/opt/homebrew/bin/brew install bat`), not a Linux release
+archive. Version `0.26.1` was verified on arm64 macOS. Remove a Homebrew-managed
+installation with `brew uninstall bat`; the user-local removal commands below
+are for archive installations only.
+
 ## Verification
 
 ```sh

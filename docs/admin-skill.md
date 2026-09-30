@@ -38,6 +38,12 @@ copy and complete the same template there according to that runtime's
 documentation. Do not install any skill from `hermes-skills/`; it is a
 reference archive. See [`hermes-skills.md`](hermes-skills.md).
 
+For institution-managed macOS workstations, use the macOS device profile but
+record institutional ownership, MDM presence, and unknown privilege/VPN/backup
+policies explicitly. Do not call the machine personally owned just because
+the profile is named personal. Check hardware rather than relying on a model
+name supplied informally; retain system security and management controls.
+
 Restart or reload the agent runtime after completing or changing its skill.
 
 ## Verify

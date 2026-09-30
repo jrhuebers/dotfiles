@@ -30,8 +30,22 @@ file.
 
 ## Personal macOS Zsh
 
-`.zshrc` is the personal macOS profile. It contains macOS-specific paths and
-must not be installed unchanged on Linux or a headless personal server.
+`.zshrc` is the macOS profile, including institution-managed work laptops.
+It retains macOS-specific `ls -G` and must not be installed unchanged on Linux
+or a headless personal server. It adds `~/.local/bin` and the standalone Pi
+installer's `~/.pi/agent/bin` to PATH, sources `~/.local/bin/env` only if present,
+and includes Antigravity only if installed under the current user's home.
+It sets Vim as EDITOR/VISUAL and sources the shared Yazi `y` wrapper, which is
+compatible with Zsh as well as Bash.
+
+For Apple Silicon Homebrew, retain this in `~/.zprofile`:
+
+```sh
+eval "$(/opt/homebrew/bin/brew shellenv zsh)"
+```
+
+Back up existing startup files before deploying. Preserve any local runtime
+PATH entries required by your Pi/Node installation.
 
 From a macOS checkout, install it with:
 
@@ -40,9 +54,15 @@ install -m 0644 ~/dotfiles/.zshrc ~/.zshrc
 zsh -n ~/.zshrc
 ```
 
-Start a new Zsh login session to use it. Before deployment, review the
-machine-local tool paths in the tracked file; retain or replace them only when
-they exist on that Mac.
+Start a new Zsh login session to use it. Verify with:
+
+```sh
+zsh -lic 'command -v brew pi python3 yazi md; type y; print -r -- "$EDITOR"'
+```
+
+For a noninteractive wrapper smoke test, stub `yazi` to write an existing test
+directory to `--cwd-file`, call `y`, and verify `pwd` changes to that directory.
+Interactive verification is still needed for terminal keys and previews.
 
 ## Removal
 

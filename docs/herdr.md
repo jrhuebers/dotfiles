@@ -18,6 +18,23 @@ curl -fsSL https://herdr.dev/install.sh | sh
 herdr --version
 ```
 
+The same official installer supports Apple Silicon macOS (`macos-aarch64`)
+and verifies its download against the SHA-256 in the HTTPS release manifest.
+For an inspect-before-run installation:
+
+```sh
+curl -fsSL https://herdr.dev/install.sh -o /tmp/herdr-install.sh
+less /tmp/herdr-install.sh
+sh /tmp/herdr-install.sh
+~/.local/bin/herdr --version
+```
+
+Version `0.9.3` was verified on arm64 macOS. Create the configuration below
+before launching a new session and run `herdr config check`; reload/status
+commands require a running server. No server needs to be started during
+provisioning. To remove it, remove the user-local binary; retain session data
+unless explicitly approved for deletion.
+
 The installer places the binary in `~/.local/bin`; ensure that directory is in
 `PATH`. Do not run the installer from a shared system account or replace a
 package-managed installation.

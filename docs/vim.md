@@ -17,6 +17,10 @@ On macOS:
 brew install vim
 ```
 
+Native Homebrew Vim `9.2` was verified on Apple Silicon, including vim-plug
+and the declared Lean syntax plugin. Back up any existing `~/.vimrc` before
+replacing it; restore the backup to roll back configuration.
+
 From a checkout at `~/dotfiles`, deploy the configuration:
 
 ```sh

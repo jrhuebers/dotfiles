@@ -29,8 +29,15 @@ install -m 0755 "$target/bin/gh" ~/.local/bin/gh
 gh --version
 ```
 
-On Ubuntu/Fedora/macOS, use the documented package-manager command where
-administrative or Homebrew access is available.
+On macOS with Homebrew, run `brew install gh` and `gh auth login` as the user.
+Verify `gh --version` and `gh api user --jq .login`. On Apple Silicon Homebrew
+is under `/opt/homebrew`; ensure its `bin` directory is in PATH. Git provided
+by Apple's Command Line Tools can be retained if already working.
+
+Back up `~/.gitconfig` before copying the tracked identity. The repository email
+is a personal address; use a repository-local `user.email` override for work
+projects if institutional policy requires it. Verify GitHub SSH authentication
+before relying on the HTTP-to-SSH rewrite. Never bypass host-key verification.
 
 A repository-local `.git/config` can override these global values and is not synced with the remote.
 

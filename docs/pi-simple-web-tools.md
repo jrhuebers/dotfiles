@@ -52,6 +52,12 @@ Install the extension:
 pi install npm:pi-simple-web-tools
 ```
 
+For fresh deployments of the pinned profile, use
+`pi install npm:pi-simple-web-tools@0.1.0` if `pi list` shows the declaration
+without an installed path. Package installation and credential setup are
+separate: leave search unavailable until the user supplies the Exa credential
+locally. Do not ask for the key in chat.
+
 Create the Exa config file securely:
 
 ```bash

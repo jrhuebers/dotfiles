@@ -52,3 +52,15 @@ tmux source-file ~/.tmux.conf
 ```
 
 Reload a running server after changes with `tmux source-file ~/.tmux.conf`.
+If none is running, validate without affecting ordinary sessions using a
+separate temporary server:
+
+```sh
+tmux -L dotfiles-check -f ~/.tmux.conf new-session -d -s check
+tmux -L dotfiles-check show-options -g status-style
+tmux -L dotfiles-check kill-server
+```
+
+Native Homebrew tmux `3.7c` was verified on Apple Silicon. Back up the wrapper
+before replacing it; restore that backup to roll back configuration. To remove
+the package, use `brew uninstall tmux` only after checking for active sessions.

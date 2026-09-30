@@ -33,15 +33,23 @@ ln -sfn ~/.local/opt/md-${version}/bin/md ~/.local/bin/md
 ln -sfn ~/md/.config/md.yaml ~/.config/md.yaml
 ```
 
-If `rustc` is already available, building from the checked-out source is also
-supported:
+Current source requires Cargo and the dependencies pinned in `Cargo.lock`;
+the old direct `rustc` command no longer works. On Apple Silicon macOS, build
+natively (the published release archive is Linux-only):
 
 ```sh
-mkdir -p ~/.local/bin
-rustc -O -C strip=symbols ~/md/tools/md.rs -o ~/.local/bin/md
-mkdir -p ~/.config
+brew install rust
+cd ~/md
+cargo build --release --locked
+mkdir -p ~/.local/bin ~/.config
+install -m 0755 target/release/md ~/.local/bin/md
 ln -sfn ~/md/.config/md.yaml ~/.config/md.yaml
 ```
+
+The Node.js math bridge and vendored renderer remain in the checkout. Keep
+`~/md` available and Node.js in `PATH` for full math rendering. The same Cargo
+build works on supported Linux platforms with Rust installed. To remove this
+installation, remove only `~/.local/bin/md` and the `~/.config/md.yaml` symlink.
 
 The viewer uses its built-in interactive pager when `$PAGER` is unset, or the specified external pager when set (for example, `PAGER='less -R' md FILE`). Since `jrhuebers/md` commit `ed52c94`, the built-in pager keeps terminal input blocking to avoid timeouts being mistaken for EOF by another TUI. This is a preventive change, not a confirmed fix for every Yazi input freeze; an external pager remains a workaround if the problem persists. LaTeX-to-Unicode rendering is enabled by default and can be disabled with `render_latex: false` in `~/.config/md.yaml`.
 
