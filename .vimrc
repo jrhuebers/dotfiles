@@ -26,7 +26,7 @@ set mouse=a
 
 " Use the system clipboard for ordinary yanks, deletes, and puts when supported.
 if has('clipboard')
-    set clipboard=unnamedplus
+    set clipboard=unnamed,unnamedplus
 endif
 
 " Screen-line movement when wrapped
