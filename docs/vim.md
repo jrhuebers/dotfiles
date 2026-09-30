@@ -33,6 +33,20 @@ Markdown, no line numbers in Markdown, incremental highlighted search, mouse
 support, wrapped-line movement, and a persistent status line. Makefiles retain
 real tabs.
 
+## System clipboard
+
+When Vim is compiled with `+clipboard`, the shared vimrc sets
+`clipboard=unnamedplus`. Select with `v` or `V`, then press `y` to copy to the
+system clipboard; paste in other macOS applications with Cmd+V. Ordinary
+`d`, `x`, and `p` also use the clipboard. Explicit registers remain available;
+use `"_d` for a deletion that should not replace clipboard contents.
+
+Homebrew Vim on macOS supports this directly. On headless or other platforms,
+clipboard access also depends on a working provider/display. The feature guard
+avoids setting the option on builds without clipboard support. Verify with
+`:set clipboard?` and `vim --version`. To disable, remove this setting or use
+`:set clipboard=` for the current session.
+
 ## Plugins
 
 Vim plugins are managed with [vim-plug](https://github.com/junegunn/vim-plug).

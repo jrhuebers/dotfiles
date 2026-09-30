@@ -24,6 +24,11 @@ nnoremap <Esc> :nohl<CR>
 
 set mouse=a
 
+" Use the system clipboard for ordinary yanks, deletes, and puts when supported.
+if has('clipboard')
+    set clipboard=unnamedplus
+endif
+
 " Screen-line movement when wrapped
 " j/k move by display lines when no count is given; with counts they behave normally.
 nnoremap <expr> k (v:count == 0 ? 'gk' : 'k')
