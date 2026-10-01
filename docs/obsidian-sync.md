@@ -41,8 +41,9 @@ confirming that this is the intended personal Mac, but it must:
 4. Pair devices and share the existing hub folder through the Syncthing GUI.
    Do not create a second hub folder or change the hub's folder path.
 5. Never print, copy, or request private keys, Syncthing database files, API
-   keys, or passwords. Device IDs are safe to enter in the Syncthing GUI but
-   should not be committed to this repository.
+   keys, or passwords. Device IDs are safe to enter in the Syncthing GUI and
+   should not be committed to this repository unless the user explicitly
+   requests recording a specific device ID in `machine-registry.md`.
 6. Do not expose either Syncthing GUI to the network. The GUI should remain
    bound to `127.0.0.1`; only the Syncthing data listener needs to connect.
 7. Do not open Obsidian until Syncthing reports that the initial transfer is

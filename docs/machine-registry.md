@@ -19,6 +19,9 @@ For each entry, record:
   headless server, login host, or compute host;
 - the complete public SSH key or keys used by that machine, with a short label
   explaining the key's purpose; and
+- a Syncthing device ID when the user explicitly requests that it be recorded;
+  otherwise keep device IDs out of this repository (see
+  [`obsidian-sync.md`](obsidian-sync.md)); and
 - comments about VPN requirements, bastions, tunnels, cluster policy, unusual
   access patterns, or anything an agent should know before acting there.
 
@@ -87,6 +90,19 @@ appropriate:
 ## X1 Carbon
 
 ## EPFL M1 MacBook Pro
+
+- **Kind:** EPFL-managed personal GUI workstation
+- **Hardware:** Apple MacBook Pro (MacBookPro18,3)
+  - **Architecture:** ARM64 (`arm64`)
+  - **CPU:** Apple M1 Pro
+  - **RAM:** 16 GiB
+  - **Storage:** Not recorded
+  - **GPU:** Integrated Apple M1 Pro GPU
+- **Operating system:** macOS 15.8.1
+- **Main use:** Work and research workstation; Syncthing client for Obsidian vaults.
+- **Public SSH keys:** Not recorded here.
+- **Syncthing device ID:** `QS6X2WE-TEKAYMX-GAX7UZN-L22L6AD-5KYV6ZH-HJ3K5PS-5FDILO4-BQBZPAY`
+- **Comments:** Syncs the Oracle `/home/ubuntu/vaults/` folder to `~/vaults/`; see [`obsidian-sync.md`](obsidian-sync.md). The Syncthing GUI is loopback-only.
 
 ## EPFL LTS2 frontend (`stivm0163`)
 
