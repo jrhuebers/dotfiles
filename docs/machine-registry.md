@@ -90,6 +90,24 @@ appropriate:
 
 ## EPFL LTS2 frontend
 
-## RCP environment
+## RCP access host (`haas034.ds-a3-r02.cct.rcp.epfl.ch`)
+
+- **Kind:** Shared cluster login/access host
+- **Hardware:**
+  - **Architecture:** x86_64
+  - **CPU:** AMD EPYC 9124 16-Core Processor; 32 logical CPUs visible
+  - **RAM:** Approximately 251.5 GiB
+  - **Storage:** 100 GiB root filesystem; persistent home on NAS-backed storage
+  - **GPU:** ASPEED Graphics Family management adapter; no compute GPU
+- **Operating system:** Ubuntu 24.04.4 LTS
+- **Main use:** RCP SSH access host for cluster work; submit compute workloads through approved site workflows rather than running them here.
+- **Public SSH keys:**
+  - **Outbound user-managed SSH key:** `ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMKEjunklnnW0o9mOQcfmCCKYbHsSSjcq+XWyO6IUbKb`
+- **Comments:**
+  - Reach it through the SSH alias `rcp` and the RCP jump host; the backend hostname is the name above.
+  - This is shared infrastructure. Do not modify shared services or run heavy workloads on the access host.
+  - No Slurm client was present when recorded; verify scheduler tooling before using Slurm commands.
+  - User-local software belongs under `~/.local`; no non-interactive sudo permission is available.
+
 
 ## TU Dortmund / LAMARR cluster endpoints
