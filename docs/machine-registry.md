@@ -143,6 +143,6 @@ appropriate:
   - User-local software belongs under `~/.local`; no non-interactive sudo permission is available.
 
 
-### TU Dortmund / LAMARR cluster endpoints
-
 ## Former machines and environments
+
+### TU Dortmund / LAMARR cluster endpoints
