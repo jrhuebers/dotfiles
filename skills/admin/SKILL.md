@@ -27,6 +27,12 @@ description: TEMPLATE — complete this skill during machine provisioning with t
 - **Local administration documentation:** [path to the local admin-doc map and
   the relevant documents]
 
+Before administering a machine, consult the portable machine registry at
+`~/dotfiles/docs/machine-registry.md` for its role and relationships. Record
+stable hardware, OS, purpose, and public SSH-key facts there when adding or
+retiring a machine; keep mutable host-specific procedures and operational
+state in the local `~/admin-docs/` files.
+
 ## Role-specific boundaries
 
 ### [Keep and complete for a shared cluster host; otherwise remove]
