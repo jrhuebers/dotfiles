@@ -88,7 +88,24 @@ appropriate:
 
 ## EPFL M1 MacBook Pro
 
-## EPFL LTS2 frontend
+## EPFL LTS2 frontend (`stivm0163`)
+
+- **Kind:** Shared cluster login/access host; VMware guest
+- **Hardware:**
+  - **Architecture:** x86_64
+  - **CPU:** Intel Xeon Gold 6248 @ 2.50GHz; 2 vCPUs visible
+  - **RAM:** Approximately 7.7 GiB
+  - **Storage:** 39 GiB root filesystem; shared NAS-backed `/nfs_home` (8.0 TiB filesystem visible)
+  - **GPU:** VMware SVGA II virtual display adapter; no compute GPU
+- **Operating system:** Ubuntu 24.04.5 LTS
+- **Main use:** Shared EPFL LTS2 Slurm frontend for cluster access, development, and job submission.
+- **Public SSH keys:**
+  - **User login/authentication key:** `ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAA3hpVrw0wZS1ibG4eUdrfMmspZaqdCVuIc3mr83Z0t huebers@stivm0163`
+  - **GitHub dotfiles access key:** `ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICCBkOjad5k/WS8f8UFfSpm5+vIj5C71Y4r1sI7fTmO8 github-dotfiles-stivm0163-20260916`
+  - **Oracle reverse-tunnel key:** `ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDVWTRtXXMuZgFUditg+mIglCTd67qLc3L1HRah+kPC/ lts2-to-oracle-tunnel`
+- **Comments:**
+  - This is shared infrastructure, not a compute node. Submit substantial or intensive workloads through Slurm rather than running them on the frontend.
+  - User-local software belongs under `~/.local`; persistent home storage is shared through `/nfs_home`.
 
 ## RCP access host (`haas034.ds-a3-r02.cct.rcp.epfl.ch`)
 
