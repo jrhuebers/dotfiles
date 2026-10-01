@@ -46,7 +46,7 @@ Every entry should use this shape, adding or removing hardware lines as
 appropriate:
 
 ```markdown
-## Name
+### Name
 
 - **Kind:**
 - **Hardware:**
@@ -65,7 +65,7 @@ appropriate:
 
 ## Current machines and environments
 
-## Oracle
+### Oracle
 
 - **Kind:** Personal headless server; cloud VM
 - **Hardware:**
@@ -87,9 +87,9 @@ appropriate:
     and the RCP environment when direct access is unavailable.
   - Treat this as a server, not as a shared cluster login or compute host.
 
-## X1 Carbon
+### X1 Carbon
 
-## EPFL M1 MacBook Pro
+### EPFL M1 MacBook Pro
 
 - **Kind:** EPFL-managed personal GUI workstation
 - **Hardware:** Apple MacBook Pro (MacBookPro18,3)
@@ -104,7 +104,7 @@ appropriate:
 - **Syncthing device ID:** `QS6X2WE-TEKAYMX-GAX7UZN-L22L6AD-5KYV6ZH-HJ3K5PS-5FDILO4-BQBZPAY`
 - **Comments:** Syncs the Oracle `/home/ubuntu/vaults/` folder to `~/vaults/`; see [`obsidian-sync.md`](obsidian-sync.md). The Syncthing GUI is loopback-only.
 
-## EPFL LTS2 frontend (`stivm0163`)
+### EPFL LTS2 frontend (`stivm0163`)
 
 - **Kind:** Shared cluster login/access host; VMware guest
 - **Hardware:**
@@ -123,7 +123,7 @@ appropriate:
   - This is shared infrastructure, not a compute node. Submit substantial or intensive workloads through Slurm rather than running them on the frontend.
   - User-local software belongs under `~/.local`; persistent home storage is shared through `/nfs_home`.
 
-## RCP access host (`haas034.ds-a3-r02.cct.rcp.epfl.ch`)
+### RCP access host (`haas034.ds-a3-r02.cct.rcp.epfl.ch`)
 
 - **Kind:** Shared cluster login/access host
 - **Hardware:**
@@ -143,4 +143,6 @@ appropriate:
   - User-local software belongs under `~/.local`; no non-interactive sudo permission is available.
 
 
-## TU Dortmund / LAMARR cluster endpoints
+### TU Dortmund / LAMARR cluster endpoints
+
+## Former machines and environments
