@@ -24,6 +24,7 @@ documentation belongs in `~/admin-docs/`, not in this repository.
 - [`docs/ghostty.md`](docs/ghostty.md) — Workstation terminal with a light theme and steady cursor.
 - [`docs/hermes-skills.md`](docs/hermes-skills.md) — Archived Hermes skills boundary, use, promotion, and removal.
 - [`docs/mdformat.md`](docs/mdformat.md) — Markdown formatter installation, alias, and pre-commit configuration.
+- [`docs/machine-registry.md`](docs/machine-registry.md) — Shared registry of machines, environments, hardware, uses, and public SSH keys.
 - [`docs/herdr.md`](docs/herdr.md) — Herdr terminal multiplexer usage and current local configuration.
 - [`docs/cloc.md`](docs/cloc.md) — Required cloc source-code line counter installation on every machine.
 - [`docs/open-in-cursor.md`](docs/open-in-cursor.md) — macOS Finder service for opening files and folders in Cursor.
