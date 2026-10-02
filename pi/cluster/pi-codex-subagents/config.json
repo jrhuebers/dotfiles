@@ -1,0 +1,14 @@
+{
+  "models": [
+    "openai-codex/gpt-5.6-luna",
+    "openai-codex/gpt-5.6-sol",
+    "openai-codex/gpt-5.6-terra",
+    "openai-codex/gpt-6-luna",
+    "openai-codex/gpt-6-sol",
+    "epfl/zai-org/GLM-5.3",
+    "epfl/zai-org/GLM-5.3-fp8",
+    "epfl/zai-org/GLM-5.3-Flash",
+    "epfl/deepseek-ai/DeepSeek-V4-Flash-0731"
+  ],
+  "modelsFromEnabledModels": true
+}
