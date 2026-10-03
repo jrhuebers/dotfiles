@@ -1,62 +1,73 @@
-# Token counter CLI
+# tiktoken-cli token counter
 
-`token-counter-cli` is the required tiktoken-based token counter. It is
-published on PyPI and maintained at
-https://github.com/puya/token-counter-cli. Install it user-local on every
-supported machine; no system-wide package or service is required. The package
-installs the `token-counter` command and its isolated `tiktoken` dependency.
+Use the maintained third-party [`samber/tiktoken-cli`](https://github.com/samber/tiktoken-cli) package for token counts. This is the standard command for all machines and file types. Do not use the Python `tiktoken` library directly or the retired `token-counter` command for routine counting.
 
-## Install or upgrade
+`tiktoken-cli` counts explicitly named files regardless of extension, including LaTeX (`.tex`) and extensionless text files. It uses OpenAI-compatible `tiktoken` encodings but is a separate CLI package.
 
-Use `uv` so the tool and its Python dependencies remain isolated from the
-system Python and other user projects:
+## Install
+
+The package requires Node.js and npm. Install it globally with the user-local npm setup on each machine:
 
 ```sh
-uv tool install --upgrade token-counter-cli
+npm install --global tiktoken-cli
 ```
 
-The launcher is installed under `~/.local/bin/token-counter`; keep that
-directory in `PATH`. `uv` manages the isolated environment under
-`~/.local/share/uv/tools/token-counter-cli/`.
+For a one-off invocation without a global install:
+
+```sh
+npx --yes tiktoken-cli path/to/file.tex
+```
+
+On the cluster, the npm prefix is under `~/.local/opt/`; its `bin` directory must be on `PATH` alongside `node`, `npm`, and `npx`. Do not commit the installed package or its generated files to this repository.
 
 ## Use
 
-Count a supported text file using the default `cl100k_base` encoding:
+Count one or more files:
 
 ```sh
-token-counter input.txt
+tiktoken-cli paper.tex
+tiktoken-cli README.md paper.tex
 ```
 
-Count a LaTeX file by adding its extension explicitly:
+Select the model used for tokenization:
 
 ```sh
-token-counter --extension .tex paper.tex
+tiktoken-cli paper.tex --model gpt-4o
 ```
 
-Select an encoding, read standard input, or compare against context limits:
+Count a directory recursively or exclude paths:
 
 ```sh
-echo -n "Hello, world!" | token-counter
-token-counter --model cl100k_base input.txt
-token-counter --check-limits input.txt
+tiktoken-cli src/
+tiktoken-cli . --exclude .git/ --exclude "**/*.log"
 ```
 
-Use `token-counter --help` for all options. The original `tiktoken` command,
-which emits token IDs rather than a count, is not required for normal counting.
+Read stdin:
+
+```sh
+cat paper.tex | tiktoken-cli
+```
+
+Use `tiktoken-cli --help` for the current option list.
 
 ## Verify
 
 ```sh
-command -v token-counter
-token-counter --version
-token-counter --help
+command -v node
+command -v npm
+command -v tiktoken-cli
+tiktoken-cli --version
+tiktoken-cli --help
+printf '\\newcommand{\\example}{text}\n' >/tmp/token-counter-smoke.tex
+tiktoken-cli /tmp/token-counter-smoke.tex
 ```
 
-Version `0.1.6` and its `tiktoken 0.14.0` dependency were verified on the
-current Ubuntu 24.04 cluster host.
+The cluster installation was verified with `tiktoken-cli` version 0.3.0 and a `.tex` file.
 
 ## Remove
 
 ```sh
-uv tool uninstall token-counter-cli
+npm uninstall --global tiktoken-cli
 ```
+
+Removing the CLI does not remove Node.js or npm.
