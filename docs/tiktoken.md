@@ -1,85 +1,62 @@
-# tiktoken CLI
+# Token counter CLI
 
-The `tiktoken-cli` package installs the `tiktoken` command and its Python
-library on every supported machine where Python is available. It is installed
-user-local; no system-wide package or service is required.
+`token-counter-cli` is the required tiktoken-based token counter. It is
+published on PyPI and maintained at
+https://github.com/puya/token-counter-cli. Install it user-local on every
+supported machine; no system-wide package or service is required. The package
+installs the `token-counter` command and its isolated `tiktoken` dependency.
 
 ## Install or upgrade
 
-On Ubuntu 24.04, whose Python uses the externally-managed-environment policy:
+Use `uv` so the tool and its Python dependencies remain isolated from the
+system Python and other user projects:
 
 ```sh
-python3 -m pip install --user --break-system-packages --upgrade tiktoken-cli
+uv tool install --upgrade token-counter-cli
 ```
 
-On a machine whose Python does not enforce that policy, omit
-`--break-system-packages`:
-
-```sh
-python3 -m pip install --user --upgrade tiktoken-cli
-```
-
-On Apple Silicon macOS with Homebrew Python, the interpreter also enforces
-PEP 668. Install into the user site without changing Homebrew's site-packages:
-
-```sh
-brew install python
-/opt/homebrew/bin/python3 -m pip install --user --break-system-packages --upgrade tiktoken-cli
-```
-
-The Linux command installs the executable under `~/.local/bin/tiktoken`; keep
-`~/.local/bin` in `PATH`. On macOS, add the user script directory to `PATH` if
-Homebrew Python does not already expose it:
-
-```sh
-export PATH="$HOME/Library/Python/$(/opt/homebrew/bin/python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')/bin:$PATH"
-```
-
-The `uv` tool manager is also supported and creates an isolated user-local
-installation:
-
-```sh
-uv tool install --upgrade tiktoken-cli
-```
+The launcher is installed under `~/.local/bin/token-counter`; keep that
+directory in `PATH`. `uv` manages the isolated environment under
+`~/.local/share/uv/tools/token-counter-cli/`.
 
 ## Use
 
-Encode text and write token IDs to standard output:
+Count a supported text file using the default `cl100k_base` encoding:
 
 ```sh
-echo -n "Hello, world!" | tiktoken --model gpt-4o - -
+token-counter input.txt
 ```
 
-Count tokens in a file:
+Count a LaTeX file by adding its extension explicitly:
 
 ```sh
-tiktoken --model gpt-4o input.txt - | wc -l
+token-counter --extension .tex paper.tex
 ```
 
-Use `tiktoken --help` for the supported model list and input/output syntax.
+Select an encoding, read standard input, or compare against context limits:
+
+```sh
+echo -n "Hello, world!" | token-counter
+token-counter --model cl100k_base input.txt
+token-counter --check-limits input.txt
+```
+
+Use `token-counter --help` for all options. The original `tiktoken` command,
+which emits token IDs rather than a count, is not required for normal counting.
 
 ## Verify
 
 ```sh
-command -v tiktoken
-tiktoken --help
-python3 -c 'import tiktoken; print(tiktoken.__version__)'
+command -v token-counter
+token-counter --version
+token-counter --help
 ```
 
-Always verify using the same interpreter used for installation. Reinstall after
-changing Python minor versions. Version `0.14.0` was verified on the current
-Ubuntu 24.04 cluster host and with Homebrew Python 3.14 on arm64 macOS.
+Version `0.1.6` and its `tiktoken 0.14.0` dependency were verified on the
+current Ubuntu 24.04 cluster host.
 
 ## Remove
 
-For a pip user installation:
-
 ```sh
-python3 -m pip uninstall tiktoken-cli tiktoken
-```
-
-For a `uv` tool installation:
-
-```sh
-uv tool uninstall tiktoken-cli
+uv tool uninstall token-counter-cli
 ```
