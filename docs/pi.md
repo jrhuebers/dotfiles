@@ -8,14 +8,17 @@ should not be enabled on personal machines:
 - `pi/personal/settings.json` → `~/.pi/agent/settings.json` on a laptop,
   desktop PC, or personal server such as the Oracle server.
 
-The cluster profile enables one package that is not in the personal profile:
-`git:github.com/jrhuebers/pi-slurm`. Both profiles include
-`git:github.com/jrhuebers/pi-whoami`, `npm:@signalridge/pi-goal`, and
-`npm:@ogulcancelik/pi-codex-compaction`. The goal package provides the
+The cluster profile includes two packages that are not in the personal profile:
+`git:github.com/jrhuebers/pi-slurm` and `npm:pi-subagents`. Both profiles include
+`git:github.com/jrhuebers/pi-whoami`, `npm:@signalridge/pi-goal`,
+`npm:@ogulcancelik/pi-codex-compaction`, and
+`npm:@ogulcancelik/pi-codex-subagents`. Codex subagents are enabled in both
+profiles; `pi-subagents` remains cluster-only. The goal package provides the
 session-scoped `/goal` command and `goal_complete`, `goal_blocked`, and
 `goal_wait` tools for autonomous, verifiable
-completion. All other Pi settings and packages are currently identical, including
-`npm:pi-simple-web-tools@0.1.0`. The web-tools credential is user-local and secret-bearing; follow
+completion. Other Pi settings and packages are currently identical, including
+`npm:pi-simple-web-tools@0.1.0`. The web-tools credential is user-local and
+secret-bearing; follow
 [`pi-simple-web-tools.md`](pi-simple-web-tools.md) rather than tracking it here.
 See [`device-profiles.md`](device-profiles.md) for the complete cluster/personal
 split across this repository.
@@ -30,7 +33,7 @@ The installed `git:github.com/jrhuebers/pi-context-viewer` package is the user-o
 
 `pi-basic` disables discovered extensions, prompt templates, and themes, then explicitly loads the configured allowed extensions; it leaves skill discovery enabled so all user, project, and package skills remain available.
 
-The basic profile intentionally excludes `pi-slurm` and `pi-btw` extensions, while retaining skills supplied by those packages.
+The basic profile intentionally excludes `pi-slurm` and `pi-btw` extensions, while retaining skills supplied by those packages. It must explicitly load `@ogulcancelik/pi-codex-subagents` from the local package store because it disables extension discovery.
 
 The installed profile definitions are `~/.pi/profiles/basic.json` and `~/.pi/profiles/research.json`; the wrapper requires `jq` and forwards ordinary Pi CLI flags unchanged. A profile's optional `agentDir` key selects an existing absolute directory (or `~/` path) through `PI_CODING_AGENT_DIR`; it does not redirect a working directory's project `.pi/` configuration. Without `agentDir`, the default user agent directory remains in use. The research settings are independent of the ordinary settings, so synchronize non-secret package/settings changes deliberately rather than assuming they propagate.
 
@@ -116,7 +119,8 @@ To install or remove a package in the live global Pi setup:
 pi install npm:pi-btw
 pi install npm:@signalridge/pi-goal
 pi install npm:@ogulcancelik/pi-codex-compaction
+pi install npm:@ogulcancelik/pi-codex-subagents
 pi remove npm:pi-btw
 ```
 
-After installation, verify it with `pi list` and restart Pi so the extension loads. The `pi-goal` package is included in both settings profiles; use `/goal` to start or manage a session-scoped autonomous goal. The `pi-codex-compaction` package is included in both profiles and uses OpenAI Codex native remote compaction when an applicable Codex model is active; no additional configuration is required. The extension's `/btw` thread can use the configured Pi model and coding tools; review third-party package source before updating it.
+After installation, verify it with `pi list` and restart Pi so the extension loads. The `pi-goal` package is included in both settings profiles; use `/goal` to start or manage a session-scoped autonomous goal. The `pi-codex-compaction` package is included in both profiles and uses OpenAI Codex native remote compaction when an applicable Codex model is active; no additional configuration is required. The `pi-codex-subagents` package is included in both profiles; configure its model routing with [`pi-codex-subagents.md`](pi-codex-subagents.md). The extension's `/btw` thread can use the configured Pi model and coding tools; review third-party package source before updating it.
