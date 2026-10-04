@@ -38,7 +38,7 @@ def parse_figures(tex):
     environment = re.compile(r"\\begin\{(figure\*?)\}(.*?)\\end\{\1\}", re.S)
     for match in environment.finditer(tex):
         body = match.group(2)
-        images = [target.strip() for target in re.findall(r"\\includegraphics(?:\[[^]]*\])?\{([^}]*)\}", body)]
+        images = [target.strip() for target in re.findall(r"\\includegraphics\s*\*?\s*(?:\[[^]]*\]\s*)?\{([^}]*)\}", body)]
         caption_match = re.search(r"\\caption(?:\[[^]]*\])?\{", body)
         caption = ""
         if caption_match:
@@ -59,8 +59,14 @@ def paper_dirs(paths):
             yield from sorted(path for path in root.iterdir() if path.is_dir() and any(path.glob("*.tex")))
 
 
-def locate_image(paper, target):
-    clean = target.strip().lstrip("./")
+def locate_image(paper, target, *, canonical=False):
+    clean = target.strip()
+    if Path(clean).is_absolute() or ".." in Path(clean).parts:
+        return None
+    clean = clean.removeprefix("./")
+    # New flattened references already point into the materialized figures tree.
+    if canonical and clean.startswith("figures/") and (paper / clean).is_file():
+        return clean
     direct = paper / "figures" / clean
     if direct.is_file():
         return direct.relative_to(paper).as_posix()
@@ -68,18 +74,23 @@ def locate_image(paper, target):
         candidate = paper / "figures" / f"{clean}{extension}"
         if candidate.is_file():
             return candidate.relative_to(paper).as_posix()
+    if clean.startswith("figures/") and (paper / clean).is_file():
+        return clean
     matches = list((paper / "figures").rglob(Path(clean).name)) if (paper / "figures").is_dir() else []
     return matches[0].relative_to(paper).as_posix() if len(matches) == 1 else None
 
 
 def build_index(paper):
     aid = paper.name
-    tex_path = next(iter(sorted(paper.glob("*.tex"))), None)
+    tex_path = paper / f"{aid}.tex"
+    if not tex_path.is_file():
+        tex_path = next(iter(sorted(paper.glob("*.tex"))), None)
     if tex_path is None:
         print(f"{paper}: no tex file, skipped")
         return
     tex = tex_path.read_text(encoding="utf-8", errors="replace")
     figures = parse_figures(tex)
+    remapped = "+asset-paths-remapped" in tex.splitlines()[0] if tex.splitlines() else False
     source = source_files(paper, aid)
     source_name = source[0].name if len(source) == 1 else f"{aid}.tar.gz"
     lines = [f"# Figures — {aid}", "", f"Generated {date.today()} from {tex_path.name}. Figure numbers are source order, not necessarily PDF numbering.", ""]
@@ -93,9 +104,10 @@ def build_index(paper):
         lines.append(f"## Figure {number}{label}")
         if figure["images"]:
             for target in figure["images"]:
-                materialized = locate_image(paper, target)
+                materialized = locate_image(paper, target, canonical=remapped)
+                source_target = target.removeprefix("figures/") if remapped and target.startswith("figures/") else target
                 lines.append(f"- image: {materialized or '_(not materialized; embedded or unavailable)_'}")
-                lines.append(f"- source: {source_name} -> {target}")
+                lines.append(f"- source: {source_name} -> {source_target}")
         else:
             lines.append("- image: _(embedded in TeX or unavailable)_")
         lines.append(f"- caption: {figure['caption'] or '_(no caption)_'}")

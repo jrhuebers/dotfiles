@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Fetch latest arXiv papers into one self-contained directory per paper."""
 import argparse
+from contextlib import contextmanager
 import gzip
+import http.client
 from html.parser import HTMLParser
 import io
 import json
@@ -12,35 +14,25 @@ import subprocess
 import sys
 import tarfile
 import tempfile
-import time
 import urllib.error
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 
+from assets import copy_assets
+from download import MAX_BYTES, UA, request
 from flatten_tex import flatten
 from qa_corpus import check_paper
 
-UA = "paper-fetching/0.1 (research corpus; contact: https://github.com/jrhuebers/dotfiles)"
 ID = re.compile(r"\d{4}\.\d{4,5}$")
 ATOM = "{http://www.w3.org/2005/Atom}"
-MAX_BYTES = 100_000_000
-IMAGE_EXTENSIONS = {".bmp", ".eps", ".gif", ".jpeg", ".jpg", ".pdf", ".png", ".ps", ".svg", ".tif", ".tiff", ".webp"}
-BIB_EXTENSIONS = {".bib", ".bbl", ".bst", ".bcf"}
-_last_request = 0.0
-
-
-def request(url: str) -> bytes:
-    global _last_request
-    delay = 3.2 - (time.monotonic() - _last_request)
-    if _last_request and delay > 0:
-        time.sleep(delay)
-    _last_request = time.monotonic()
-    with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": UA}), timeout=60) as response:
-        data = response.read(MAX_BYTES + 1)
-    if len(data) > MAX_BYTES:
-        raise ValueError(f"download exceeds {MAX_BYTES} bytes: {url}")
-    return data
+@contextmanager
+def fetching_stage(aid: str, stage: str):
+    """Keep CLI failures attributable to a paper and pipeline stage."""
+    try:
+        yield
+    except Exception as exc:
+        raise RuntimeError(f"{stage} failed for {aid}: {exc}") from exc
 
 
 class AbsMetadata(HTMLParser):
@@ -66,8 +58,8 @@ def metadata(aid: str) -> tuple[str, str, list[str], str]:
         title = " ".join(entry.findtext(f"{ATOM}title", "").split())
         authors = [" ".join(a.findtext(f"{ATOM}name", "").split()) for a in entry.findall(f"{ATOM}author")]
         abstract = " ".join(entry.findtext(f"{ATOM}summary", "").split())
-    except urllib.error.HTTPError as exc:
-        if exc.code not in (406, 429, 502, 503):
+    except (urllib.error.URLError, OSError, EOFError, http.client.IncompleteRead, ET.ParseError) as exc:
+        if isinstance(exc, urllib.error.HTTPError) and exc.code not in (406, 408, 429, 500, 502, 503, 504):
             raise
         html = request(f"https://arxiv.org/abs/{aid}").decode("utf-8", errors="replace")
         parser = AbsMetadata()
@@ -115,40 +107,28 @@ def extract_source(data: bytes, root: Path) -> str:
     raise ValueError("arXiv source is neither tar.gz nor LaTeX (PDF/PS or error page?)")
 
 
-def copy_assets(source_root: Path, paper_dir: Path) -> None:
-    for path in source_root.rglob("*"):
-        if not path.is_file():
-            continue
-        relative = path.relative_to(source_root)
-        if path.suffix.lower() in IMAGE_EXTENSIONS:
-            destination = paper_dir / "figures" / relative
-        elif path.suffix.lower() in BIB_EXTENSIONS:
-            destination = paper_dir / "bibliography" / relative
-        else:
-            continue
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(path, destination)
-
-
-def fetch_one(outdir: Path, aid: str) -> None:
+def fetch_one(outdir: Path, aid: str, *, prune_macros: str = "safe") -> None:
     if not ID.fullmatch(aid):
         raise ValueError(f"invalid bare modern arXiv ID: {aid}")
     outdir.mkdir(parents=True, exist_ok=True)
     paper_dir = outdir / aid
     if paper_dir.exists():
         raise FileExistsError(f"paper directory already exists for {aid}; use a new directory to refresh it")
-    version, title, authors, abstract = metadata(aid)
+    with fetching_stage(aid, "metadata"):
+        version, title, authors, abstract = metadata(aid)
     author_text = "; ".join(authors) if isinstance(authors, list) else str(authors).replace(", ", "; ")
     print(f"{aid}: {version}: {title} — {author_text}", flush=True)
-    pdf = request(f"https://arxiv.org/pdf/{aid}")
-    if not pdf.startswith(b"%PDF-"):
-        raise ValueError("PDF endpoint did not return a PDF")
-    try:
-        source = request(f"https://arxiv.org/e-print/{aid}")
-    except urllib.error.HTTPError as exc:
-        if exc.code != 404:
-            raise
-        source = b""
+    with fetching_stage(aid, "PDF download"):
+        pdf = request(f"https://arxiv.org/pdf/{aid}")
+        if not pdf.startswith(b"%PDF-"):
+            raise ValueError("PDF endpoint did not return a PDF")
+    with fetching_stage(aid, "source download"):
+        try:
+            source = request(f"https://arxiv.org/e-print/{aid}")
+        except urllib.error.HTTPError as exc:
+            if exc.code != 404:
+                raise
+            source = b""
     if not source or source.startswith((b"%PDF-", b"%!PS")):
         paper_dir.mkdir(parents=True)
         (paper_dir / f"{aid}.pdf").write_bytes(pdf)
@@ -161,20 +141,25 @@ def fetch_one(outdir: Path, aid: str) -> None:
         stage = Path(tmp) / aid
         stage.mkdir(parents=True, exist_ok=True)
         extracted = stage / "extracted"
-        kind = extract_source(source, extracted)
+        with fetching_stage(aid, "source extraction"):
+            kind = extract_source(source, extracted)
         (stage / f"{aid}.pdf").write_bytes(pdf)
         # Keep a standalone plain-TeX source distinct from the flattened output.
         # The compressed single-file form already has a distinct .tex.gz suffix.
         original_name = f"{aid}.tar.gz" if kind == "tar.gz" else (f"{aid}.source.tex" if kind == "tex" else f"{aid}.{kind}")
         (stage / original_name).write_bytes(source)
-        flatten(extracted, aid, version, stage / f"{aid}.tex")
+        with fetching_stage(aid, "asset materialization"):
+            asset_map = copy_assets(extracted, stage)
+        with fetching_stage(aid, "TeX flattening/asset remapping"):
+            flatten(extracted, aid, version, stage / f"{aid}.tex", prune_macros=prune_macros, asset_map=asset_map)
         (stage / "metadata.json").write_text(json.dumps({"arxiv_id": aid, "version": version, "title": title, "authors": authors, "abstract": abstract}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        copy_assets(extracted, stage)
         shutil.rmtree(extracted)
-        errors = check_paper(stage, aid, version=version)
-        if errors:
-            raise ValueError("QA failed: " + "; ".join(errors))
-        stage.replace(paper_dir)
+        with fetching_stage(aid, "corpus QA"):
+            errors = check_paper(stage, aid, version=version)
+            if errors:
+                raise ValueError("; ".join(errors))
+        with fetching_stage(aid, "publication"):
+            stage.replace(paper_dir)
     print(f"{aid}: PDF, flattened TeX, source archive, figures and bibliography saved in {paper_dir}", flush=True)
 
 
@@ -186,11 +171,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("outdir", type=Path)
     parser.add_argument("ids", nargs="+")
+    parser.add_argument("--prune-macros", choices=("safe", "off"), default="safe",
+                        help="final single-file macro cleanup (default: safe)")
     args = parser.parse_args()
     failed = False
     for aid in args.ids:
         try:
-            fetch_one(args.outdir, aid)
+            fetch_one(args.outdir, aid, prune_macros=args.prune_macros)
         except Exception as exc:
             print(f"{aid}: ERROR: {exc}", flush=True)
             failed = True
@@ -201,9 +188,14 @@ def main() -> None:
         failed |= bool(errors)
     if not failed and paper_dirs(args.outdir):
         scripts = Path(__file__).parent
-        subprocess.run([sys.executable, str(scripts / "figindex.py"), str(args.outdir)], check=True)
-        subprocess.run([sys.executable, str(scripts / "refindex.py"), str(args.outdir)], check=True)
-        subprocess.run([sys.executable, str(scripts / "index.py"), str(args.outdir)], check=True)
+        for script, phase in (("figindex.py", "figure indexing"), ("refindex.py", "reference indexing"), ("index.py", "metadata indexing")):
+            try:
+                with fetching_stage(str(args.outdir), phase):
+                    subprocess.run([sys.executable, str(scripts / script), str(args.outdir)], check=True)
+            except RuntimeError as exc:
+                print(f"ERROR: {exc}", flush=True)
+                failed = True
+                break
     if failed:
         raise SystemExit(1)
 
