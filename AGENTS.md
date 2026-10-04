@@ -31,6 +31,7 @@ documentation belongs in `~/admin-docs/`, not in this repository.
 - [`docs/obsidian-sync.md`](docs/obsidian-sync.md) — Syncthing-based Obsidian vault setup for personal workstations.
 - [`docs/pi-simple-web-tools.md`](docs/pi-simple-web-tools.md) — Pi web-search/fetch extension setup with Exa authentication.
 - [`docs/linux-keyboard-layout.md`](docs/linux-keyboard-layout.md) — User-level Linux GNOME/Wayland XKB layout for German characters on a British keyboard.
+- [`docs/macos-keyboard-layout.md`](docs/macos-keyboard-layout.md) — User-local ABC layout with direct Option umlauts, installable file, regeneration, and native verification.
 - [`docs/latexpand.md`](docs/latexpand.md) — Required user-local TeX Live `latexpand` installation and verification on compute clusters.
 - [`docs/md.md`](docs/md.md) — Standalone `md` Markdown viewer, its replacement of Glow, installation, pager selection, and verification.
 - [`docs/pi.md`](docs/pi.md) — Pi agent configuration snapshots, deployment, refresh, and verification.
