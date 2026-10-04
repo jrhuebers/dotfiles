@@ -37,13 +37,14 @@ node.
 
 | Item or software | Cluster | Personal Linux GUI | Personal macOS | Personal headless server | What to do |
 | --- | --- | --- | --- | --- | --- |
-| Pi settings | **on:** `pi/cluster/settings.json` | **on:** `pi/personal/settings.json` | **on:** `pi/personal/settings.json` | **on:** `pi/personal/settings.json` | Follow [`pi.md`](pi.md). Both profiles include `pi-codex-subagents`; the cluster profile alone enables `pi-slurm` and `pi-subagents`. |
+| Pi settings | **on:** `pi/cluster/settings.json` | **on:** `pi/personal/settings.json` | **on:** `pi/personal/settings.json` | **on:** `pi/personal/settings.json` | Follow [`pi.md`](pi.md). Both profiles include `pi-codex-subagents`; the cluster profile alone enables `pi-slurm`. The retired `pi-subagents` package is disabled in both. |
 | Pi model configuration | local | local | local | local | Configure `~/.pi/agent/models.json` per machine when custom providers/models are needed; do not track credentials or machine-specific model endpoints here. |
 | Pi Codex subagent routing | **on** | **on** | **on** | **on** | Deploy shared model-routing config to each Pi agent directory. Follow [`pi-codex-subagents.md`](pi-codex-subagents.md). |
 | Pi web tools | optional | optional | optional | optional | The package is currently in both Pi profiles, but each machine needs its own Exa credential and must allow outbound access. Follow [`pi-simple-web-tools.md`](pi-simple-web-tools.md). |
 | Bash startup | optional | optional | **off** | optional | `.bashrc` is a portable Linux Bash configuration; it does not override `HOME` or assume a shared filesystem. See [`shell.md`](shell.md). |
 | Zsh startup | **off** | **off** | **on, after review** | **off** | `.zshrc` uses macOS shell conventions and optional home-relative Antigravity paths; do not copy it unchanged to Linux. See [`shell.md`](shell.md). |
 | SSH client config | optional | **on** when accessing the cluster | **on** when accessing the cluster | optional | `.ssh/config` is a client-side convenience configuration, not a server or compute-node setting. Never track private keys. See [`ssh.md`](ssh.md). |
+| slurmjobs / sj | **on** | **off** | **off** | **off** | Read-only indented Slurm queue viewer. See [`slurmjobs.md`](slurmjobs.md). |
 | tmux | **on** | optional | optional | optional | The shared `.tmux.conf` is portable; create a small host wrapper for the per-machine status style. See [`tmux.md`](tmux.md). |
 | Herdr | **on** | **on** | **on** | **on** | Standard terminal multiplexer for coding-agent workspaces on every supported profile. Use the shared leader/configuration documented in [`herdr.md`](herdr.md). |
 | Vim | optional | optional | optional | optional | `.vimrc` is shared. See [`vim.md`](vim.md). |
@@ -80,10 +81,7 @@ the profile boundary. [`pi.md`](pi.md) documents refresh and verification.
 
 ## Current explicit splits
 
-The paired configuration variant is Pi: `pi-slurm` and `pi-subagents` are
-**on** in the cluster settings and **off** in the personal settings;
-`pi-codex-subagents` is **on** in both. The other explicit profile boundaries
-are single-purpose files: macOS Zsh and Finder
+The paired configuration variant is Pi: `pi-slurm` is **on** in the cluster settings and **off** in the personal settings; `pi-codex-subagents` is **on** in both, and the retired `pi-subagents` package is **off** in both. The other explicit profile boundaries are single-purpose files: macOS Zsh and Finder
 integration, Linux GNOME/Wayland keyboard integration, and workstation-only
 editor configuration. Bash, tmux, Vim, Git, Glow, and Yazi are currently shared
 rather than split into profile variants.

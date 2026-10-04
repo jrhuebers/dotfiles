@@ -8,12 +8,11 @@ should not be enabled on personal machines:
 - `pi/personal/settings.json` → `~/.pi/agent/settings.json` on a laptop,
   desktop PC, or personal server such as the Oracle server.
 
-The cluster profile includes two packages that are not in the personal profile:
-`git:github.com/jrhuebers/pi-slurm` and `npm:pi-subagents`. Both profiles include
+The cluster profile includes `git:github.com/jrhuebers/pi-slurm`, which is not in the personal profile. The retired `npm:pi-subagents` package is removed from both profiles. Both profiles include
 `git:github.com/jrhuebers/pi-whoami`, `npm:@signalridge/pi-goal`,
 `npm:@ogulcancelik/pi-codex-compaction`, and
 `npm:@ogulcancelik/pi-codex-subagents`. Codex subagents are enabled in both
-profiles; `pi-subagents` remains cluster-only. The goal package provides the
+profiles. Both profiles preserve the four-line mouse-wheel scroll setting. The goal package provides the
 session-scoped `/goal` command and `goal_complete`, `goal_blocked`, and
 `goal_wait` tools for autonomous, verifiable
 completion. Other Pi settings and packages are currently identical, including
