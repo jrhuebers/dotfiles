@@ -1,6 +1,6 @@
 # slurmjobs / sj
 
-A read-only, indented Slurm queue viewer for cluster hosts with Python 3, Rich, and `squeue`. Your jobs appear first, followed by other users grouped by username. Section and username headers use white text on black backgrounds.
+A read-only, indented Slurm queue viewer for cluster hosts with Python 3, Rich, and `squeue`. Your jobs appear first, followed by other users grouped by username. Section and username headers use white text on black backgrounds. There are no blank spacer lines within either section; a single blank line separates your jobs from the other-users section.
 
 ## Install
 
