@@ -56,7 +56,6 @@ node.
 | VS Code settings | **off** | optional | optional | **off** | `VSCode/settings.json` is a GUI workstation configuration. It may be used by a local editor client connected to a cluster. See [`vscode.md`](vscode.md). |
 | Zed settings, tasks, themes | **off** | optional | optional | **off** | `zed/` is a GUI workstation configuration. Its default agent is local Ollama, which must not be assumed on a cluster or server. See [`zed.md`](zed.md). |
 | Linux keyboard layout | **off** | optional for GNOME/Wayland | **off** | **off** | Install `.config/xkb/symbols/custom` only on a Linux graphical machine using the documented desktop integration. See [`linux-keyboard-layout.md`](linux-keyboard-layout.md). |
-| macOS US International no-dead-key layout | **off** | **off** | optional | **off** | Install the `.keylayout` file in the user Library only when this input layout is wanted. See [`mac-keyboard-layout.md`](mac-keyboard-layout.md). |
 | Cursor Finder service | **off** | **off** | optional | **off** | `Open in Cursor.workflow` is macOS Finder-only. See [`open-in-cursor.md`](open-in-cursor.md). |
 | Obsidian vault sync | **off** | optional | optional | optional | Use only when this personal device should hold a local vault copy; Syncthing is the supported sync mechanism. See [`obsidian-sync.md`](obsidian-sync.md). |
 | Admin-skill template | **on** | **on** | **on** | **on** | Copy `skills/admin/SKILL.md` everywhere, then complete the local installed copy with that machine's verified facts and boundaries. See [`admin-skill.md`](admin-skill.md). |
