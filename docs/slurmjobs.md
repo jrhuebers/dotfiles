@@ -37,7 +37,7 @@ sj --no-color
 sj --timeout 5
 ```
 
-Each job shows its complete ID and name, state, running step count in the title, optional submission `--comment`, partition and nodes, GPUs, total RAM, CPU count, and elapsed/limit wall time. Pending jobs also show their waiting reason. Names and comments wrap without ellipses; detail continuations align under their values. Resource amounts are allocations where reported for active jobs, otherwise requests, not measured utilization. GPU models appear when Slurm provides them; unspecified types and unknown representations are labeled explicitly.
+Each job shows its complete ID and name, state, running step count in the title, optional submission `--comment`, partition and nodes, GPUs, total RAM, CPU count, and elapsed/limit wall time. Pending jobs also show their waiting reason. Job state and running-step count are right-aligned at the terminal edge, with ID/name on the left. Long names wrap in the reserved left column without ellipses; narrow terminals place the status on a separate right-aligned line when it fits. Comments wrap without ellipses, and detail continuations align under their values. Resource amounts are allocations where reported for active jobs, otherwise requests, not measured utilization. GPU models appear when Slurm provides them; unspecified types and unknown representations are labeled explicitly.
 
 Time uses `M:SS`, `H:MM:SS`, or `D-HH:MM:SS`; unlimited and unknown limits are explicit. Pending jobs show zero elapsed time. `--compact` combines resources and time. Piped output and `--no-color` disable colors; `NO_COLOR` is also honored.
 
