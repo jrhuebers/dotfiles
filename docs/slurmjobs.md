@@ -1,6 +1,6 @@
 # slurmjobs / sj
 
-An indented Slurm queue viewer for cluster hosts with Python 3, Rich, and `squeue`. Normal operation is read-only; opt-in `--usage` starts persistent telemetry steps in your own running allocations. Your jobs appear first, followed by other users grouped by username. Section and username headers use white text on black backgrounds. There are no blank spacer lines within either section; a single blank line separates your jobs from the other-users section.
+An indented Slurm queue viewer for cluster hosts with Python 3, Rich, and `squeue`. Normal operation is read-only; opt-in `--usage` starts persistent telemetry steps in your own running allocations. Your jobs appear first, followed by other users grouped by username. Section and username headers use white text on black backgrounds; detail labels and empty-state text use darker grey (`#707070`). There are no blank spacer lines within either section; a single blank line separates your jobs from the other-users section.
 
 ## Install
 
@@ -43,7 +43,7 @@ Time uses `M:SS`, `H:MM:SS`, or `D-HH:MM:SS`; unlimited and unknown limits are e
 
 A snapshot uses one bounded `squeue --json` call, without per-job queries. Clients rejecting JSON use a unit-separator text fallback, which has less GPU detail; multi-node GPU requests are labeled per node. Legacy names/comments containing embedded newlines or separator characters cannot be reliably parsed. Queue visibility matches normal `squeue` defaults.
 
-Watch mode refreshes the display in the normal terminal screen every second and exits with Ctrl-C. Queue queries remain limited to once every 10 seconds; elapsed times advance locally between queries. `--interval` controls display refresh, not accounting frequency. On query errors it preserves the previous queue and displays a warning. It requires a terminal and works best when the queue fits the viewport; larger queues can scroll on refresh. Use `--me`, `--compact`, or a single snapshot for large queues.
+Watch mode refreshes the display in the normal terminal screen every second and exits with `q`, Escape, or Ctrl-C. Interactive input temporarily uses cbreak mode with echo disabled; the previous terminal settings are restored on normal exit and handled errors. Arrow/function-key escape sequences are ignored. With redirected stdin, only Ctrl-C is available; no alternate screen is used. Queue queries remain limited to once every 10 seconds; elapsed times advance locally between queries. `--interval` controls display refresh, not accounting frequency. On query errors it preserves the previous queue and displays a warning. It requires a terminal and works best when the queue fits the viewport; larger queues can scroll on refresh. Use `--me`, `--compact`, or a single snapshot for large queues.
 
 ## Persistent utilization collectors
 
