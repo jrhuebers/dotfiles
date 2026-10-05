@@ -42,6 +42,7 @@ documentation belongs in `~/admin-docs/`, not in this repository.
 - [`docs/ssh.md`](docs/ssh.md) — Personal SSH client configuration deployment and verification.
 - [`docs/tmux.md`](docs/tmux.md) — tmux installation, `.tmux.conf` deployment, reload command, and key settings.
 - [`docs/tiktoken.md`](docs/tiktoken.md) — User-local tiktoken CLI installation and verification on every supported machine.
+- [`docs/uv.md`](docs/uv.md) — Required uv Python project/package manager installation and verification on every machine.
 - [`docs/vim.md`](docs/vim.md) — Vim installation and `.vimrc` deployment.
 - [`docs/vscode.md`](docs/vscode.md) — VS Code workstation settings deployment and scope.
 - [`docs/yazi.md`](docs/yazi.md) — Yazi installation, native `l` → `q` shell navigation, wrapper deployment, and retired `cd-quit.yazi` plugin.
