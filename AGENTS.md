@@ -36,7 +36,7 @@ documentation belongs in `~/admin-docs/`, not in this repository.
 - [`docs/md.md`](docs/md.md) — Standalone `md` Markdown viewer, its replacement of Glow, installation, pager selection, and verification.
 - [`docs/pi.md`](docs/pi.md) — Pi agent configuration snapshots, deployment, refresh, and verification.
 - [`docs/pi-codex-subagents.md`](docs/pi-codex-subagents.md) — Pi Codex subagent model-routing configuration and deployment.
-- [`docs/slurmjobs.md`](docs/slurmjobs.md) — Read-only `slurmjobs` / `sj` indented Slurm queue viewer, installation, usage, tests, and removal.
+- [`docs/slurmjobs.md`](docs/slurmjobs.md) — `slurmjobs` / `sj` queue dashboard, opt-in persistent resource telemetry, lifecycle/cleanup, installation, usage, tests, and removal.
 - [`docs/shell.md`](docs/shell.md) — Cluster Bash and personal macOS Zsh startup profiles.
 - [`docs/ssh.md`](docs/ssh.md) — Personal SSH client configuration deployment and verification.
 - [`docs/tmux.md`](docs/tmux.md) — tmux installation, `.tmux.conf` deployment, reload command, and key settings.
