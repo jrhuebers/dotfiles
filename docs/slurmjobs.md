@@ -1,6 +1,6 @@
 # slurmjobs / sj
 
-An indented Slurm queue viewer for cluster hosts with Python 3, Rich, and `squeue`. Normal operation is read-only; opt-in `--usage` starts persistent telemetry steps in your own running allocations. Your jobs appear first, followed by other users grouped by username. Section and username headers use white text on black backgrounds; detail labels and empty-state text use darker grey (`#707070`). There are no blank spacer lines within either section; a single blank line separates your jobs from the other-users section.
+An indented Slurm queue viewer for cluster hosts with Python 3, Rich, and `squeue`. By default it opens a fullscreen watch dashboard with usage enabled, starting/reusing persistent telemetry steps in your own running allocations. Use `--no-usage` for read-only operation and `--no-watch` for a snapshot. Your jobs appear first, followed by other users grouped by username. Section and username headers use white text on black backgrounds; detail labels and empty-state text use darker grey (`#707070`). There are no blank spacer lines within either section; a single blank line separates your jobs from the other-users section.
 
 ## Install
 
@@ -31,6 +31,8 @@ slurmjobs
 sj --me
 sj --watch
 sj --me --watch --usage
+sj --no-watch
+sj --no-watch --no-usage
 sj --watch --interval 30
 sj --compact
 sj --no-color
@@ -43,11 +45,11 @@ Time uses `M:SS`, `H:MM:SS`, or `D-HH:MM:SS`; unlimited and unknown limits are e
 
 A snapshot uses one bounded `squeue --json` call plus one batched `squeue --steps --json` call, without per-job step queries. Titles show `N running steps`, counting only steps whose own Slurm state includes `RUNNING` (`batch`, `extern`, telemetry, and workload steps included). Completing, finished, cancelled, suspended, or pending steps are excluded. This is not historical step count or the lifetime step-ID budget, and 'running' does not mean CPU/GPU activity is continuous. A failed step query or a client without step-state JSON shows `running steps ?` rather than guessing from a state-less step listing. Both queue and step queries are cached for 10 seconds in watch mode. Clients rejecting JSON use a unit-separator text fallback, which has less GPU detail; multi-node GPU requests are labeled per node. Legacy names/comments containing embedded newlines or separator characters cannot be reliably parsed. Queue visibility matches normal `squeue` defaults.
 
-Watch mode refreshes the display in the normal terminal screen every second and exits with `q`, Escape, or Ctrl-C. Interactive input temporarily uses cbreak mode with echo disabled; the previous terminal settings are restored on normal exit and handled errors. Arrow/function-key escape sequences are ignored. With redirected stdin, only Ctrl-C is available; no alternate screen is used. Queue queries remain limited to once every 10 seconds; elapsed times advance locally between queries. `--interval` controls display refresh, not accounting frequency. On query errors it preserves the previous queue and displays a warning. It requires a terminal and works best when the queue fits the viewport; larger queues can scroll on refresh. Use `--me`, `--compact`, or a single snapshot for large queues.
+Watch mode is the default when stdout is a terminal. It refreshes fullscreen in the alternate screen every second and exits with `q`, Escape, or Ctrl-C, restoring the previous screen contents. Interactive input temporarily uses cbreak mode with echo disabled; the previous terminal settings are restored on normal exit and handled errors. Arrow/function-key escape sequences are ignored. With redirected stdin, only Ctrl-C is available. Queue queries remain limited to once every 10 seconds; elapsed times advance locally between queries. `--interval` controls display refresh, not accounting frequency. On query errors it preserves the previous queue and displays a warning. Content exceeding the viewport is cropped with an ellipsis; use `--me`, `--compact`, or `--no-watch` to see larger queues. Piped/redirected stdout automatically uses a snapshot; explicit `--watch` requires a terminal. Usage remains enabled for snapshots/pipes unless `--no-usage` is supplied.
 
 ## Persistent utilization collectors
 
-`sj --usage` starts or reuses a named `sj-telemetry` step in each of your running jobs; it never monitors other users' allocations or starts a new allocation. One detached supervisor owns each step, so closing `sj` or its terminal does not stop the collector. Concurrent dashboard invocations share readings and launch locks. Pending jobs have no collector. Sampling is once per second, and readings are published atomically in a user-private shared-home cache rather than an unbounded log. Under a single `Usage` label, CPU/RAM appear on the first line and GPU/VRAM on an aligned second line; jobs without GPUs omit the GPU usage line. Both lines wrap with the same value-column alignment.
+`sj` (or explicit `sj --usage`) starts or reuses a named `sj-telemetry` step in each of your running jobs; it never monitors other users' allocations or starts a new allocation. One detached supervisor owns each step, so closing `sj` or its terminal does not stop the collector. Concurrent dashboard invocations share readings and launch locks. Pending jobs have no collector. Sampling is once per second, and readings are published atomically in a user-private shared-home cache rather than an unbounded log. Under a single `Usage` label, CPU/RAM appear on the first line and GPU/VRAM on an aligned second line; jobs without GPUs omit the GPU usage line. Both lines wrap with the same value-column alignment.
 
 CPU readings come from changes in job-level cgroup CPU time, expressed as busy cores and percentage of allocated CPUs. RAM is job-level cgroup-charged memory, which includes cache and collector overhead; it is not process RSS. If cgroup counters are inaccessible, a batched `sstat --allsteps` query supplies slower CPU/RSS fallback readings, at most every 10 seconds. Multi-node cgroup readings must be complete before a job-wide total is shown. Watch mode retains the last successful reading for each node and metric across transient shared-filesystem reads, failed GPU queries, or collector warm-up. Retained values remain visible with an explicit stale/unconfirmed marker and the age of the underlying measurement; they are never silently presented as current or converted to zero. A measurement is unavailable only if no valid value has been seen. Retention is in-memory for that dashboard instance and ends when the job leaves its running-job list.
 
@@ -61,7 +63,7 @@ After confirmed job completion, the detached supervisor waits one hour locally (
 
 ```sh
 sj --help
-sj --me --no-color
+sj --me --no-watch --no-usage --no-color
 cd ~/dotfiles/tools/slurmjobs
 python3 -m unittest -v test_slurmjobs test_telemetry
 ```
