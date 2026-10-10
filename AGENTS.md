@@ -36,7 +36,7 @@ documentation belongs in `~/admin-docs/`, not in this repository.
 - [`docs/latexpand.md`](docs/latexpand.md) — Required user-local TeX Live `latexpand` installation and verification on compute clusters.
 - [`docs/md.md`](docs/md.md) — Standalone `md` Markdown viewer, its replacement of Glow, installation, pager selection, and verification.
 - [`docs/pi.md`](docs/pi.md) — Pi agent configuration snapshots, deployment, refresh, and verification.
-- [`docs/pi-codex-subagents.md`](docs/pi-codex-subagents.md) — Pi Codex subagent model-routing configuration and deployment.
+- [`docs/pi-codex-subagents.md`](docs/pi-codex-subagents.md) — Pi Codex subagent model routing, background Bash defaults, and deployment.
 - [`docs/slurmjobs.md`](docs/slurmjobs.md) — `slurmjobs` / `sj` fullscreen queue dashboard, default persistent resource telemetry, lifecycle/cleanup, installation, usage, tests, and removal.
 - [`docs/shell.md`](docs/shell.md) — Cluster Bash and personal macOS Zsh startup profiles.
 - [`docs/ssh.md`](docs/ssh.md) — Personal SSH client configuration deployment and verification.

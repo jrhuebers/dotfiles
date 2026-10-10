@@ -10,5 +10,10 @@
     "epfl/zai-org/GLM-5.3-Flash",
     "epfl/deepseek-ai/DeepSeek-V4-Flash-0731"
   ],
-  "modelsFromEnabledModels": true
+  "modelsFromEnabledModels": true,
+  "defaults": {
+    "extensions": [
+      "~/.pi/agent/git/github.com/jrhuebers/pi-background-tasks/index.ts"
+    ]
+  }
 }

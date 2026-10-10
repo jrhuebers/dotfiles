@@ -21,6 +21,37 @@ If a runtime disables extension discovery (for example `pi-basic` with
 package path in that runtime's allowlist. A normal Pi session loads it from
 `settings.json`. Restart Pi after installation or settings changes.
 
+## Background Bash in children
+
+The shared `pi/shared/pi-codex-subagents/config.json` explicitly loads the background-task extension in children through `defaults.extensions`:
+
+```json
+{
+  "defaults": {
+    "extensions": [
+      "~/.pi/agent/git/github.com/jrhuebers/pi-background-tasks/index.ts"
+    ]
+  }
+}
+```
+
+Install the prerequisite in the ordinary Pi agent directory before deploying this config:
+
+```sh
+PI_CODING_AGENT_DIR="$HOME/.pi/agent" pi install git:github.com/jrhuebers/pi-background-tasks
+test -f "$HOME/.pi/agent/git/github.com/jrhuebers/pi-background-tasks/index.ts"
+```
+
+The installed path is Pi's user-global Git package checkout, not a path inside dotfiles. This default intentionally shares that extension with separate agent directories; if its installed location differs, adjust `defaults.extensions`. Missing paths fail agent creation rather than installing packages automatically.
+
+Children receive the overridden `bash` tool (`run_in_background`, `background_after_seconds`, `max_run_seconds`, and `notify_on_exit`) plus `jobs` for listing, cancelling, and extending jobs. The foreground handoff delay comes from the installed extension's `config.yaml`; `max_run_seconds` remains optional. This prevents a slow command from indefinitely blocking the tool batch, but does not itself stop a buggy command that runs in the background. Use a finite lifetime for potentially wedged commands.
+
+When a template omits `tools`, configured extensions cause normal child tool activation instead of copying the parent's tool-name list. A template with an explicit tool allowlist must include both `bash` and `jobs` to expose background execution and its controls. Preserve intentional read-only allowlists. A template's `extensions` replace these defaults; include the background extension there too if that template needs it.
+
+Children are terminated after final completion or interruption, and ordinary shutdown cancels their managed background jobs. A child must finish or cancel required jobs before returning its final answer; these are not detached cluster workloads. Use Slurm for substantial work on shared cluster hosts.
+
+Changes to defaults apply to newly spawned agent records without restarting Pi. Existing records retain their saved extension paths, including when continued with `send_message`; start a new task to adopt the defaults. To disable this for future children, remove only the background-task entry from `defaults.extensions`.
+
 ## Model-routing configuration
 
 The shared, non-secret model-routing configuration is tracked at
