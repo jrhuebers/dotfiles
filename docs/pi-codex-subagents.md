@@ -19,7 +19,10 @@ pi list
 If a runtime disables extension discovery (for example `pi-basic` with
 `--no-extensions`), explicitly load the installed extension from its local
 package path in that runtime's allowlist. A normal Pi session loads it from
-`settings.json`. Restart Pi after installation or settings changes.
+`settings.json`. For local development, install a reviewed checkout with
+`pi install /absolute/path/to/pi-extensions/packages/pi-codex-subagents`; this
+writes a machine-specific absolute path and must not be copied into the
+portable dotfiles profiles. Restart Pi after installation or settings changes.
 
 ## Background Bash in children
 
@@ -79,7 +82,8 @@ the package because discovery is disabled.
 
 A fresh Pi session should expose `model` and `thinking` on `spawn_agent` when
 eligible configured models are available. Example model identifiers include
-`openai-codex/gpt-5.6-sol` and `epfl/zai-org/GLM-5.3`.
+`openai-codex/gpt-5.6-sol`, `openai-codex/gpt-6.1-sol`, and
+`epfl/zai-org/GLM-5.3`.
 
 ## Removal
 
