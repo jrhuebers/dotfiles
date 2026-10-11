@@ -1,7 +1,6 @@
 # Pi Codex subagents
 
-The `@ogulcancelik/pi-codex-subagents` Pi extension provides `spawn_agent`,
-`wait_agent`, steering, and agent-browsing tools. It is distinct from
+The standalone [`jrhuebers/pi-codex-subagents`](https://github.com/jrhuebers/pi-codex-subagents) fork provides `spawn_agent`, bounded `wait_agent` / `wait_all_agents`, steering, and agent-browsing tools. It preserves the upstream extension's license and Git history and adds visible lead/child exchanges and notification-styled final replies. It is distinct from
 `npm:pi-subagents`. The Codex extension is included in both Pi settings
 profiles (`pi/personal/settings.json` and `pi/cluster/settings.json`) and should
 be enabled on every supported machine.
@@ -12,17 +11,18 @@ Reconcile the profile's package list with Pi, or install directly:
 
 ```sh
 pi update --extensions
-# or: pi install npm:@ogulcancelik/pi-codex-subagents
+# or: pi install git:github.com/jrhuebers/pi-codex-subagents
 pi list
 ```
 
 If a runtime disables extension discovery (for example `pi-basic` with
 `--no-extensions`), explicitly load the installed extension from its local
 package path in that runtime's allowlist. A normal Pi session loads it from
-`settings.json`. For local development, install a reviewed checkout with
-`pi install /absolute/path/to/pi-extensions/packages/pi-codex-subagents`; this
-writes a machine-specific absolute path and must not be copied into the
-portable dotfiles profiles. Restart Pi after installation or settings changes.
+`settings.json`. The Git installation places `index.ts` at `~/.pi/agent/git/github.com/jrhuebers/pi-codex-subagents/index.ts`. For local development, clone the standalone repository to `~/pi-codex-subagents` and run `pi install "$HOME/pi-codex-subagents"`; the resulting machine-specific absolute path must not be copied into portable settings. Replace any old monorepo-local or upstream npm declaration rather than loading both implementations. Restart Pi after installation or settings changes; reload only when children are idle.
+
+## Bounded waits and replies
+
+Both wait tools require positive `seconds` and a `message`; `targets` is optional. A timeout is a normal result and does not stop children. Wait only when no useful independent work remains. Final replies appear once as `[subagent response]` messages styled like background-task completion notifications; assignments and steering remain visible. Inspect `/subagents` for intermediate child progress.
 
 ## Background Bash in children
 
@@ -90,7 +90,7 @@ eligible configured models are available. Example model identifiers include
 Remove the package from the active agent profile and uninstall it from Pi:
 
 ```sh
-pi remove npm:@ogulcancelik/pi-codex-subagents
+pi remove git:github.com/jrhuebers/pi-codex-subagents
 ```
 
 Remove only the corresponding

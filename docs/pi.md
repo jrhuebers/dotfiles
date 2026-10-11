@@ -11,7 +11,7 @@ should not be enabled on personal machines:
 The cluster profile includes `git:github.com/jrhuebers/pi-slurm`, which is not in the personal profile. The retired `npm:pi-subagents` package is removed from both profiles. Both profiles include
 `git:github.com/jrhuebers/pi-whoami`, `npm:@signalridge/pi-goal`,
 `npm:@ogulcancelik/pi-codex-compaction`, and
-`npm:@ogulcancelik/pi-codex-subagents`. Codex subagents are enabled in both
+`git:github.com/jrhuebers/pi-codex-subagents`. Codex subagents are enabled in both
 profiles. Both profiles preserve the four-line mouse-wheel scroll setting. The goal package provides the
 session-scoped `/goal` command and `goal_complete`, `goal_blocked`, and
 `goal_wait` tools for autonomous, verifiable
@@ -32,19 +32,21 @@ The installed `git:github.com/jrhuebers/pi-context-viewer` package is the user-o
 
 `pi-basic` disables discovered extensions, prompt templates, and themes, then explicitly loads the configured allowed extensions; it leaves skill discovery enabled so all user, project, and package skills remain available.
 
-The basic profile intentionally excludes `pi-slurm` and `pi-btw` extensions, while retaining skills supplied by those packages. It must explicitly load `@ogulcancelik/pi-codex-subagents` from the local package store because it disables extension discovery.
+The basic profile intentionally excludes `pi-slurm` and `pi-btw` extensions, while retaining skills supplied by those packages. It must explicitly load the standalone `jrhuebers/pi-codex-subagents` fork from the local Git package store because it disables extension discovery.
 
-After installing the Codex package, add its resolved extension entry to the machine-local basic profile; use the local development checkout only on machines that have it, and otherwise use the npm package path:
+After installing the standalone Git package, replace any old Codex extension entry in the machine-local basic profile with its resolved entry point:
 
 ```sh
-codex_extension="$HOME/.pi/agent/npm/node_modules/@ogulcancelik/pi-codex-subagents/index.ts"
-[ -f "$codex_extension" ] || codex_extension="$HOME/projects/pi-extensions/packages/pi-codex-subagents/index.ts"
+set -e
+codex_extension="$HOME/.pi/agent/git/github.com/jrhuebers/pi-codex-subagents/index.ts"
 test -f "$codex_extension"
 tmp=$(mktemp)
-jq --arg path "$codex_extension" '.extensions |= if index($path) then . else . + [$path] end' ~/.pi/profiles/basic.json >"$tmp"
-chmod --reference ~/.pi/profiles/basic.json "$tmp"
+jq --arg path "$codex_extension" '.extensions |= (map(select(contains("pi-codex-subagents") | not)) + [$path])' ~/.pi/profiles/basic.json >"$tmp"
+chmod 600 "$tmp"
 mv "$tmp" ~/.pi/profiles/basic.json
 ```
+
+The fork is now a standalone Git package, not an extension subdirectory in `pi-extensions`. Remove the old monorepo-local or upstream npm package declaration when migrating ordinary or Research settings; preserve subagent config, prompts, runs, and sessions. The package source is portable, while an explicit `pi-basic` entry is resolved locally.
 
 The basic wrapper still requires `jq` and forwards Pi CLI flags unchanged. Its optional `agentDir` selects a user agent directory, not project `.pi/` configuration. Regenerate its package-store paths per machine. The portable research launcher instead requires Python 3.10+, Node.js 22.19+, and Pi 0.99.2+; its setup preserves existing local settings on explicit adoption and never imports credentials automatically. Research and ordinary settings remain independent. Verify with `pi-research doctor`, `pi-research --version`, and a model lookup appropriate to the target machine; use local documentation and live read-only queries to establish relevant cluster facts; the local `cluster.md` notes are optional, not a mandatory checklist. Follow the portable repository's upgrade/rollback instructions rather than changing the retired research profile JSON.
 
@@ -128,7 +130,7 @@ To install or remove a package in the live global Pi setup:
 pi install npm:pi-btw
 pi install npm:@signalridge/pi-goal
 pi install npm:@ogulcancelik/pi-codex-compaction
-pi install npm:@ogulcancelik/pi-codex-subagents
+pi install git:github.com/jrhuebers/pi-codex-subagents
 pi remove npm:pi-btw
 ```
 

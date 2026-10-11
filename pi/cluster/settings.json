@@ -28,7 +28,7 @@
     "git:github.com/jrhuebers/pi-slurm",
     "npm:@signalridge/pi-goal",
     "npm:@ogulcancelik/pi-codex-compaction",
-    "npm:@ogulcancelik/pi-codex-subagents"
+    "git:github.com/jrhuebers/pi-codex-subagents"
   ],
   "hideThinkingBlock": false
 }
