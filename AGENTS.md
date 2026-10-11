@@ -19,6 +19,7 @@ documentation belongs in `~/admin-docs/`, not in this repository.
 ## Knowledge base index
 
 - [`docs/admin-skill.md`](docs/admin-skill.md) — Universal, machine-aware admin skill deployment and verification.
+- [`docs/arxiv-papers.md`](docs/arxiv-papers.md) — User-local arxiv-papers CLI installation, verification, library use, and removal on every supported machine.
 - [`docs/device-profiles.md`](docs/device-profiles.md) — Cluster versus personal-device configuration profiles and on/off matrix.
 - [`docs/git.md`](docs/git.md) — Global Git author identity and installation/query commands.
 - [`docs/ghostty.md`](docs/ghostty.md) — Workstation terminal with a light theme and steady cursor.
