@@ -44,7 +44,7 @@ node.
 | Bash startup | optional | optional | **off** | optional | `.bashrc` is a portable Linux Bash configuration; it does not override `HOME` or assume a shared filesystem. See [`shell.md`](shell.md). |
 | Zsh startup | **off** | **off** | **on, after review** | **off** | `.zshrc` uses macOS shell conventions and optional home-relative Antigravity paths; do not copy it unchanged to Linux. See [`shell.md`](shell.md). |
 | SSH client config | optional | **on** when accessing the cluster | **on** when accessing the cluster | optional | `.ssh/config` is a client-side convenience configuration, not a server or compute-node setting. Never track private keys. See [`ssh.md`](ssh.md). |
-| hpc-dashboard / hpcd | **on** | **off** | **off** | **off** | Standalone Slurm dashboard with persistent resource telemetry; use `--no-usage` for read-only operation. See [`hpc-dashboard.md`](hpc-dashboard.md). |
+| hpc-dashboard / hpcd | **on (required)** | **off** | **off** | **off** | Install on every HPC cluster. Currently Slurm-only; non-Slurm clusters get the commands but await backend support. Use `--no-usage` for read-only operation. See [`hpc-dashboard.md`](hpc-dashboard.md). |
 | tmux | **on** | optional | optional | optional | The shared `.tmux.conf` is portable; create a small host wrapper for the per-machine status style. See [`tmux.md`](tmux.md). |
 | Herdr | **on** | **on** | **on** | **on** | Standard terminal multiplexer for coding-agent workspaces on every supported profile. Use the shared leader/configuration documented in [`herdr.md`](herdr.md). |
 | Vim | optional | optional | optional | optional | `.vimrc` is shared. See [`vim.md`](vim.md). |
