@@ -2,17 +2,12 @@
 ratio = [1, 3, 4]
 
 [opener]
-md = [
-  { run = "env -u PAGER md %s1", desc = "View Markdown with md", block = true, for = "linux" },
-  { run = "env -u PAGER md %s1", desc = "View Markdown with md", block = true, for = "macos" },
-]
-pdf = [
-  { run = "xdg-open %s1", desc = "Open PDF", orphan = true, for = "linux" },
-  { run = "open %s1", desc = "Open PDF", orphan = true, for = "macos" },
+# Open images in Iris and keep Yazi suspended until Iris exits.
+iris = [
+  { run = "iris %s1", desc = "Iris", for = "unix", block = true },
 ]
 
 [open]
 prepend_rules = [
-  { url = "*.md", use = "md" },
-  { mime = "application/pdf", use = "pdf" },
+  { mime = "image/*", use = "iris" },
 ]
