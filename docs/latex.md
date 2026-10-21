@@ -70,3 +70,40 @@ Compile a project's `.tex` entry point with `latexmk -pdf <file>.tex` when
 `latexmk` is installed, or use `pdflatex <file>.tex` (often twice to resolve
 references). Some projects require extra TeX packages or a specific compiler;
 follow the project's instructions in those cases.
+
+## Build directories and latexmk configuration
+
+For projects using an isolated output directory, a project-level `.latexmkrc`
+(Perl syntax) can contain:
+
+```perl
+$out_dir = 'build';
+$pdf_mode = 1;
+```
+
+Then, from the project directory, `latexmk main.tex` produces a PDF using
+pdfLaTeX and writes generated files into `build/`. The equivalent explicit
+invocation is:
+
+```sh
+latexmk -pdf -outdir=build main.tex
+```
+
+`latexmk` reruns the compiler and bibliography/index tools as needed. Explicit
+command-line options override the corresponding `.latexmkrc` defaults. Thus an
+editor recipe passing a different `-outdir` can override this file.
+
+LaTeX Workshop also needs `latex-workshop.latex.outDir: "%DIR%/build"` and
+`latex-workshop.latex.auxDir: "%OUTDIR%"` in the active project/workspace
+settings, with a recipe that uses those output directories. See
+[`vscode.md`](vscode.md) for the JSON, folder scope, PDF viewer, and SyncTeX
+behavior. Existing generated artifacts in the source root are not removed by
+changing the output directory.
+
+## Optional source formatting
+
+The compiler/build setup is independent of source formatting. Use
+[`latexindent.md`](latexindent.md) for the optional `latexindent` formatter,
+Perl dependency troubleshooting, and conservative VS Code defaults. Keep
+research-specific notation, macros, and paragraph/display formatting rules in
+the research project rather than in this machine-configuration repository.

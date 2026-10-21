@@ -15,6 +15,28 @@
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "charliermarsh.ruff"
     },
+    "[latex]": {
+        "editor.wordWrap": "on",
+        "editor.defaultFormatter": "James-Yu.latex-workshop",
+        "editor.formatOnSave": false,
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true
+    },
+    "[tex]": {
+        "editor.wordWrap": "on",
+        "editor.defaultFormatter": "James-Yu.latex-workshop",
+        "editor.formatOnSave": false,
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true
+    },
+    "latex-workshop.formatting.latex": "latexindent",
+    "latex-workshop.formatting.latexindent.path": "latexindent",
+    "latex-workshop.formatting.latexindent.args": [
+        "-c",
+        "%DIR%/build/",
+        "%TMPFILE%",
+        "-y=defaultIndent: '  '"
+    ],
     "chat.viewSessions.orientation": "stacked",
     "workbench.activityBar.location": "bottom",
     "files.insertFinalNewline": true,
@@ -46,5 +68,8 @@
     "window.autoDetectColorScheme": true,
     "workbench.experimental.modernUI": false,
     "chat.remoteAgentHosts": [],
-    "remote.tunnels.alwaysUpdateCLI": true
+    "remote.tunnels.alwaysUpdateCLI": true,
+    "workbench.editorAssociations": {
+        "*.pdf": "latex-workshop-pdf-hook"
+    }
 }

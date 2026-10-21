@@ -57,6 +57,7 @@ node.
 | arxiv-papers CLI | **on** | **on** | **on** | **on** | Install the user-local `arxiv-papers` tool on every supported machine. See [`arxiv-papers.md`](arxiv-papers.md). |
 | LaTeX / TeX Live | **on (required)** | **on (required)** | **on (required)** | **on (required)** | Ensure a usable TeX distribution and PDF compiler are installed on every supported machine. See [`latex.md`](latex.md). |
 | latexpand | **on (required)** | optional | optional | optional | Install it through user-local TeX Live on every compute-cluster setup. See [`latexpand.md`](latexpand.md). |
+| latexindent | optional | optional | optional | optional | CLI source formatter; install only when wanted and verify its Perl dependencies. VS Code integration requires a GUI editor client; on clusters follow site installation policy. See [`latexindent.md`](latexindent.md). |
 | VS Code settings | **off** | optional | optional | **off** | `VSCode/settings.json` is a GUI workstation configuration. It may be used by a local editor client connected to a cluster. See [`vscode.md`](vscode.md). |
 | Zed settings, tasks, themes | **off** | optional | optional | **off** | `zed/` is a GUI workstation configuration. Its default agent is local Ollama, which must not be assumed on a cluster or server. See [`zed.md`](zed.md). |
 | Linux keyboard layout | **off** | optional for GNOME/Wayland | **off** | **off** | Install `.config/xkb/symbols/custom` only on a Linux graphical machine using the documented desktop integration. See [`linux-keyboard-layout.md`](linux-keyboard-layout.md). |
