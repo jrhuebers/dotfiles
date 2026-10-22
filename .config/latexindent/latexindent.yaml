@@ -1,4 +1,4 @@
-# Normalize math delimiters; join prose paragraphs and $$ displays into single source lines.
+# Normalize math delimiters; unwrap prose and simple displays, but keep multiline math rows.
 # Display style: $$ ... $$, with one space immediately inside each delimiter.
 # Keep visual wrapping in VS Code.
 # Activate with: latexindent -m -rv -l=latexindent.yaml -c=build/ FILE.tex
@@ -41,7 +41,7 @@ replacements:
   - when: before
     substitution: 's{(?<!\\)\\\((.*?)(?<!\\)\\\)}{q{$} . $1 . q{$}}gse'
   # Flatten displays only when exported token/comment patterns say it is safe.
-  # Keep protected displays multiline and preserve explicit TeX row breaks (\\).
+  # Keep multiline row displays and protected displays; preserve TeX row breaks (\\).
   - when: after
     substitution: >-
       s{(?<!\\)\$\$((?:(?!\$\$).)*?)\$\$}{
@@ -49,8 +49,8 @@ replacements:
         if ($math =~ /$trailingCommentRegExp/ || index($math, $tokens{beginOfToken}) >= 0) {
           '$$' . $math . '$$';
         } else {
-          $math =~ s/\h*\R\h*/ /g;
-          $math =~ s/\A\h+|\h+\z//g;
+          $math =~ s/\h*\R\h*/ /g unless $math =~ /\\\\/;
+          $math =~ s/\A\s+|\s+\z//g;
           '$$ ' . $math . ' $$';
         }
       }gse

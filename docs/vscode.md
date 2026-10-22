@@ -53,7 +53,8 @@ The shared defaults for both `latex` and `tex` language modes are:
 - Global formatter arguments `-m`, `-rv`, `-l=%DIR%/latexindent.yaml`, `-c`,
   `%DIR%/build/`, and `%TMPFILE%`. Persistent formatter logs go into `build/`.
 - A shared native user profile supplies prose unwrapping, compact source-list
-  layout, and single-line `$$ ... $$` displays. Optional project YAML overlays
+  layout, and single-line `$$ ... $$` displays except when explicit `\\` row
+  breaks call for multiline layout. Optional project YAML overlays
   that style; missing project YAML is nonfatal. Formatting is still manual.
 - Global LaTeX Workshop output and auxiliary directories point into `build/`.
 - PDF files opened with LaTeX Workshop's PDF viewer by default through
