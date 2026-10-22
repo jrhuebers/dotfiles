@@ -1,4 +1,4 @@
-# Join prose paragraphs and $$ displays into single source lines.
+# Normalize math delimiters; join prose paragraphs and $$ displays into single source lines.
 # Display style: $$ ... $$, with one space immediately inside each delimiter.
 # Keep visual wrapping in VS Code.
 # Activate with: latexindent -m -rv -l=latexindent.yaml -c=build/ FILE.tex
@@ -25,18 +25,23 @@ modifyLineBreaks:
     blocksBeginWith:
       0-9: 1
       other: '\$(?!\$)|\\(?:emph|textbf|textit|textsc|textrm|textsf|texttt)\{'
-    # Do not join prose across display mathematics or environment boundaries.
+    # Do not reflow across displays, environments, or a trailing comment.
     blocksEndBefore:
-      other: '\\begin\{|\\\[|\\end\{|\$\$'
+      other: '\\begin\{|\\\[|\\end\{|\$\$|(?<!\\)%'
     blocksFollow:
       # Resume prose unwrapping after closing $$; normalize displays below.
       other: '\\\]|\\item(?:\h|\[|\R)|\$\$(?=\h*(?:\R|\Z))'
 
-# -rv runs this rule with verbatim material and comments still protected.
-# The exported latexindent token/regex values identify protected material:
-# leave those displays alone rather than moving a comment or altering literal code.
-# Explicit TeX line breaks (\\) remain intact even on one physical source line.
+# -rv protects comments and verbatim content before these replacements run.
+# Convert paired math delimiters before indentation/reflow, so one pass is stable.
+# Do not mistake TeX row breaks such as \\[2pt] for display delimiters.
 replacements:
+  - when: before
+    substitution: 's{(?<!\\)\\\[(.*?)(?<!\\)\\\]}{q{$$} . $1 . q{$$}}gse'
+  - when: before
+    substitution: 's{(?<!\\)\\\((.*?)(?<!\\)\\\)}{q{$} . $1 . q{$}}gse'
+  # Flatten displays only when exported token/comment patterns say it is safe.
+  # Keep protected displays multiline and preserve explicit TeX row breaks (\\).
   - when: after
     substitution: >-
       s{(?<!\\)\$\$((?:(?!\$\$).)*?)\$\$}{

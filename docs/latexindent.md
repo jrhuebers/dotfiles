@@ -62,6 +62,12 @@ The user-requested default style is tracked in
 [`../.config/latexindent/latexindent.yaml`](../.config/latexindent/latexindent.yaml).
 It uses two-space indentation, joins prose paragraphs, keeps list markers with
 their opening text, and writes safe displays as `$$ ... $$` on one source line.
+Before indentation/reflow, protected replacement rules convert paired
+`\(...\)` to `$...$` and `\[...\]` to `$$...$$`. The display-spacing rule
+then normalizes safe converted displays as well. Literal examples in comments
+or verbatim content and TeX row breaks such as `\\[2pt]` are not converted.
+Reflow stops at trailing comments; comment-bearing math can remain multiline
+rather than moving a comment across its terminating newline.
 It preserves blank paragraph boundaries, comments, verbatim content, and
 explicit TeX row breaks. This is an intentional source-reflow default, not just
 visual wrapping. Format-on-save remains off.
@@ -138,9 +144,10 @@ Important switches:
 - `-l=FILE`: load YAML settings after native user settings. Project-local
   rules can override the shared style without changing the global arguments.
 - `-m`: enable the YAML's `modifyLineBreaks` rules; it does not mean overwrite.
-- `-rv`: enable replacement rules with verbatim material protected. The shared
-  post-indentation display rule also checks protected comment/token patterns.
-  It uses latexindent internals; retest it when upgrading the formatter.
+- `-rv`: enable replacement rules with comments/verbatim material protected.
+  Shared pre-indentation rules normalize paired math delimiters; the final
+  display rule checks protected comment/token patterns before joining lines.
+  The protection relies on latexindent internals; retest it when upgrading.
 - `-w` / `-wd`: overwrite the source (always / only if different), with a backup.
   Do not add these to VS Code arguments; the editor handles applying edits.
 - `-d`: ignore native user and local YAML settings. Useful when a CLI caller
