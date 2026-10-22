@@ -1,0 +1,51 @@
+# Join prose paragraphs and $$ displays into single source lines.
+# Display style: $$ ... $$, with one space immediately inside each delimiter.
+# Keep visual wrapping in VS Code.
+# Activate with: latexindent -m -rv -l=latexindent.yaml -c=build/ FILE.tex
+# Without -m, the modifyLineBreaks settings below are ignored.
+defaultIndent: '  '
+# Avoid latexindent's default six extra spaces after a list marker.
+indentRules:
+  item: '  '
+
+modifyLineBreaks:
+  preserveBlankLines: 1
+  condenseMultipleBlankLinesInto: 0
+  oneSentencePerLine:
+    manipulateSentences: 0
+  items:
+    ItemStartsOnOwnLine: 1
+    ItemFinishesWithLineBreak: -1
+  textWrapOptions:
+    columns: -1
+    removeBlockLineBreaks: 1
+    multipleSpacesToSingle: 0
+    comments:
+      wrap: 0
+    blocksBeginWith:
+      0-9: 1
+      other: '\$(?!\$)|\\(?:emph|textbf|textit|textsc|textrm|textsf|texttt)\{'
+    # Do not join prose across display mathematics or environment boundaries.
+    blocksEndBefore:
+      other: '\\begin\{|\\\[|\\end\{|\$\$'
+    blocksFollow:
+      # Resume prose unwrapping after closing $$; normalize displays below.
+      other: '\\\]|\\item(?:\h|\[|\R)|\$\$(?=\h*(?:\R|\Z))'
+
+# -rv runs this rule with verbatim material and comments still protected.
+# The exported latexindent token/regex values identify protected material:
+# leave those displays alone rather than moving a comment or altering literal code.
+# Explicit TeX line breaks (\\) remain intact even on one physical source line.
+replacements:
+  - when: after
+    substitution: >-
+      s{(?<!\\)\$\$((?:(?!\$\$).)*?)\$\$}{
+        my $math = $1;
+        if ($math =~ /$trailingCommentRegExp/ || index($math, $tokens{beginOfToken}) >= 0) {
+          '$$' . $math . '$$';
+        } else {
+          $math =~ s/\h*\R\h*/ /g;
+          $math =~ s/\A\h+|\h+\z//g;
+          '$$ ' . $math . ' $$';
+        }
+      }gse

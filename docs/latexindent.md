@@ -56,84 +56,114 @@ On clusters, follow site policy and prefer existing or user-local tools. Do
 not install system packages, alter system Perl, or deploy GUI settings there
 without the required role and authorization.
 
-## Conservative shared settings
+## Install the shared style
+
+The user-requested default style is tracked in
+[`../.config/latexindent/latexindent.yaml`](../.config/latexindent/latexindent.yaml).
+It uses two-space indentation, joins prose paragraphs, keeps list markers with
+their opening text, and writes safe displays as `$$ ... $$` on one source line.
+It preserves blank paragraph boundaries, comments, verbatim content, and
+explicit TeX row breaks. This is an intentional source-reflow default, not just
+visual wrapping. Format-on-save remains off.
+
+Back up existing configuration before deployment; merge existing path lists
+rather than overwrite them. Install the style file:
+
+```sh
+mkdir -p "$HOME/.config/latexindent"
+cp -p ~/dotfiles/.config/latexindent/latexindent.yaml \
+  "$HOME/.config/latexindent/latexindent.yaml"
+```
+
+A native latexindent user configuration supplies this style even when a project
+has no local YAML. For first-time setup, create `~/.indentconfig.yaml` with an
+absolute path generated for the current user:
+
+```sh
+python3 - <<'PY'
+from pathlib import Path
+import json
+home = Path.home()
+config = home / '.indentconfig.yaml'
+if config.exists():
+    raise SystemExit('Existing user configuration: merge its paths instead.')
+style = home / '.config/latexindent/latexindent.yaml'
+if not style.is_file():
+    raise SystemExit('Install the shared style first.')
+config.write_text('paths:\n  - ' + json.dumps(str(style)) + '\n')
+PY
+```
+
+Do not put a literal `~` or `${HOME}` in the YAML path and assume a shell will
+expand it. `LATEXINDENT_CONFIG` and platform-native configurations can take
+precedence over `~/.indentconfig.yaml`: for example,
+`~/Library/Preferences/latexindent/indentconfig.yaml` on macOS, and
+`$XDG_CONFIG_HOME/latexindent/indentconfig.yaml` or
+`~/.config/latexindent/indentconfig.yaml` on Linux. If one already exists,
+merge the style path there; consult `indent.log` to verify which file is read.
+
+## Global VS Code arguments and project overrides
 
 [`../VSCode/settings.json`](../VSCode/settings.json) selects LaTeX Workshop and
 `latexindent` for the `latex` and `tex` modes, keeps visual word wrapping,
-uses two-space indentation, and leaves format-on-save off. The shared arguments
+uses two-space indentation, and leaves format-on-save off. Its global arguments
 are:
 
 ```json
 "latex-workshop.formatting.latexindent.args": [
+    "-m",
+    "-rv",
+    "-l=%DIR%/latexindent.yaml",
     "-c",
     "%DIR%/build/",
-    "%TMPFILE%",
-    "-y=defaultIndent: '  '"
+    "%TMPFILE%"
 ]
 ```
+
+The native user configuration loads the shared style first. The `-l` argument
+then overlays a root-level project `latexindent.yaml`, if present. If absent,
+latexindent logs a nonfatal missing-file warning and continues with the shared
+style; it does not fail or lose the paragraph/display rules. This fallback was
+verified with latexindent 4.0.3. Keep project notation and any exceptions in the
+project, not in the shared profile. A global default does not require opening
+each project as its own VS Code folder; explicit `.vscode` overrides still do.
 
 LaTeX Workshop formats a temporary input, reads formatted stdout, and applies
 an editor edit. `-c` puts persistent logs/backups in the root TeX file's
 `build/` directory; it requires the trailing slash. The extension may briefly
 create and remove `__latexindent_temp_*.tex` beside the edited document.
 
-There is no shared `-m` or replacement flag, so these defaults do not enable
-prose reflow, single-line paragraphs, or display rewriting. Visual wrapping is
-only an editor display feature; source formatting can change actual line
-breaks when explicitly configured.
-
-## Project-specific YAML
-
-Keep `latexindent.yaml` and notation-specific formatting rules in each research
-project, not in dotfiles. Merely creating the file does not activate it under
-the shared arguments: load it explicitly with `-l` and enable its line-break
-rules with `-m`. For example, in the project's `.vscode/settings.json`:
-
-```json
-{
-    "latex-workshop.formatting.latex": "latexindent",
-    "latex-workshop.formatting.latexindent.args": [
-        "-m",
-        "-l=%DIR%/latexindent.yaml",
-        "-c",
-        "%DIR%/build/",
-        "%TMPFILE%"
-    ]
-}
-```
-
-Open that project as the VS Code folder (or a folder in a multi-root workspace)
-for its `.vscode` settings to apply. Opening a parent folder alone does not
-activate a nested project's settings. Shared user settings still supply the
-formatter path unless the project overrides it.
-
 Important switches:
 
-- `-l=FILE`: load YAML settings, including indentation and optional rules.
-- `-m`: enable the YAML's `modifyLineBreaks` rules. It does not itself mean
-  overwrite, nor does it require one particular wrapping style.
-- `-rv`: enable replacement rules while respecting protected verbatim content;
-  use only if the project's YAML needs replacements. A narrow post-indentation
-  rule may also inspect protected comment tokens. Keep such implementation-
-  specific rules with the project and retest when upgrading the formatter.
+- `-l=FILE`: load YAML settings after native user settings. Project-local
+  rules can override the shared style without changing the global arguments.
+- `-m`: enable the YAML's `modifyLineBreaks` rules; it does not mean overwrite.
+- `-rv`: enable replacement rules with verbatim material protected. The shared
+  post-indentation display rule also checks protected comment/token patterns.
+  It uses latexindent internals; retest it when upgrading the formatter.
 - `-w` / `-wd`: overwrite the source (always / only if different), with a backup.
-  Do not add these to the VS Code arguments; the editor handles applying edits.
+  Do not add these to VS Code arguments; the editor handles applying edits.
+- `-d`: ignore native user and local YAML settings. Useful when a CLI caller
+  explicitly wants only latexindent's built-in defaults.
 
-Test paragraph and display normalization on copies, particularly around `%`
-comments, inline/verbatim code, `$$` delimiters, and explicit TeX row breaks
-(`\\`). Do not silently move comments or change mathematical notation, and do
-not mass-format working research sources as a side effect of editor setup.
+Global `-m` and `-rv` mean that a project's own transformation/replacement rules
+are enabled too. Only format trusted project YAML, especially Perl replacement
+rules. A project can opt out of reflow or use a different formatter through an
+explicit workspace setting. No files are mass-formatted merely by setup.
 
 ## Verification and removal
 
-Run the chosen executable's `--version` and format a temporary copy with the
-configured arguments. Check that only intended whitespace changes, paragraph
-boundaries and math are preserved as appropriate, and a second formatting pass
-is stable. Then use **Format Document** in VS Code; see
-[`vscode.md`](vscode.md) for shortcuts and setup.
+Run the selected executable's `--version`. Format copies in projects both with
+and without local YAML. Check prose, lists, paragraph boundaries, math,
+comments, verbatim material, and explicit TeX row breaks; a second pass should
+be stable. Confirm in `indent.log` that the shared style was read. Then use
+**Format Document** in VS Code; see [`vscode.md`](vscode.md).
 
-To undo the editor configuration, restore the relevant settings backup or
-remove only its LaTeX formatter keys. Uninstall the Homebrew formatter, if
-explicitly wanted, with `brew uninstall latexindent`; do not run broad cleanup
-or remove Perl dependencies without checking their other users. Preserve TeX
-distributions, project YAML files, research sources, and editor sessions.
+To undo deployment, restore the relevant editor settings and native user
+configuration backups. Remove only the shared style path from an existing
+native configuration, or remove the newly created `~/.indentconfig.yaml` if it
+was created solely for this setup. Remove the installed style separately when
+wanted; preserve other configuration paths, project YAML, research sources,
+editor sessions, and TeX distributions. Uninstall the Homebrew formatter only
+if explicitly wanted with `brew uninstall latexindent`; do not broadly remove
+Perl dependencies or run autoremove.

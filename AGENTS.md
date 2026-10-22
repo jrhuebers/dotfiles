@@ -34,7 +34,7 @@ documentation belongs in `~/admin-docs/`, not in this repository.
 - [`docs/linux-keyboard-layout.md`](docs/linux-keyboard-layout.md) — User-level Linux GNOME/Wayland XKB layout for German characters on a British keyboard.
 - [`docs/macos-keyboard-layout.md`](docs/macos-keyboard-layout.md) — User-local ABC layout with direct Option umlauts, installable file, regeneration, and native verification.
 - [`docs/latex.md`](docs/latex.md) — Required LaTeX/TeX Live toolchain on every supported machine, platform-specific installation, and isolated build directories.
-- [`docs/latexindent.md`](docs/latexindent.md) — Optional LaTeX formatter installation, Perl dependency/PATH troubleshooting, conservative defaults, and project-level formatting rules.
+- [`docs/latexindent.md`](docs/latexindent.md) — Optional LaTeX formatter installation, Perl/PATH troubleshooting, shared style deployment and native user configuration, global reflow defaults, and project overrides.
 - [`docs/latexpand.md`](docs/latexpand.md) — Required user-local TeX Live `latexpand` installation and verification on compute clusters.
 - [`docs/md.md`](docs/md.md) — Standalone `md` Markdown viewer, its replacement of Glow, installation, pager selection, and verification.
 - [`docs/pi.md`](docs/pi.md) — Pi agent configuration snapshots, deployment, refresh, and verification.
@@ -46,7 +46,7 @@ documentation belongs in `~/admin-docs/`, not in this repository.
 - [`docs/tiktoken.md`](docs/tiktoken.md) — User-local tiktoken CLI installation and verification on every supported machine.
 - [`docs/uv.md`](docs/uv.md) — Required uv Python project/package manager installation and verification on every machine.
 - [`docs/vim.md`](docs/vim.md) — Vim installation and `.vimrc` deployment.
-- [`docs/vscode.md`](docs/vscode.md) — VS Code workstation settings deployment, TeX word wrapping, LaTeX Workshop formatting/PDF viewing, and project-level build settings.
+- [`docs/vscode.md`](docs/vscode.md) — VS Code workstation settings deployment, TeX word wrapping, global LaTeX Workshop formatting/build defaults, project overrides, and PDF viewing.
 - [`docs/yazi.md`](docs/yazi.md) — Yazi installation, native `l` → `q` shell navigation, wrapper deployment, and retired `cd-quit.yazi` plugin.
 - [`docs/bat.md`](docs/bat.md) — bat installation, portable paths, usage, and platform differences.
 - [`docs/zed.md`](docs/zed.md) — Zed configuration contents and symlink-based setup.

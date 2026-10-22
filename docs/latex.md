@@ -93,9 +93,10 @@ latexmk -pdf -outdir=build main.tex
 command-line options override the corresponding `.latexmkrc` defaults. Thus an
 editor recipe passing a different `-outdir` can override this file.
 
-LaTeX Workshop also needs `latex-workshop.latex.outDir: "%DIR%/build"` and
-`latex-workshop.latex.auxDir: "%OUTDIR%"` in the active project/workspace
-settings, with a recipe that uses those output directories. See
+The tracked VS Code user defaults already set
+`latex-workshop.latex.outDir: "%DIR%/build"` and
+`latex-workshop.latex.auxDir: "%OUTDIR%"`. A project can override those values,
+but its recipe must use the corresponding output directories. See
 [`vscode.md`](vscode.md) for the JSON, folder scope, PDF viewer, and SyncTeX
 behavior. Existing generated artifacts in the source root are not removed by
 changing the output directory.

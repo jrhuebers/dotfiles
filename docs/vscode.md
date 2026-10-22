@@ -36,7 +36,9 @@ For LaTeX work, install the extension separately:
 code --install-extension James-Yu.latex-workshop
 ```
 
-Install and verify `latexindent` using [`latexindent.md`](latexindent.md).
+Install and verify `latexindent`, deploy its shared style, and configure its
+native user settings using [`latexindent.md`](latexindent.md). The shared style
+is required for the global formatting behavior in projects without local YAML.
 The tracked settings use the portable executable name `latexindent`. On a Mac
 where MacTeX's executable shadows Homebrew's working copy, set the installed
 user setting `latex-workshop.formatting.latexindent.path` to the absolute
@@ -48,10 +50,12 @@ The shared defaults for both `latex` and `tex` language modes are:
 - Visual word wrapping on, without inserting source line breaks.
 - LaTeX Workshop as the formatter, with two-space indentation.
 - Format-on-save explicitly off; Python's separate Ruff settings are unchanged.
-- `latexindent` arguments `-c`, `%DIR%/build/`, `%TMPFILE%`, and
-  `-y=defaultIndent: '  '`. Persistent formatter logs go into `build/`.
-- No global `-m` line-break transformations, replacement rules, or project YAML
-  loading. Project-specific prose/display rules belong with their source files.
+- Global formatter arguments `-m`, `-rv`, `-l=%DIR%/latexindent.yaml`, `-c`,
+  `%DIR%/build/`, and `%TMPFILE%`. Persistent formatter logs go into `build/`.
+- A shared native user profile supplies prose unwrapping, compact source-list
+  layout, and single-line `$$ ... $$` displays. Optional project YAML overlays
+  that style; missing project YAML is nonfatal. Formatting is still manual.
+- Global LaTeX Workshop output and auxiliary directories point into `build/`.
 - PDF files opened with LaTeX Workshop's PDF viewer by default through
   `workbench.editorAssociations`; remove that association to prefer another
   PDF editor.
@@ -61,16 +65,19 @@ VS Code's default macOS keybindings. **Format Selection** is also supported.
 If prompted, use **Format Document With...** and select **LaTeX Workshop**.
 If an old executable path is cached, run **Developer: Reload Window**.
 
-## Project settings and build output
+## Global build output and project overrides
 
-Keep project-specific formatting in `latexindent.yaml` and activate it with
-formatter arguments in that project's `.vscode/settings.json`; see
-[`latexindent.md`](latexindent.md). A nested `.vscode` directory is not used
-merely because a file is inside it: open the project as a VS Code folder, or
-add it as a folder in a multi-root workspace. Opening only its parent folder
-does not activate the child's settings.
+Formatting and build output now have user-level defaults, so a project does
+not need `.vscode/settings.json` merely to activate them. Project-specific
+`latexindent.yaml` is loaded from the detected root TeX file's directory after
+the shared style; see [`latexindent.md`](latexindent.md).
 
-For a project that keeps generated artifacts in `build/`, add:
+Explicit `.vscode` overrides still obey VS Code's folder scope: open the
+project as a folder, or add it to a multi-root workspace. Opening only a parent
+folder does not activate a child's `.vscode/settings.json`.
+
+The tracked user settings already contain these build defaults; a workspace
+may override them when needed:
 
 ```json
 {

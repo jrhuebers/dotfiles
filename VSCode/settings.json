@@ -29,13 +29,17 @@
         "editor.tabSize": 2,
         "editor.insertSpaces": true
     },
+    "latex-workshop.latex.outDir": "%DIR%/build",
+    "latex-workshop.latex.auxDir": "%OUTDIR%",
     "latex-workshop.formatting.latex": "latexindent",
     "latex-workshop.formatting.latexindent.path": "latexindent",
     "latex-workshop.formatting.latexindent.args": [
+        "-m",
+        "-rv",
+        "-l=%DIR%/latexindent.yaml",
         "-c",
         "%DIR%/build/",
-        "%TMPFILE%",
-        "-y=defaultIndent: '  '"
+        "%TMPFILE%"
     ],
     "chat.viewSessions.orientation": "stacked",
     "workbench.activityBar.location": "bottom",
