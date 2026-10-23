@@ -62,8 +62,11 @@ The user-requested default style is tracked in
 [`../.config/latexindent/latexindent.yaml`](../.config/latexindent/latexindent.yaml).
 It uses two-space indentation, joins prose paragraphs, keeps list markers with
 their opening text, and writes simple displays as `$$ ... $$` on one source line.
-Displays containing explicit TeX row breaks (`\\`) retain internal source line
-breaks instead of being flattened. The delimiter-edge whitespace is normalized,
+Inside displays, every TeX row break (`\\`) starts the following row on a new
+physical source line, even if the input was single-line. This is enforced before
+indentation, with `\\[2pt]`, `\\*`, and combined modifiers kept together.
+Existing row-ending comments are left on their original line, without extra
+blank lines. The delimiter-edge whitespace is normalized,
 keeping the first/last mathematics beside the opening/closing `$$`.
 Before indentation/reflow, protected replacement rules convert paired
 `\(...\)` to `$...$` and `\[...\]` to `$$...$$`. The display-spacing rule

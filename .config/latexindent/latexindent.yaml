@@ -1,4 +1,4 @@
-# Normalize math delimiters; unwrap prose and simple displays, but keep multiline math rows.
+# Normalize math delimiters; unwrap prose/simple displays and put TeX math rows on separate lines.
 # Display style: $$ ... $$, with one space immediately inside each delimiter.
 # Keep visual wrapping in VS Code.
 # Activate with: latexindent -m -rv -l=latexindent.yaml -c=build/ FILE.tex
@@ -40,6 +40,15 @@ replacements:
     substitution: 's{(?<!\\)\\\[(.*?)(?<!\\)\\\]}{q{$$} . $1 . q{$$}}gse'
   - when: before
     substitution: 's{(?<!\\)\\\((.*?)(?<!\\)\\\)}{q{$} . $1 . q{$}}gse'
+  # Give every TeX row break its own source line before normal indentation.
+  # Keep optional spacing/star modifiers attached; leave trailing comments alone.
+  - when: before
+    substitution: >-
+      s{(?<!\\)\$\$((?:(?!\$\$).)*?)\$\$}{
+        my $math = $1;
+        $math =~ s{(\\\\\*?(?:\h*\[[^\]\r\n]*\])?)\h*(?=[^\s%\[\*])}{$1 . "\n"}ge;
+        '$$' . $math . '$$';
+      }gse
   # Flatten displays only when exported token/comment patterns say it is safe.
   # Keep multiline row displays and protected displays; preserve TeX row breaks (\\).
   - when: after

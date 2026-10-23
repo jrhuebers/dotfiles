@@ -54,7 +54,7 @@ The shared defaults for both `latex` and `tex` language modes are:
   `%DIR%/build/`, and `%TMPFILE%`. Persistent formatter logs go into `build/`.
 - A shared native user profile supplies prose unwrapping, compact source-list
   layout, and single-line `$$ ... $$` displays except when explicit `\\` row
-  breaks call for multiline layout. Optional project YAML overlays
+  breaks start each following equation row on a new source line. Optional project YAML overlays
   that style; missing project YAML is nonfatal. Formatting is still manual.
 - Global LaTeX Workshop output and auxiliary directories point into `build/`.
 - PDF files opened with LaTeX Workshop's PDF viewer by default through
