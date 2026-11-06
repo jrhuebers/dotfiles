@@ -15,7 +15,6 @@ set tabstop=8       " a tab looks like 8 spaces
 set shiftwidth=4    " indentation uses 4 spaces
 set softtabstop=4   " pressing Tab inserts 4 spaces
 autocmd FileType make setlocal noexpandtab " Makefiles require real tabs for recipes.
-autocmd FileType markdown setlocal shiftwidth=2 softtabstop=2 nonumber " Markdown uses two-space indentation without line numbers.
 
 " Search settings
 set hlsearch
@@ -24,15 +23,23 @@ nnoremap <Esc> :nohl<CR>
 
 set mouse=a
 
-" Use the system clipboard for ordinary yanks, deletes, and puts when supported.
-if has('clipboard')
-    set clipboard=unnamed,unnamedplus
-endif
-
 " Screen-line movement when wrapped
 " j/k move by display lines when no count is given; with counts they behave normally.
 nnoremap <expr> k (v:count == 0 ? 'gk' : 'k')
 nnoremap <expr> j (v:count == 0 ? 'gj' : 'j')
+vnoremap <expr> k (v:count == 0 ? 'gk' : 'k')
+vnoremap <expr> j (v:count == 0 ? 'gj' : 'j')
+
+nnoremap <expr> <Up> (v:count == 0 ? 'gk' : 'k')
+xnoremap <expr> <Up> (v:count == 0 ? 'gk' : 'k')
+inoremap <Up> <C-o>gk
+nnoremap <expr> <Down> (v:count == 0 ? 'gj' : 'j')
+xnoremap <expr> <Down> (v:count == 0 ? 'gj' : 'j')
+inoremap <Up> <C-o>gj
+" the insert-mode inoremap can interfere with completion menus. To preserve
+" their behavior, we do
+inoremap <expr> <Up> pumvisible() ? "\<Up>" : "\<C-o>gk"
+inoremap <expr> <Down> pumvisible() ? "\<Down>" : "\<C-o>gj"
 
 " Y becomes y$ (yank to end of line), consistent with D and C.
 nnoremap Y y$
