@@ -4,7 +4,7 @@
   "tuiMode": "fullscreen",
   "fullscreenScrollbar": "always",
   "scrollSpeed": {
-    "wheelLines": 8
+    "wheelLines": 4
   },
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.6-luna",
@@ -26,8 +26,8 @@
     "npm:pi-btw",
     "npm:pi-simple-web-tools@0.1.0",
     "npm:@signalridge/pi-goal",
-    "npm:pi-subagents",
-    "npm:@ogulcancelik/pi-codex-compaction"
+    "npm:@ogulcancelik/pi-codex-compaction",
+    "git:github.com/jrhuebers/pi-codex-subagents"
   ],
   "hideThinkingBlock": false
 }

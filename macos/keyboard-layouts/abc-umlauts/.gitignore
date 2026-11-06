@@ -1,0 +1,3 @@
+# Generated native-layout snapshot and Python caches; not needed for installation.
+*.uchr
+__pycache__/

@@ -37,12 +37,14 @@ node.
 
 | Item or software | Cluster | Personal Linux GUI | Personal macOS | Personal headless server | What to do |
 | --- | --- | --- | --- | --- | --- |
-| Pi settings | **on:** `pi/cluster/settings.json` | **on:** `pi/personal/settings.json` | **on:** `pi/personal/settings.json` | **on:** `pi/personal/settings.json` | Follow [`pi.md`](pi.md). The cluster profile alone enables `pi-slurm`. |
+| Pi settings | **on:** `pi/cluster/settings.json` | **on:** `pi/personal/settings.json` | **on:** `pi/personal/settings.json` | **on:** `pi/personal/settings.json` | Follow [`pi.md`](pi.md). Both profiles include `pi-codex-subagents`; the cluster profile alone enables `pi-slurm`. The retired `pi-subagents` package is disabled in both. |
 | Pi model configuration | local | local | local | local | Configure `~/.pi/agent/models.json` per machine when custom providers/models are needed; do not track credentials or machine-specific model endpoints here. |
+| Pi Codex subagent routing | **on** | **on** | **on** | **on** | Deploy shared model-routing config to each Pi agent directory. Follow [`pi-codex-subagents.md`](pi-codex-subagents.md). |
 | Pi web tools | optional | optional | optional | optional | The package is currently in both Pi profiles, but each machine needs its own Exa credential and must allow outbound access. Follow [`pi-simple-web-tools.md`](pi-simple-web-tools.md). |
 | Bash startup | optional | optional | **off** | optional | `.bashrc` is a portable Linux Bash configuration; it does not override `HOME` or assume a shared filesystem. See [`shell.md`](shell.md). |
 | Zsh startup | **off** | **off** | **on, after review** | **off** | `.zshrc` uses macOS shell conventions and optional home-relative Antigravity paths; do not copy it unchanged to Linux. See [`shell.md`](shell.md). |
 | SSH client config | optional | **on** when accessing the cluster | **on** when accessing the cluster | optional | `.ssh/config` is a client-side convenience configuration, not a server or compute-node setting. Never track private keys. See [`ssh.md`](ssh.md). |
+| hpc-dashboard / hpcd | **on (required)** | **off** | **off** | **off** | Install on every HPC cluster. Currently Slurm-only; non-Slurm clusters get the commands but await backend support. Use `--no-usage` for read-only operation. See [`hpc-dashboard.md`](hpc-dashboard.md). |
 | tmux | **on** | optional | optional | optional | The shared `.tmux.conf` is portable; create a small host wrapper for the per-machine status style. See [`tmux.md`](tmux.md). |
 | Herdr | **on** | **on** | **on** | **on** | Standard terminal multiplexer for coding-agent workspaces on every supported profile. Use the shared leader/configuration documented in [`herdr.md`](herdr.md). |
 | Vim | optional | optional | optional | optional | `.vimrc` is shared. See [`vim.md`](vim.md). |
@@ -51,11 +53,15 @@ node.
 | md | **on** | **on** | **on** | **on** | Install the standalone user-local Markdown viewer from the separate `~/md` repository on every supported profile. |
 | Yazi | **on** | **on** | **on** | **on** | Install Yazi on every supported profile and deploy the shared configuration. See [`yazi.md`](yazi.md). |
 | bat | **on** | **on** | **on** | **on** | Install the terminal viewer on every supported profile. See [`bat.md`](bat.md). |
-| tiktoken | **on** | **on** | **on** | **on** | Install the user-local Python package on every supported machine where Python is available. See [`tiktoken.md`](tiktoken.md). |
+| Token counter CLI | **on** | **on** | **on** | **on** | Install the user-local `token-counter` command on every supported machine. See [`tiktoken.md`](tiktoken.md). |
+| arxiv-papers CLI | **on** | **on** | **on** | **on** | Install the user-local `arxiv-papers` tool on every supported machine. See [`arxiv-papers.md`](arxiv-papers.md). |
+| LaTeX / TeX Live | **on (required)** | **on (required)** | **on (required)** | **on (required)** | Ensure a usable TeX distribution and PDF compiler are installed on every supported machine. See [`latex.md`](latex.md). |
 | latexpand | **on (required)** | optional | optional | optional | Install it through user-local TeX Live on every compute-cluster setup. See [`latexpand.md`](latexpand.md). |
+| latexindent | optional | optional | optional | optional | CLI source formatter; install only when wanted and verify its Perl dependencies. VS Code integration requires a GUI editor client; on clusters follow site installation policy. See [`latexindent.md`](latexindent.md). |
 | VS Code settings | **off** | optional | optional | **off** | `VSCode/settings.json` is a GUI workstation configuration. It may be used by a local editor client connected to a cluster. See [`vscode.md`](vscode.md). |
 | Zed settings, tasks, themes | **off** | optional | optional | **off** | `zed/` is a GUI workstation configuration. Its default agent is local Ollama, which must not be assumed on a cluster or server. See [`zed.md`](zed.md). |
 | Linux keyboard layout | **off** | optional for GNOME/Wayland | **off** | **off** | Install `.config/xkb/symbols/custom` only on a Linux graphical machine using the documented desktop integration. See [`linux-keyboard-layout.md`](linux-keyboard-layout.md). |
+| macOS keyboard layout | **off** | **off** | optional | **off** | Install `macos/keyboard-layouts/abc-umlauts/ABC - Umlauts.keylayout` for direct Option+A/O/U umlauts while preserving other ABC mappings. See [`macos-keyboard-layout.md`](macos-keyboard-layout.md). |
 | Cursor Finder service | **off** | **off** | optional | **off** | `Open in Cursor.workflow` is macOS Finder-only. See [`open-in-cursor.md`](open-in-cursor.md). |
 | Obsidian vault sync | **off** | optional | optional | optional | Use only when this personal device should hold a local vault copy; Syncthing is the supported sync mechanism. See [`obsidian-sync.md`](obsidian-sync.md). |
 | Admin-skill template | **on** | **on** | **on** | **on** | Copy `skills/admin/SKILL.md` everywhere, then complete the local installed copy with that machine's verified facts and boundaries. See [`admin-skill.md`](admin-skill.md). |
@@ -78,10 +84,7 @@ the profile boundary. [`pi.md`](pi.md) documents refresh and verification.
 
 ## Current explicit splits
 
-The paired configuration variant is Pi: `pi-slurm` is **on** in the cluster
-settings and **off** in the personal settings; `pi-subagents` is **on** in both.
-The other explicit
-profile boundaries are single-purpose files: macOS Zsh and Finder
+The paired configuration variant is Pi: `pi-slurm` is **on** in the cluster settings and **off** in the personal settings; `pi-codex-subagents` is **on** in both, and the retired `pi-subagents` package is **off** in both. The other explicit profile boundaries are single-purpose files: macOS Zsh and Finder
 integration, Linux GNOME/Wayland keyboard integration, and workstation-only
 editor configuration. Bash, tmux, Vim, Git, Glow, and Yazi are currently shared
 rather than split into profile variants.

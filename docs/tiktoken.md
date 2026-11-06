@@ -1,53 +1,73 @@
-# tiktoken
+# tiktoken-cli token counter
 
-`tiktoken` is installed on every supported machine where Python is available.
-It is a user-local Python package; no system-wide package or service is
-required.
+Use the maintained third-party [`samber/tiktoken-cli`](https://github.com/samber/tiktoken-cli) package for token counts. This is the standard command for all machines and file types. Do not use the Python `tiktoken` library directly or the retired `token-counter` command for routine counting.
 
-## Install or upgrade
+`tiktoken-cli` counts explicitly named files regardless of extension, including LaTeX (`.tex`) and extensionless text files. It uses OpenAI-compatible `tiktoken` encodings but is a separate CLI package.
 
-On Ubuntu 24.04, whose Python uses the externally-managed-environment policy:
+## Install
 
-```sh
-python3 -m pip install --user --break-system-packages --upgrade tiktoken
-```
-
-On a machine whose Python does not enforce that policy, omit
-`--break-system-packages`:
+The package requires Node.js and npm. Install it globally with the user-local npm setup on each machine:
 
 ```sh
-python3 -m pip install --user --upgrade tiktoken
+npm install --global tiktoken-cli
 ```
 
-On Apple Silicon macOS with Homebrew Python, the interpreter also enforces
-PEP 668. Install into the user site without changing Homebrew's site-packages:
+For a one-off invocation without a global install:
 
 ```sh
-brew install python
-/opt/homebrew/bin/python3 -m pip install --user --break-system-packages --upgrade tiktoken
-/opt/homebrew/bin/python3 -c 'import tiktoken; print(tiktoken.__version__)'
+npx --yes tiktoken-cli path/to/file.tex
 ```
 
-The user site is normally under `~/Library/Python/<major.minor>/lib/python/site-packages`.
-Always verify using the same interpreter used for installation; Apple's
-`/usr/bin/python3` is a separate interpreter. Reinstall after changing Python
-minor versions. Version `0.14.0` was verified with Homebrew Python 3.14 on arm64.
+On the cluster, the npm prefix is under `~/.local/opt/`; its `bin` directory must be on `PATH` alongside `node`, `npm`, and `npx`. Do not commit the installed package or its generated files to this repository.
 
-The current cluster install is in
-`~/.local/lib/python3.12/site-packages/`. The cluster home directory is shared,
-so the package is available from other cluster nodes that provide the same
-Python 3.12 user site; install it separately on personal machines.
+## Use
+
+Count one or more files:
+
+```sh
+tiktoken-cli paper.tex
+tiktoken-cli README.md paper.tex
+```
+
+Select the model used for tokenization:
+
+```sh
+tiktoken-cli paper.tex --model gpt-4o
+```
+
+Count a directory recursively or exclude paths:
+
+```sh
+tiktoken-cli src/
+tiktoken-cli . --exclude .git/ --exclude "**/*.log"
+```
+
+Read stdin:
+
+```sh
+cat paper.tex | tiktoken-cli
+```
+
+Use `tiktoken-cli --help` for the current option list.
 
 ## Verify
 
 ```sh
-python3 -c 'import tiktoken; e=tiktoken.get_encoding("cl100k_base"); print(tiktoken.__version__, e.encode("hello"))'
+command -v node
+command -v npm
+command -v tiktoken-cli
+tiktoken-cli --version
+tiktoken-cli --help
+printf '\\newcommand{\\example}{text}\n' >/tmp/token-counter-smoke.tex
+tiktoken-cli /tmp/token-counter-smoke.tex
 ```
+
+The cluster installation was verified with `tiktoken-cli` version 0.3.0 and a `.tex` file.
 
 ## Remove
 
 ```sh
-python3 -m pip uninstall tiktoken regex
+npm uninstall --global tiktoken-cli
 ```
 
-Only remove `regex` if it is not needed by another user-local package.
+Removing the CLI does not remove Node.js or npm.
