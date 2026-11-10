@@ -30,6 +30,7 @@ documentation belongs in `~/admin-docs/`, not in this repository.
 - [`docs/cloc.md`](docs/cloc.md) — Required cloc source-code line counter installation on every machine.
 - [`docs/open-in-cursor.md`](docs/open-in-cursor.md) — macOS Finder service for opening files and folders in Cursor.
 - [`docs/obsidian-sync.md`](docs/obsidian-sync.md) — Syncthing-based Obsidian vault setup for personal workstations.
+- [`docs/newfile.md`](docs/newfile.md) — Optional macOS Finder file-creation extension, Homebrew installation, activation, and removal.
 - [`docs/pi-simple-web-tools.md`](docs/pi-simple-web-tools.md) — Pi web-search/fetch extension setup with Exa authentication.
 - [`docs/linux-keyboard-layout.md`](docs/linux-keyboard-layout.md) — User-level Linux GNOME/Wayland XKB layout for German characters on a British keyboard.
 - [`docs/macos-keyboard-layout.md`](docs/macos-keyboard-layout.md) — User-local ABC layout with direct Option umlauts, installable file, regeneration, and native verification.
