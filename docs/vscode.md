@@ -28,6 +28,15 @@ file exclusions, and agent UI behavior. They do not install extensions such as
 Ruff or the Python extension; install the extensions required by the projects
 being edited.
 
+## Open Finder folders in VS Code (macOS)
+
+Install the tracked `Open in VS Code.workflow` to open folders through Finder's
+**Quick Actions** or **Services** menu. See
+[`open-in-vscode.md`](open-in-vscode.md) for installation, the required
+menu-visibility fix when copying the workflow leaves it hidden, verification,
+and removal. This uses Apple's native **Open Finder Items** action and does
+not require the `code` CLI or change VS Code user settings.
+
 ## LaTeX editing and formatting
 
 For LaTeX work, install the extension separately:

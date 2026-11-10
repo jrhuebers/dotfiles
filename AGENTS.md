@@ -29,6 +29,7 @@ documentation belongs in `~/admin-docs/`, not in this repository.
 - [`docs/herdr.md`](docs/herdr.md) — Herdr terminal multiplexer usage and current local configuration.
 - [`docs/cloc.md`](docs/cloc.md) — Required cloc source-code line counter installation on every machine.
 - [`docs/open-in-cursor.md`](docs/open-in-cursor.md) — macOS Finder service for opening files and folders in Cursor.
+- [`docs/open-in-vscode.md`](docs/open-in-vscode.md) — Native macOS Finder Quick Action for opening folders in VS Code, including menu-visibility troubleshooting.
 - [`docs/obsidian-sync.md`](docs/obsidian-sync.md) — Syncthing-based Obsidian vault setup for personal workstations.
 - [`docs/newfile.md`](docs/newfile.md) — Optional macOS Finder file-creation extension, Homebrew installation, activation, and removal.
 - [`docs/pi-simple-web-tools.md`](docs/pi-simple-web-tools.md) — Pi web-search/fetch extension setup with Exa authentication.
