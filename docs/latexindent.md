@@ -116,6 +116,17 @@ merge the style path there; consult `indent.log` to verify which file is read.
 
 ## Global VS Code arguments and project overrides
 
+Use a **global-first** setup: keep the shared editor settings in
+`VSCode/settings.json` and formatter style in
+`.config/latexindent/latexindent.yaml` in this repository, then deploy them to
+the user configuration paths described above. Projects need neither a
+`.vscode/settings.json` nor a `latexindent.yaml` unless they have exceptions
+(or deliberately carry a style for collaborators). Avoid copying unchanged
+global defaults into each project: use project `.vscode/settings.json` for
+editor/build overrides and project `latexindent.yaml` for formatting overrides.
+Native user settings load first, followed by project YAML; VS Code workspace
+settings likewise take precedence over user settings.
+
 [`../VSCode/settings.json`](../VSCode/settings.json) selects LaTeX Workshop and
 `latexindent` for the `latex` and `tex` modes, keeps visual word wrapping,
 uses two-space indentation, and leaves format-on-save off. Its global arguments
