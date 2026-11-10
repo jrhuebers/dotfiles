@@ -1,6 +1,8 @@
 {
     "debug.console.fontSize": 14,
     "workbench.startupEditor": "none",
+    "chat.disableAIFeatures": true,
+    "workbench.secondarySideBar.defaultVisibility": "hidden",
     "git.autofetch": true,
     "editor.cursorBlinking": "solid",
     "chat.useNestedAgentsMdFiles": true,

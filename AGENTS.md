@@ -48,7 +48,7 @@ documentation belongs in `~/admin-docs/`, not in this repository.
 - [`docs/tiktoken.md`](docs/tiktoken.md) — User-local tiktoken CLI installation and verification on every supported machine.
 - [`docs/uv.md`](docs/uv.md) — Required uv Python project/package manager installation and verification on every machine.
 - [`docs/vim.md`](docs/vim.md) — Vim installation and `.vimrc` deployment.
-- [`docs/vscode.md`](docs/vscode.md) — VS Code workstation settings deployment, TeX word wrapping, global LaTeX Workshop formatting/build defaults, project overrides, and PDF viewing.
+- [`docs/vscode.md`](docs/vscode.md) — VS Code workstation settings, built-in Copilot disablement, Finder integration, TeX word wrapping, global LaTeX Workshop formatting/build defaults, project overrides, and PDF viewing.
 - [`docs/yazi.md`](docs/yazi.md) — Yazi installation, native `l` → `q` shell navigation, wrapper deployment, and retired `cd-quit.yazi` plugin.
 - [`docs/bat.md`](docs/bat.md) — bat installation, portable paths, usage, and platform differences.
 - [`docs/zed.md`](docs/zed.md) — Zed configuration contents and symlink-based setup.

@@ -28,6 +28,38 @@ file exclusions, and agent UI behavior. They do not install extensions such as
 Ruff or the Python extension; install the extensions required by the projects
 being edited.
 
+## Disable built-in Copilot and its startup pane
+
+The tracked user settings disable and hide VS Code's built-in GitHub Copilot
+features, including chat and inline suggestions, and hide the secondary (right)
+sidebar by default in newly opened workspaces/windows:
+
+```json
+{
+    "chat.disableAIFeatures": true,
+    "workbench.secondarySideBar.defaultVisibility": "hidden"
+}
+```
+
+Both settings were checked against VS Code 1.145.2's installed configuration
+schema. Recent versions bundle Copilot, so it may not appear in the list of
+user-installed extensions. The supported `chat.disableAIFeatures` setting is
+preferable to deleting bundled files. It does not uninstall or disable the
+separate Claude Code or OpenCode extensions; it does disable VS Code's built-in
+Copilot chat surface, including integrations that depend on that surface.
+
+Reload with **Developer: Reload Window** after saving work if the Copilot UI
+remains visible. The sidebar visibility setting applies to workspaces/windows
+opened for the first time; existing workspaces may restore their saved layout.
+Use **View: Toggle Secondary Side Bar Visibility** from the Command Palette
+(or **Option+Command+B** on macOS) to close a restored right sidebar.
+
+To retain Copilot but only prevent the default startup pane, remove
+`chat.disableAIFeatures` (or set it to `false`) and keep the sidebar setting.
+To restore both defaults, remove both keys. On older VS Code versions that do
+not support these settings, disable the installed GitHub Copilot / GitHub
+Copilot Chat extensions through the Extensions view instead.
+
 ## Open Finder folders in VS Code (macOS)
 
 Install the tracked `Open in VS Code.workflow` to open folders through Finder's
