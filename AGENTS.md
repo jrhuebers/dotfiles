@@ -22,6 +22,7 @@ documentation belongs in `~/admin-docs/`, not in this repository.
 - [`docs/arxiv-papers.md`](docs/arxiv-papers.md) — User-local arxiv-papers CLI installation, verification, library use, and removal on every supported machine.
 - [`docs/device-profiles.md`](docs/device-profiles.md) — Cluster versus personal-device configuration profiles and on/off matrix.
 - [`docs/git.md`](docs/git.md) — Global Git author identity and installation/query commands.
+- [`docs/finder.md`](docs/finder.md) — macOS Finder new-window home-folder default, verification, and rollback.
 - [`docs/ghostty.md`](docs/ghostty.md) — Workstation terminal with a light theme and steady cursor.
 - [`docs/hermes-skills.md`](docs/hermes-skills.md) — Archived Hermes skills boundary, use, promotion, and removal.
 - [`docs/mdformat.md`](docs/mdformat.md) — Markdown formatter installation, alias, and pre-commit configuration.
